@@ -146,6 +146,19 @@ document.querySelectorAll('.product-wishlist').forEach(btn => {
     });
 });
 
+// ---------- Whole collection card is clickable ----------
+// Clicking anywhere on a category card navigates to its "Explore" link
+// (which hits /shop?categorySlug=… and loads that category from the API).
+document.querySelectorAll('.category-card').forEach(card => {
+    const link = card.querySelector('.category-link');
+    if (!link) return;
+    card.addEventListener('click', (e) => {
+        // Let real clicks on the link (or any anchor) behave normally.
+        if (e.target.closest('a')) return;
+        window.location.href = link.getAttribute('href');
+    });
+});
+
 // ---------- Header icon shortcuts ----------
 const userIcon = document.getElementById('userIcon');
 if (userIcon) {

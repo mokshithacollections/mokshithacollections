@@ -1,6 +1,6 @@
 		:root {
-            --dark-sea-green: #2E8B57;
-            --light-sea-green: #20B2AA;
+            --dark-sea-green: #55000c; /*#2E8B57;*/
+            --light-sea-green: #880012; /*#20B2AA;*/
             --light-cream: #FFF8F0;
             --gold-accent: #D4AF37;
             --dark-text: #2C3E50;
@@ -209,53 +209,92 @@
             background: linear-gradient(90deg, var(--dark-sea-green), var(--light-sea-green));
         }
         
+        /* Full-width rows: a square image on the left + content on the right */
         .category-card {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 24px;
             border-radius: 15px;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             transition: all 0.4s;
-            height: 100%;
+            background: white;
             position: relative;
             cursor: pointer;
+            padding: 18px;
         }
-        
+
         .category-card:hover {
-            transform: translateY(-15px);
+            transform: translateY(-6px);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
         }
-        
+
+        /* Square image — equal width & height */
         .category-image {
-            height: 400px;
+            flex: 0 0 240px;
+            width: 240px;
+            height: 240px;
+            aspect-ratio: 1 / 1;
             overflow: hidden;
+            border-radius: 12px;
+            background: #f7f7f7;
         }
-        
+
         .category-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             transition: transform 0.5s;
         }
-        
+
         .category-card:hover .category-image img {
             transform: scale(1.05);
         }
-        
+
         .category-content {
             background: white;
-            padding: 25px;
+            padding: 8px 16px;
             position: relative;
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
-        
+
         .category-badge {
-            position: absolute;
-            top: -20px;
-            right: 20px;
+            display: inline-block;
+            align-self: flex-start;
             background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
             color: white;
-            padding: 8px 20px;
+            padding: 6px 18px;
             border-radius: 20px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            margin-bottom: 14px;
+        }
+
+        /* Responsive: shrink the square so it stays image-left/content-right (row) */
+        @media (max-width: 767.98px) {
+            .category-card { flex-direction: row; align-items: center; gap: 16px; padding: 14px; }
+            .category-image { flex-basis: 130px; width: 130px; height: 130px; }
+            .category-title { font-size: 1.3rem; }
+            .category-desc { font-size: 0.9rem; margin-bottom: 12px; }
+        }
+
+        @media (max-width: 400px) {
+            .category-card { flex-direction: row; gap: 12px; padding: 12px; }
+            .category-image { flex-basis: 104px; width: 104px; height: 104px; }
+            .category-title { font-size: 1.1rem; }
+            .category-desc {
+                font-size: 0.84rem;
+                /* keep the row compact on tiny screens */
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
         }
         
         .category-title {
@@ -505,7 +544,7 @@
             background: var(--gold-accent);
             color: white;
             border: none;
-            padding: 0 30px;
+            padding: 10px 30px;
             border-radius: 0 30px 30px 0;
             font-weight: 600;
             cursor: pointer;
@@ -619,29 +658,53 @@
 
         /* ---- Tablet & below ---- */
         @media (max-width: 991.98px) {
-            /* The contain/right desktop art doesn't sit behind full-width text well,
-               so switch to the cover mobile art with a soft overlay for readability. */
+            /* No fade — the mobile art covers the hero (right-aligned), and the
+               area it doesn't fill (top/bottom) takes the image's backdrop colour. */
             .hero-section {
-                background: linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.82)),
-                            url(../images/MobileBG.png);
+                background-color: #f6dca0; /* matches the hero art backdrop */
+                background-image: url(../images/MobileBG.png);
                 background-size: cover;
-                background-position: center;
-                padding: 110px 0 70px;
+                background-position: right center;
+                background-repeat: no-repeat;
+                padding: 80px 0 56px;
             }
-            .hero-subtitle { max-width: 100%; }
+
+            /* Readable over the photo: white text + soft shadow */
+            .hero-title,
+            .hero-title span {
+                color: #fff;
+                -webkit-text-fill-color: #fff;
+                text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
+            }
+            .hero-subtitle {
+                color: #fff;
+                max-width: 100%;
+                text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+            }
+            /* The outlined "Shop Now" button (carries inline styles) → white outline */
+            .hero-btn[style] {
+                background: rgba(255, 255, 255, 0.18) !important;
+                border-color: #fff !important;
+                color: #fff !important;
+            }
 
             .testimonial-card { margin: 10px 0; }
-            .newsletter-section { margin: 50px 0; }
         }
 
         /* ---- Phones ---- */
         @media (max-width: 767.98px) {
-            .hero-section { padding: 70px 0 50px; }
+            .hero-section { padding: 56px 0 44px; }
             .hero-title { font-size: 2.3rem; }
             .hero-subtitle { font-size: 1.05rem; margin-bottom: 24px; }
             .hero-btn { padding: 11px 24px; font-size: 0.95rem; }
 
-            .section-title { margin-bottom: 34px; }
+            /* Tighter vertical rhythm — less empty space between sections */
+            section.py-5 { padding-top: 1.75rem !important; padding-bottom: 1.75rem !important; }
+            section.my-5 { margin-top: 0.5rem !important; margin-bottom: 0.5rem !important; }
+            .testimonial-section { padding: 40px 0; }
+            .newsletter-section { margin: 26px 0 !important; padding: 36px 20px; }
+
+            .section-title { margin-bottom: 22px; }
             .section-title h2 { font-size: 1.9rem; }
 
             .newsletter-form { flex-direction: column; }
@@ -650,11 +713,6 @@
                 width: 100%;
                 margin-bottom: 10px;
             }
-            .newsletter-section { padding: 40px 22px; }
-
-            .category-image { height: 260px; }
-            .category-title { font-size: 1.45rem; }
-            .category-content { padding: 22px 20px; }
 
             /* Featured products: 2-up (cols are col-6 in markup), tighter cards */
             .product-image { height: auto; aspect-ratio: 3 / 4; }

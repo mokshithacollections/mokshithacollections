@@ -24,11 +24,11 @@
                     <span th:if="${user != null}" th:text="'Welcome back, ' + ${user.firstName} + '!'">Welcome back!</span>
                     <span th:unless="${user != null}">
                         <i class="fas fa-phone-alt"></i> +91 98765 43210 &nbsp;|&nbsp;
-                        <i class="fas fa-envelope"></i> info@mokshithacollections.com
+                        <i class="fas fa-envelope"></i> mokshithacollections@gmail.com
                     </span>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <span>Free Shipping on Orders Above ₹1999</span>
+                    <span>Free Shipping on Orders Above ₹5000</span>
                 </div>
             </div>
         </div>
@@ -146,15 +146,14 @@
         <div class="container">
             <div class="section-title fade-in">
                 <h2>Our Collections</h2>
-                <p class="mt-3">Choose from our two exclusive categories</p>
             </div>
 
             <div class="row g-4">
                 <!-- Mokshitha Collections - Sarees -->
-                <div class="col-lg-6">
+                <div class="col-12">
                     <div class="category-card fade-in">
                         <div class="category-image">
-                            <img src="https://th.bing.com/th/id/OSK.HERO4W8hHZM8Pcm-sKteF1T27N_njVcK7bn5CRK00XV2GMg?o=7&cb=ucfimg2&rm=3&ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3"
+                            <img th:src="@{/images/mc_img.png}"
                                  alt="Saree Collection">
                         </div>
                         <div class="category-content">
@@ -173,15 +172,15 @@
                 </div>
 
                 <!-- Mokshitha Studio - Dresses -->
-                <div class="col-lg-6">
+                <div class="col-12">
                     <div class="category-card fade-in">
                         <div class="category-image">
-                            <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+                            <img th:src="@{/images/ms_img.png}"
                                  alt="Dress Collection">
                         </div>
                         <div class="category-content">
                             <div class="category-badge">Contemporary</div>
-                            <h3 class="category-title">Mokshitha Studio for Dresses</h3>
+                            <h3 class="category-title">Mokshas Studios for Dresses</h3>
                             <p class="category-desc">
                                 Modern fashion meets comfort in our exclusive dress collection. From elegant
                                 evening gowns to casual summer dresses, find the perfect outfit that
@@ -189,6 +188,28 @@
                             </p>
                             <a th:href="@{/shop(categorySlug='dresses')}" class="category-link">
                                 Explore Dresses <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+				
+				<!-- Mokshas Comfort - Dresses -->
+                <div class="col-12">
+                    <div class="category-card fade-in">
+                        <div class="category-image">
+                            <img th:src="@{/images/ms_img.png}"
+                                 alt="Comfort Collection">
+                        </div>
+                        <div class="category-content">
+                            <div class="category-badge">Home &amp; Living</div>
+                            <h3 class="category-title">Mokshitha Comforts for Home</h3>
+                            <p class="category-desc">
+                                Wrap your home in comfort with our premium bedsheets, cosy blankets,
+                                cushion covers and soft furnishings. Crafted from breathable, durable
+                                fabrics to bring warmth and elegance to every room.
+                            </p>
+                            <a th:href="@{/shop(categorySlug='comforts')}" class="category-link">
+                                Explore Comforts <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
                     </div>
@@ -202,7 +223,6 @@
         <div class="container">
             <div class="section-title fade-in">
                 <h2>Featured Products</h2>
-                <p class="mt-3">Handpicked just for you</p>
             </div>
 
             <div class="row g-4">
@@ -270,7 +290,6 @@
         <div class="container">
             <div class="section-title fade-in">
                 <h2>What Our Customers Say</h2>
-                <p class="mt-3">Trusted by thousands of elegant women</p>
             </div>
 
             <div class="row">
