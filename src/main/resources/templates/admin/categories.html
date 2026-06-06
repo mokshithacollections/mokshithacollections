@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Categories')}"></head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/_layout :: sidebar('categories')}"></aside>
+
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <div>
+                <h1>Categories</h1>
+                <div class="breadcrumb"
+                     th:text="${#lists.size(categories)} + ' categories'">0 categories</div>
+            </div>
+            <a class="btn btn-primary" th:href="@{/admin/categories/new}">
+                <i class="fas fa-plus"></i> New category
+            </a>
+        </div>
+
+        <div class="table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Slug</th>
+                        <th>Parent</th>
+                        <th>Description</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="c : ${categories}">
+                        <td>
+                            <a th:href="@{/admin/categories/{id}(id=${c.categoryId})}"
+                               th:text="${c.name}" style="font-weight:500;">Name</a>
+                        </td>
+                        <td><code th:text="${c.slug}">slug</code></td>
+                        <td>
+                            <span th:if="${c.parentId != null}" th:text="${c.parentId}">—</span>
+                            <span th:unless="${c.parentId != null}" style="color:#bbb;">—</span>
+                        </td>
+                        <td th:text="${c.description != null ? #strings.abbreviate(c.description, 60) : '—'}">—</td>
+                        <td>
+                            <a class="btn btn-outline btn-sm"
+                               th:href="@{/admin/categories/{id}(id=${c.categoryId})}">Edit</a>
+                            <button type="button" class="btn btn-danger btn-sm"
+                                    th:attr="data-id=${c.categoryId}, data-name=${c.name}"
+                                    onclick="onDeactivate(this)">Deactivate</button>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(categories)}">
+                        <td class="empty-row" colspan="5">
+                            No categories yet. <a th:href="@{/admin/categories/new}">Create one</a>.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<div th:replace="~{admin/_layout :: scripts}"></div>
+<script>
+    function onDeactivate(btn) {
+        const id = btn.dataset.id;
+        const name = btn.dataset.name;
+        confirmThen('Deactivate "' + name + '"? Products in this category stay but the category is hidden.', async () => {
+            try {
+                await adminApi('DELETE', '/api/admin/categories/' + id);
+                toast('Category deactivated', 'success');
+                setTimeout(() => location.reload(), 600);
+            } catch (e) { toast(e.message, 'error'); }
+        });
+    }
+</script>
+</body>
+</html>

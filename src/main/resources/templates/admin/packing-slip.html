@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Packing slip · ' + ${order.orderNumber}">Packing slip</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --ink: #0f172a;
+            --muted: #6b7280;
+            --line: #1f2937;
+            --soft: #e5e7eb;
+            --tint: #f9fafb;
+            --brand: #2E8B57;
+            --danger: #b91c1c;
+        }
+
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #f3f4f6;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: var(--ink);
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        /* ===== Screen-only toolbar (hidden when printing) ===== */
+        .toolbar {
+            position: sticky;
+            top: 0;
+            background: #fff;
+            border-bottom: 1px solid var(--soft);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .toolbar .info { color: var(--muted); font-size: 13px; }
+        .toolbar .info strong { color: var(--ink); }
+        .toolbar .actions { display: flex; gap: 8px; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        .btn-print { background: var(--brand); color: #fff; border-color: var(--brand); }
+        .btn-print:hover { background: #246b43; color: #fff; text-decoration: none; }
+        .btn-outline { background: #fff; border-color: var(--soft); }
+        .btn-outline:hover { background: var(--tint); }
+
+        /* ===== The slip itself ===== */
+        .slip-wrap {
+            display: flex;
+            justify-content: center;
+            padding: 24px;
+        }
+        .slip {
+            background: #fff;
+            width: 100%;
+            max-width: 760px;
+            padding: 32px;
+            border: 1px solid var(--soft);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+
+        /* Header */
+        .slip-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--line);
+            margin-bottom: 20px;
+        }
+        .brand-name {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--brand);
+            letter-spacing: -0.02em;
+            margin: 0 0 6px;
+        }
+        .brand-meta { color: var(--muted); font-size: 12px; line-height: 1.5; }
+        .doc-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: right;
+            color: var(--line);
+            margin: 0;
+        }
+        .doc-sub { text-align: right; color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+        /* Order number band */
+        .order-band {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 16px;
+            background: var(--tint);
+            border: 1px solid var(--soft);
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-bottom: 24px;
+        }
+        .order-band .cell .lbl {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+            margin-bottom: 2px;
+        }
+        .order-band .cell .val { font-weight: 600; }
+        .order-band .cell .val.big { font-size: 1.1rem; color: var(--brand); }
+
+        /* Addresses */
+        .address-block {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        .address-card {
+            border: 1px solid var(--soft);
+            border-radius: 8px;
+            padding: 16px 18px;
+        }
+        .address-card.highlight {
+            background: var(--tint);
+            border-color: var(--line);
+        }
+        .address-card h3 {
+            margin: 0 0 10px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+        .address-card .name { font-weight: 700; font-size: 1.05rem; margin-bottom: 4px; }
+        .address-card .lines { color: var(--ink); line-height: 1.5; }
+        .address-card .phone { color: var(--muted); margin-top: 8px; }
+        .address-card .phone i { color: var(--brand); margin-right: 4px; }
+
+        /* COD callout */
+        .cod-callout {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cod-callout .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #92400e;
+            font-weight: 700;
+        }
+        .cod-callout .title { font-size: 1.1rem; font-weight: 700; color: var(--ink); margin-top: 2px; }
+        .cod-callout .amount {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #b45309;
+        }
+
+        /* Items table */
+        .items-section h2 {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--muted);
+            margin: 0 0 12px;
+        }
+        table.items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+        table.items-table thead th {
+            background: var(--line);
+            color: #fff;
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        table.items-table tbody td {
+            padding: 12px;
+            border-bottom: 1px solid var(--soft);
+            vertical-align: top;
+        }
+        table.items-table tbody tr:last-child td { border-bottom: 0; }
+        .col-num { width: 36px; text-align: center; color: var(--muted); font-weight: 600; }
+        .col-qty { text-align: center; font-weight: 700; }
+        .col-amt { text-align: right; font-weight: 600; white-space: nowrap; }
+        .product-cell { line-height: 1.4; }
+        .product-cell .name { font-weight: 600; }
+        .product-cell .variant { color: var(--muted); font-size: 12px; margin-top: 2px; }
+        .product-cell .sku { color: var(--muted); font-size: 11px; margin-top: 2px; font-family: 'Courier New', monospace; }
+
+        /* Totals strip */
+        .totals {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 24px;
+        }
+        .totals-grid {
+            width: 280px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 6px 16px;
+        }
+        .totals-grid .lbl { color: var(--muted); }
+        .totals-grid .val { text-align: right; font-weight: 600; }
+        .totals-grid .grand { border-top: 2px solid var(--line); margin-top: 6px; padding-top: 10px; font-size: 1.15rem; }
+        .totals-grid .grand .val { color: var(--brand); }
+
+        /* Notes / signature footer */
+        .notes-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+        .note-box {
+            border: 1px dashed var(--soft);
+            border-radius: 8px;
+            padding: 14px;
+            min-height: 80px;
+        }
+        .note-box h4 {
+            margin: 0 0 8px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+        .note-box p { margin: 0; color: var(--ink); font-size: 12px; line-height: 1.5; }
+        .sig-line {
+            margin-top: 30px;
+            border-top: 1px solid var(--line);
+            padding-top: 6px;
+            font-size: 11px;
+            color: var(--muted);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Footer */
+        .slip-footer {
+            border-top: 1px solid var(--soft);
+            padding-top: 16px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.6;
+        }
+        .slip-footer strong { color: var(--ink); }
+
+        /* ===== Print styles ===== */
+        @media print {
+            body { background: #fff; font-size: 11pt; }
+            .toolbar { display: none; }
+            .slip-wrap { padding: 0; }
+            .slip {
+                max-width: none;
+                width: 100%;
+                margin: 0;
+                padding: 16mm;
+                box-shadow: none;
+                border: 0;
+            }
+            @page {
+                size: A4;
+                margin: 12mm;
+            }
+            .cod-callout { border-width: 2px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .order-band, table.items-table thead th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- On-screen toolbar (stripped when printing) -->
+    <div class="toolbar">
+        <div class="info">
+            Packing slip for <strong th:text="${order.orderNumber}">#MC-000000</strong>
+        </div>
+        <div class="actions">
+            <a th:href="@{/admin/orders/{id}(id=${order.orderId})}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to order
+            </a>
+            <button type="button" class="btn btn-print" onclick="window.print()">
+                <i class="fas fa-print"></i> Print
+            </button>
+        </div>
+    </div>
+
+    <div class="slip-wrap">
+        <div class="slip">
+
+            <!-- Header -->
+            <header class="slip-header">
+                <div>
+                    <h1 class="brand-name">Mokshitha Collections</h1>
+                    <div class="brand-meta">
+                        123 Fashion Street, Chennai, India · 600001<br>
+                        +91 98765 43210 · info@mokshithacollections.com
+                    </div>
+                </div>
+                <div>
+                    <h2 class="doc-title">Packing Slip</h2>
+                    <div class="doc-sub" th:text="'Generated ' + ${#temporals.format(#temporals.createNow(), 'd MMM yyyy, HH:mm')}">Generated date</div>
+                </div>
+            </header>
+
+            <!-- Order info band -->
+            <div class="order-band">
+                <div class="cell">
+                    <div class="lbl">Order #</div>
+                    <div class="val big" th:text="${order.orderNumber}">#MC-000000</div>
+                </div>
+                <div class="cell">
+                    <div class="lbl">Placed</div>
+                    <div class="val" th:text="${#temporals.format(order.placedAt, 'd MMM yyyy')}">date</div>
+                </div>
+                <div class="cell">
+                    <div class="lbl">Status</div>
+                    <div class="val" th:text="${order.status.name()}">PLACED</div>
+                </div>
+                <div class="cell">
+                    <div class="lbl">Items</div>
+                    <div class="val" th:text="${#lists.size(order.items)} + ' (' +
+                                              ${#aggregates.sum(order.items.![quantity])} + ' units)'">0 (0 units)</div>
+                </div>
+            </div>
+
+            <!-- COD callout (only renders if payment is COD and not yet paid) -->
+            <div class="cod-callout" th:if="${order.paymentMethod.name() == 'COD' and order.paymentStatus.name() != 'PAID'}">
+                <div>
+                    <div class="label">⚠ Cash on Delivery</div>
+                    <div class="title">Collect on delivery</div>
+                </div>
+                <div class="amount" th:text="'₹' + ${order.totalAmount}">₹0</div>
+            </div>
+
+            <!-- Addresses (FROM left, SHIP TO right — emphasised) -->
+            <div class="address-block">
+                <div class="address-card">
+                    <h3>From</h3>
+                    <div class="name">Mokshitha Collections</div>
+                    <div class="lines">
+                        123 Fashion Street<br>
+                        Chennai, Tamil Nadu 600001<br>
+                        India
+                    </div>
+                    <div class="phone"><i class="fas fa-phone-alt"></i> +91 98765 43210</div>
+                </div>
+
+                <div class="address-card highlight" th:if="${order.shippingAddress != null}">
+                    <h3>Ship To</h3>
+                    <div class="name" th:text="${order.shippingAddress.firstName + ' ' + order.shippingAddress.lastName}">Customer</div>
+                    <div class="lines">
+                        <span th:text="${order.shippingAddress.streetAddress}">Street</span><br>
+                        <span th:text="${order.shippingAddress.city + ', ' + order.shippingAddress.state + ' ' + order.shippingAddress.pinCode}">City, State PIN</span><br>
+                        <span th:text="${order.shippingAddress.country}">Country</span>
+                    </div>
+                    <div class="phone">
+                        <i class="fas fa-phone-alt"></i>
+                        <span th:text="${order.shippingAddress.phone}">Phone</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items -->
+            <section class="items-section">
+                <h2>Items to pack</h2>
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th class="col-num">#</th>
+                            <th>Product</th>
+                            <th class="col-qty">Qty</th>
+                            <th class="col-amt">Unit price</th>
+                            <th class="col-amt">Line total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="item, iter : ${order.items}">
+                            <td class="col-num" th:text="${iter.count}">1</td>
+                            <td class="product-cell">
+                                <div class="name" th:text="${item.productName}">Product</div>
+                                <div class="variant">
+                                    <span th:if="${item.variantColor != null}" th:text="${item.variantColor}">Color</span>
+                                    <span th:if="${item.variantSize != null}" th:text="' / Size ' + ${item.variantSize}"> / Size</span>
+                                </div>
+                                <div class="sku" th:if="${item.skuVariant != null}" th:text="'SKU: ' + ${item.skuVariant}">SKU</div>
+                            </td>
+                            <td class="col-qty" th:text="${item.quantity}">1</td>
+                            <td class="col-amt" th:text="'₹' + ${item.unitPrice}">₹0</td>
+                            <td class="col-amt" th:text="'₹' + ${item.lineTotal}">₹0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Totals -->
+            <div class="totals">
+                <div class="totals-grid">
+                    <div class="lbl">Subtotal</div>
+                    <div class="val" th:text="'₹' + ${order.subtotal}">₹0</div>
+
+                    <div class="lbl">Shipping</div>
+                    <div class="val" th:text="'₹' + ${order.shippingFee}">₹0</div>
+
+                    <div class="lbl grand">Total</div>
+                    <div class="val grand" th:text="'₹' + ${order.totalAmount}">₹0</div>
+
+                    <div class="lbl" style="margin-top:4px; font-size:11px;">Payment</div>
+                    <div class="val" style="margin-top:4px; font-size:11px; font-weight: 500;">
+                        <span th:text="${order.paymentMethod.name()}">COD</span> ·
+                        <span th:text="${order.paymentStatus.name()}">PENDING</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Packer note + signature -->
+            <div class="notes-row">
+                <div class="note-box">
+                    <h4>Packer note</h4>
+                    <p>Verify every item against the list above before sealing the parcel. Include a printed copy of this slip inside the box where customers can find it.</p>
+                </div>
+                <div class="note-box">
+                    <h4>Packed by</h4>
+                    <p style="opacity: 0; user-select: none;">.</p>
+                    <div class="sig-line">Signature / Date</div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="slip-footer">
+                Thank you for shopping with <strong>Mokshitha Collections</strong>.<br>
+                Questions about this order? Email <strong>info@mokshithacollections.com</strong>
+                or call <strong>+91 98765 43210</strong>.
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Convenience: trigger print with Ctrl/Cmd + P (browsers do this anyway,
+        // but Enter on the toolbar's Print button works too).
+        document.addEventListener('keydown', function (e) {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
+                // Let the default browser print dialog handle it
+                return;
+            }
+        });
+    </script>
+</body>
+</html>

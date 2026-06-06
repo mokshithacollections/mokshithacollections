@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('User')}"></head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/_layout :: sidebar('users')}"></aside>
+
+    <main class="admin-main">
+
+        <!-- Page header with profile summary + quick actions -->
+        <div class="admin-page-header" style="align-items: flex-start;">
+            <div>
+                <h1 th:text="${u.firstName + ' ' + (u.lastName != null ? u.lastName : '')}">Name</h1>
+                <div class="breadcrumb">
+                    <a th:href="@{/admin/users}">Users</a> /
+                    <span th:text="${u.email}">email</span>
+                </div>
+                <div style="margin-top: 10px; display: flex; gap: 8px; align-items: center;">
+                    <span class="pill" th:if="${u.isAdmin}" th:classappend="'pill-admin'">ADMIN</span>
+                    <span class="pill" th:unless="${u.isAdmin}">CUSTOMER</span>
+                    <span class="pill"
+                          th:classappend="${u.isActive} ? 'pill-active' : 'pill-inactive'"
+                          th:text="${u.isActive} ? 'Active' : 'Inactive'">Active</span>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button th:if="${u.isActive}" type="button" class="btn btn-outline"
+                        th:attr="data-id=${u.userId}, data-name=${u.firstName}"
+                        onclick="setActive(this, false)">
+                    <i class="fas fa-user-slash"></i> Deactivate
+                </button>
+                <button th:unless="${u.isActive}" type="button" class="btn btn-outline"
+                        th:attr="data-id=${u.userId}, data-name=${u.firstName}"
+                        onclick="setActive(this, true)">
+                    <i class="fas fa-user-check"></i> Activate
+                </button>
+
+                <button th:unless="${u.isAdmin}" type="button" class="btn btn-outline"
+                        th:attr="data-id=${u.userId}, data-name=${u.firstName}"
+                        onclick="setAdmin(this, true)">
+                    <i class="fas fa-user-shield"></i> Promote
+                </button>
+                <button th:if="${u.isAdmin}" type="button" class="btn btn-outline"
+                        th:attr="data-id=${u.userId}, data-name=${u.firstName}"
+                        onclick="setAdmin(this, false)">
+                    <i class="fas fa-user-minus"></i> Demote
+                </button>
+
+                <a class="btn btn-outline" th:href="@{/admin/users}">Back to list</a>
+            </div>
+        </div>
+
+        <!-- Stats grid -->
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="label">Orders placed</div>
+                <div class="value" th:text="${totalOrders}">0</div>
+                <div class="accent">Cancellations included</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Total spent</div>
+                <div class="value"
+                     th:text="'₹' + ${totalSpent != null ? totalSpent : 0}">₹0</div>
+                <div class="accent">Excluding cancelled orders</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Wishlist items</div>
+                <div class="value" th:text="${wishlistCount}">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Member since</div>
+                <div class="value" style="font-size: 1.4rem;"
+                     th:text="${u.createdAt != null ? #temporals.format(u.createdAt, 'd MMM yyyy') : '—'}">—</div>
+                <div class="accent">
+                    <span th:if="${u.createdAt != null}"
+                          th:text="${#temporals.format(u.createdAt, 'HH:mm')}">time</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Two-column layout: profile/addresses on left, orders on right -->
+        <div style="display:grid; grid-template-columns: 1fr 2fr; gap: 20px;">
+
+            <!-- ===== Left column ===== -->
+            <div>
+                <!-- Contact card -->
+                <div class="card">
+                    <h2>Contact</h2>
+                    <div style="display:grid; grid-template-columns: auto 1fr; gap: 8px 12px; font-size: 0.9rem;">
+                        <span style="color: var(--admin-muted);">Email</span>
+                        <a th:href="${'mailto:' + u.email}" th:text="${u.email}">email</a>
+
+                        <span style="color: var(--admin-muted);">Phone</span>
+                        <span th:text="${u.phone != null ? u.phone : '—'}">—</span>
+
+                        <span style="color: var(--admin-muted);">User ID</span>
+                        <code th:text="${u.userId}">0</code>
+                    </div>
+                </div>
+
+                <!-- Addresses -->
+                <div class="card">
+                    <h2>Addresses (<span th:text="${u.addresses != null ? #lists.size(u.addresses) : 0}">0</span>)</h2>
+
+                    <div th:if="${u.addresses == null or #lists.isEmpty(u.addresses)}"
+                         class="text-muted" style="padding: 18px 0; text-align: center;">
+                        No saved addresses.
+                    </div>
+
+                    <div th:each="addr : ${u.addresses}"
+                         style="border:1px solid var(--admin-border); border-radius:8px;
+                                padding: 12px 14px; margin-bottom: 10px; background:#fff;">
+                        <div style="display:flex; justify-content: space-between; align-items: flex-start;">
+                            <div style="font-weight: 600;"
+                                 th:text="${addr.firstName + ' ' + addr.lastName}">Name</div>
+                            <span class="pill pill-active"
+                                  th:if="${addr.isDefault != null and addr.isDefault}">Default</span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: var(--admin-text); margin-top: 6px; line-height: 1.5;">
+                            <span th:text="${addr.streetAddress}">Street</span><br>
+                            <span th:text="${addr.city + ', ' + addr.state + ' ' + addr.pinCode}">City, State PIN</span><br>
+                            <span th:text="${addr.country}">Country</span> ·
+                            <span th:text="${addr.phone}">Phone</span><br>
+                            <small style="color: var(--admin-muted);"
+                                   th:text="'Type: ' + ${addr.addressType}">Type</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Right column ===== -->
+            <div>
+                <!-- Orders -->
+                <div class="card">
+                    <h2>Recent orders (<span th:text="${totalOrders}">0</span>)</h2>
+
+                    <div class="table-wrap" style="border:0; padding:0;">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Date</th>
+                                    <th>Items</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Payment</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="o : ${orders.content}">
+                                    <td><strong th:text="${o.orderNumber}">#MC-000000</strong></td>
+                                    <td th:text="${#temporals.format(o.placedAt, 'd MMM yyyy')}">date</td>
+                                    <td th:text="${o.itemCount}">0</td>
+                                    <td th:text="'₹' + ${o.totalAmount}">₹0</td>
+                                    <td>
+                                        <span class="pill"
+                                              th:classappend="'pill-' + ${#strings.toLowerCase(o.status.name())}"
+                                              th:text="${o.status.name()}">PLACED</span>
+                                    </td>
+                                    <td>
+                                        <span class="pill"
+                                              th:classappend="${o.paymentStatus.name() == 'PAID'} ? 'pill-active' :
+                                                              (${o.paymentStatus.name() == 'REFUNDED'} ? 'pill-cancelled' : '')"
+                                              th:text="${o.paymentStatus.name()}">PENDING</span>
+                                    </td>
+                                    <td>
+                                        <a class="btn btn-outline btn-sm"
+                                           th:href="@{/admin/orders/{id}(id=${o.orderId})}">View</a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(orders.content)}">
+                                    <td class="empty-row" colspan="7">This user hasn't placed any orders yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <ul class="pagination" th:if="${orders.totalPages > 1}" style="margin-top: 16px;">
+                        <li th:classappend="${!orders.hasPrevious()} ? 'disabled'">
+                            <a th:if="${orders.hasPrevious()}"
+                               th:href="@{/admin/users/{id}(id=${u.userId}, ordersPage=${orders.number - 1})}">Previous</a>
+                            <span th:unless="${orders.hasPrevious()}">Previous</span>
+                        </li>
+                        <li th:each="i : ${#numbers.sequence(0, orders.totalPages - 1)}"
+                            th:classappend="${i == orders.number} ? 'active'">
+                            <a th:href="@{/admin/users/{id}(id=${u.userId}, ordersPage=${i})}"
+                               th:text="${i + 1}">1</a>
+                        </li>
+                        <li th:classappend="${!orders.hasNext()} ? 'disabled'">
+                            <a th:if="${orders.hasNext()}"
+                               th:href="@{/admin/users/{id}(id=${u.userId}, ordersPage=${orders.number + 1})}">Next</a>
+                            <span th:unless="${orders.hasNext()}">Next</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div th:replace="~{admin/_layout :: scripts}"></div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const VIEWING_SELF = /*[[${user != null and user.userId == u.userId}]]*/ false;
+    /*]]>*/
+
+    async function setActive(btn, on) {
+        const id = btn.dataset.id;
+        const name = btn.dataset.name;
+        const verb = on ? 'Activate' : 'Deactivate';
+        if (!on && VIEWING_SELF) {
+            toast("You can't deactivate your own account", 'error');
+            return;
+        }
+        confirmThen(verb + ' ' + name + '?', async () => {
+            try {
+                await adminApi('POST', '/api/admin/users/' + id + (on ? '/activate' : '/deactivate'));
+                toast(verb + 'd ' + name, 'success');
+                setTimeout(() => location.reload(), 500);
+            } catch (e) { toast(e.message, 'error'); }
+        });
+    }
+
+    async function setAdmin(btn, promote) {
+        const id = btn.dataset.id;
+        const name = btn.dataset.name;
+        const verb = promote ? 'Promote' : 'Demote';
+        if (!promote && VIEWING_SELF) {
+            toast("You can't remove your own admin role", 'error');
+            return;
+        }
+        confirmThen(verb + ' ' + name + (promote ? ' to admin?' : ' from admin?'), async () => {
+            try {
+                await adminApi('POST', '/api/admin/users/' + id + (promote ? '/promote' : '/demote'));
+                toast(name + (promote ? ' promoted to admin' : ' demoted'), 'success');
+                setTimeout(() => location.reload(), 500);
+            } catch (e) { toast(e.message, 'error'); }
+        });
+    }
+</script>
+</body>
+</html>

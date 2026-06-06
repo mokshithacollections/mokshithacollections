@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"d:\\\\Java Web Projects VT\\\\mokshitha_collections\\\\src\\\\main\\\\java\" -Recurse | Where-Object {$_.Extension -eq \".java\"} | Select-Object -ExpandProperty FullName | Sort-Object | Select-Object -First 50)",
+      "Bash(./mvnw -q -o compile)"
+    ]
+  }
+}

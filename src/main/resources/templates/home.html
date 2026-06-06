@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mokshitha Collections | Premium Sarees &amp; Dresses</title>
+
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Local CSS -->
+    <link rel="stylesheet" type="text/css" th:href="@{/css/home.css}">
+</head>
+
+<body>
+
+    <!-- Header Top Bar -->
+    <div class="header-top">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <span th:if="${user != null}" th:text="'Welcome back, ' + ${user.firstName} + '!'">Welcome back!</span>
+                    <span th:unless="${user != null}">
+                        <i class="fas fa-phone-alt"></i> +91 98765 43210 &nbsp;|&nbsp;
+                        <i class="fas fa-envelope"></i> info@mokshithacollections.com
+                    </span>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <span>Free Shipping on Orders Above ₹1999</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="main-header py-3">
+        <div class="container">
+            <div class="row align-items-center">
+
+                <!-- Logo -->
+                <div class="col-lg-3 col-md-4 col-6">
+                    <a th:href="@{/home}" class="logo">Mokshitha<span>.</span></a>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="col-lg-6 col-md-4 d-none d-md-block">
+                    <nav class="navbar navbar-expand-lg justify-content-center">
+                        <ul class="navbar-nav">
+                            <li class="nav-item"><a class="nav-link active" th:href="@{/home}">Home</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Shop</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Collections</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/about}">About</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/contact}">Contact</a></li>
+                            <li class="nav-item" th:if="${user != null and user.isAdmin}">
+                                <a class="nav-link" th:href="@{/admin}" style="color: var(--dark-sea-green); font-weight: 600;">
+                                    <i class="fas fa-cog"></i> Admin
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <!-- Icons -->
+                <div class="col-lg-3 col-md-4 col-6 text-end">
+                    <div class="header-icons d-inline-flex align-items-center">
+                        <div class="icon search-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="icon user-icon" id="userIcon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="icon wishlist-icon" id="wishlistIcon">
+                            <i class="far fa-heart"></i>
+                            <span class="cart-count" th:text="${wishlistCount != null ? wishlistCount : 0}">0</span>
+                        </div>
+                        <div class="icon cart-icon" id="cartIcon">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span class="cart-count" th:text="${cartCount != null ? cartCount : 0}">0</span>
+                        </div>
+
+                        <button class="navbar-toggler d-md-none ms-3" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#mobileMenu">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Mobile Menu -->
+            <div class="collapse d-md-none" id="mobileMenu">
+                <ul class="navbar-nav mt-3">
+                    <li class="nav-item"><a class="nav-link active" th:href="@{/home}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Shop</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/collections}">Collections</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/about}">About</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/contact}">Contact</a></li>
+                    <li class="nav-item" th:if="${user != null and user.isAdmin}">
+                        <a class="nav-link" th:href="@{/admin}" style="color: var(--dark-sea-green); font-weight: 600;">
+                            <i class="fas fa-cog"></i> Admin
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="floating-element floating-1"></div>
+        <div class="floating-element floating-2"></div>
+
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <div class="hero-content">
+                        <h1 class="hero-title fade-in">
+                            Elegance Redefined<br>
+                            <span>Mokshitha Collections</span>
+                        </h1>
+                        <p class="hero-subtitle fade-in">
+                            Discover the perfect blend of tradition and modernity in our exquisite collection
+                            of sarees and dresses. Each piece tells a story of craftsmanship and elegance.
+                        </p>
+                        <div class="fade-in">
+                            <a href="#categories" class="hero-btn me-3">Explore Collections</a>
+                            <a th:href="@{/shop}" class="hero-btn"
+                               style="background: transparent; border: 2px solid var(--dark-sea-green); color: var(--dark-sea-green);">
+                                Shop Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 d-none d-lg-block">
+                    <!-- Hero image would be here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Categories -->
+    <section id="categories" class="py-5 my-5">
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>Our Collections</h2>
+                <p class="mt-3">Choose from our two exclusive categories</p>
+            </div>
+
+            <div class="row g-4">
+                <!-- Mokshitha Collections - Sarees -->
+                <div class="col-lg-6">
+                    <div class="category-card fade-in">
+                        <div class="category-image">
+                            <img src="https://th.bing.com/th/id/OSK.HERO4W8hHZM8Pcm-sKteF1T27N_njVcK7bn5CRK00XV2GMg?o=7&cb=ucfimg2&rm=3&ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3"
+                                 alt="Saree Collection">
+                        </div>
+                        <div class="category-content">
+                            <div class="category-badge">Traditional</div>
+                            <h3 class="category-title">Mokshitha Collections for Sarees</h3>
+                            <p class="category-desc">
+                                Experience the timeless elegance of traditional Indian sarees. Our collection
+                                features handwoven silk, exquisite Banarasi, elegant Kanchipuram, and
+                                contemporary designer sarees for every occasion.
+                            </p>
+                            <a th:href="@{/shop(categorySlug='sarees')}" class="category-link">
+                                Explore Sarees <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mokshitha Studio - Dresses -->
+                <div class="col-lg-6">
+                    <div class="category-card fade-in">
+                        <div class="category-image">
+                            <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+                                 alt="Dress Collection">
+                        </div>
+                        <div class="category-content">
+                            <div class="category-badge">Contemporary</div>
+                            <h3 class="category-title">Mokshitha Studio for Dresses</h3>
+                            <p class="category-desc">
+                                Modern fashion meets comfort in our exclusive dress collection. From elegant
+                                evening gowns to casual summer dresses, find the perfect outfit that
+                                complements your style and personality.
+                            </p>
+                            <a th:href="@{/shop(categorySlug='dresses')}" class="category-link">
+                                Explore Dresses <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="py-5 my-5">
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>Featured Products</h2>
+                <p class="mt-3">Handpicked just for you</p>
+            </div>
+
+            <div class="row g-4">
+
+                <div class="col-6 col-md-6 col-lg-3" th:each="product : ${featuredProducts}">
+                    <div class="product-card fade-in">
+
+                        <div class="product-image">
+                            <a th:href="@{/product-detail/{id}(id=${product.productId})}">
+                                <img th:src="${product.imageUrl}" th:alt="${product.name}">
+                            </a>
+
+                            <!-- Wishlist button: adds 'active' class if product is in wishlist -->
+                            <div class="product-wishlist"
+                                 th:classappend="${wishlistProductIds != null and wishlistProductIds.contains(product.productId)} ? 'active'"
+                                 th:attr="data-product-id=${product.productId}, data-name=${product.name}">
+                                <i th:class="${wishlistProductIds != null and wishlistProductIds.contains(product.productId)} ? 'fas fa-heart' : 'far fa-heart'"></i>
+                            </div>
+                        </div>
+
+                        <div class="product-content">
+                            <h4 class="product-title">
+                                <a th:href="@{/product-detail/{id}(id=${product.productId})}"
+                                   th:text="${product.name}"
+                                   style="color: inherit; text-decoration: none;">Product Name</a>
+                            </h4>
+
+                            <div class="product-price">
+                                <!-- Show discount price if set, otherwise the regular price -->
+                                <span th:if="${product.discountPrice != null}" th:text="'₹' + ${product.discountPrice}">₹0</span>
+                                <span th:unless="${product.discountPrice != null}" th:text="'₹' + ${product.price}">₹0</span>
+                                <!-- Strike-through original price only when there's a discount -->
+                                <span class="old-price" th:if="${product.discountPrice != null}"
+                                      th:text="'₹' + ${product.price}">₹0</span>
+                            </div>
+
+                            <button class="product-btn"
+                                    th:classappend="${cartProductIds != null and cartProductIds.contains(product.productId)} ? 'in-cart'"
+                                    th:attr="data-product-id=${product.productId}"
+                                    th:text="${cartProductIds != null and cartProductIds.contains(product.productId)} ? 'View Cart' : 'Add to Cart'">
+                                Add to Cart
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Empty state when no featured products are configured yet -->
+                <div class="col-12 text-center py-5"
+                     th:if="${featuredProducts == null or #lists.isEmpty(featuredProducts)}">
+                    <p class="text-muted">No featured products yet. Browse our full catalog instead.</p>
+                    <a th:href="@{/shop}" class="hero-btn mt-3">Visit Shop</a>
+                </div>
+
+            </div>
+
+            <div class="text-center mt-5 fade-in">
+                <a th:href="@{/shop}" class="hero-btn">View All Products</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonial-section">
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>What Our Customers Say</h2>
+                <p class="mt-3">Trusted by thousands of elegant women</p>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="testimonial-card fade-in">
+                        <p class="testimonial-text">
+                            The silk saree I bought from Mokshitha Collections is absolutely stunning!
+                            The quality is exceptional and I received so many compliments at the wedding.
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-img">
+                                <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Customer">
+                            </div>
+                            <div class="author-info">
+                                <h5>Priya Sharma</h5>
+                                <p>Delhi</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="testimonial-card fade-in">
+                        <p class="testimonial-text">
+                            Mokshitha Studio dresses are my go-to for office wear. Perfect blend of comfort
+                            and style. The fabric quality is consistently good across all purchases.
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-img">
+                                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Customer">
+                            </div>
+                            <div class="author-info">
+                                <h5>Ananya Reddy</h5>
+                                <p>Bangalore</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="testimonial-card fade-in">
+                        <p class="testimonial-text">
+                            Ordered a custom stitched saree blouse and the fit was perfect! Their attention
+                            to detail and customer service is remarkable. Highly recommended!
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-img">
+                                <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Customer">
+                            </div>
+                            <div class="author-info">
+                                <h5>Meera Patel</h5>
+                                <p>Mumbai</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter -->
+    <section class="container">
+        <div class="newsletter-section fade-in">
+            <div class="row justify-content-center text-center">
+                <div class="col-lg-8">
+                    <h3 class="newsletter-title">Stay Updated</h3>
+                    <p class="mb-4">Subscribe to our newsletter for exclusive offers, new arrivals, and style tips</p>
+                    <form class="newsletter-form">
+                        <input type="email" class="newsletter-input" placeholder="Your email address" required>
+                        <button type="submit" class="newsletter-btn">Subscribe</button>
+                    </form>
+                    <p class="mt-3 small">By subscribing, you agree to our Privacy Policy</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <a th:href="@{/home}" class="footer-logo">Mokshitha<span>.</span></a>
+                    <p class="footer-about">
+                        Bringing you the finest collection of traditional sarees and contemporary dresses
+                        since 2010. Our mission is to make every woman feel elegant and confident.
+                    </p>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-pinterest-p"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h4 class="footer-title">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a th:href="@{/home}">Home</a></li>
+                        <li><a th:href="@{/shop}">Shop</a></li>
+                        <li><a th:href="@{/shop(categorySlug='sarees')}">Sarees</a></li>
+                        <li><a th:href="@{/shop(categorySlug='dresses')}">Dresses</a></li>
+                        <li><a th:href="@{/about}">About Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h4 class="footer-title">Support</h4>
+                    <ul class="footer-links">
+                        <li><a th:href="@{/contact}">Contact Us</a></li>
+                        <li><a th:href="@{/contact}">FAQ</a></li>
+                        <li><a th:href="@{/contact}">Shipping Policy</a></li>
+                        <li><a th:href="@{/contact}">Returns &amp; Exchange</a></li>
+                        <li><a th:href="@{/contact}">Privacy Policy</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-4 col-md-4 mb-4">
+                    <h4 class="footer-title">Contact Info</h4>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt me-2"></i> 123 Fashion Street, Chennai, India</li>
+                        <li><i class="fas fa-phone-alt me-2"></i> +91 98765 43210</li>
+                        <li><i class="fas fa-envelope me-2"></i> info@mokshithacollections.com</li>
+                        <li><i class="fas fa-clock me-2"></i> Mon-Sat: 10AM - 8PM</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="copyright">
+                <p>
+                    <span th:text="'&copy; ' + ${#temporals.format(#temporals.createNow(), 'yyyy')} + ' Mokshitha Collections. All rights reserved. |'">&copy; 2026 Mokshitha Collections. All rights reserved. |</span>
+                    Designed with <i class="fas fa-heart" style="color: var(--light-sea-green);"></i>
+                    for elegant women
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        // Variant ids already in this user's wishlist — read by home.js to mark
+        // "already added" rows in the wishlist picker.
+        window.WISHLIST_VARIANT_IDS = new Set(/*[[${wishlistVariantIds}]]*/ []);
+    </script>
+    <script type="text/javascript" th:src="@{/js/home.js}"></script>
+</body>
+</html>

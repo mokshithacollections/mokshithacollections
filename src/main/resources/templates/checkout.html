@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Mokshitha Collections</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dark-sea-green: #2E8B57;
+            --light-sea-green: #20B2AA;
+            --light-cream: #FFF8F0;
+            --gold-accent: #D4AF37;
+            --dark-text: #2C3E50;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--dark-text);
+            background-color: #f9f9f9;
+        }
+        
+        h1, h2, h3, h4, h5 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+        }
+        
+        /* Header Styles */
+        .header-top {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            color: white;
+            padding: 8px 0;
+            font-size: 0.9rem;
+        }
+        
+        .main-header {
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        
+        .logo span {
+            color: var(--gold-accent);
+        }
+        
+        .nav-link {
+            color: var(--dark-text) !important;
+            font-weight: 500;
+            margin: 0 10px;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover {
+            color: var(--dark-sea-green) !important;
+        }
+        
+        .nav-link.active {
+            color: var(--dark-sea-green) !important;
+            font-weight: 600;
+        }
+        
+        .header-icons .icon {
+            position: relative;
+            margin-left: 20px;
+            font-size: 1.2rem;
+            color: var(--dark-text);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .header-icons .icon:hover {
+            color: var(--dark-sea-green);
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--light-sea-green);
+            color: white;
+            font-size: 0.7rem;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Checkout Header */
+        .checkout-header {
+            background: linear-gradient(135deg, rgba(46, 139, 87, 0.1), rgba(32, 178, 170, 0.1));
+            position: sticky;
+            top: 88px;
+            z-index: 1000;
+            padding: 20px 0;
+        }
+        
+        .checkout-progress {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            
+        }
+        
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            width: 150px;
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #999;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+            z-index: 2;
+        }
+        
+        .step-number.active {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            border-color: var(--dark-sea-green);
+            color: white;
+        }
+        
+        .step-number.completed {
+            background: var(--gold-accent);
+            border-color: var(--gold-accent);
+            color: white;
+        }
+        
+        .step-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .step-label.active {
+            color: var(--dark-sea-green);
+            font-weight: 600;
+        }
+        
+        .progress-line {
+            height: 2px;
+            background: #ddd;
+            flex: 1;
+            max-width: 100px;
+            position: relative;
+            top: -20px;
+        }
+        
+        .progress-line.active {
+            background: linear-gradient(90deg, var(--dark-sea-green), var(--light-sea-green));
+        }
+        
+        /* Checkout Container */
+        .checkout-container {
+            padding: 20px 0;
+        }
+        
+        /* Checkout Form */
+        .checkout-form-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+        
+        .form-section-title {
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            color: var(--dark-text);
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+            display: block;
+        }
+        
+        .form-label.required::after {
+            content: '*';
+            color: #ff6b6b;
+            margin-left: 4px;
+        }
+        
+        .form-control {
+            border: 2px solid #eee;
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--dark-sea-green);
+            box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
+        }
+        
+        .form-control.is-invalid {
+            border-color: #ff6b6b;
+        }
+        
+        .invalid-feedback {
+            color: #ff6b6b;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        /* Radio and Checkbox Styles */
+        .option-group {
+            margin-bottom: 20px;
+        }
+        
+        .option-item {
+            border: 2px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .option-item:hover {
+            border-color: #ddd;
+            background: #fafafa;
+        }
+        
+        .option-item.selected {
+            border-color: var(--dark-sea-green);
+            background: rgba(46, 139, 87, 0.05);
+        }
+        
+        .option-radio {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--dark-sea-green);
+        }
+        
+        .option-content {
+            flex: 1;
+        }
+        
+        .option-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .option-description {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .option-price {
+            font-weight: 600;
+            color: var(--dark-sea-green);
+        }
+        
+        /* Same as Shipping Checkbox */
+        .form-check {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .form-check-input {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            accent-color: var(--dark-sea-green);
+        }
+        
+        .form-check-label {
+            cursor: pointer;
+        }
+
+        /* Saved-address selectable cards — highlight the chosen one (no JS needed) */
+        .form-check:has(input[name="addressId"]) {
+            transition: border-color .2s, background .2s, box-shadow .2s;
+            cursor: pointer;
+        }
+        .form-check:has(input[name="addressId"]):hover {
+            border-color: #bfe3cf !important;
+            background: #fafffc;
+        }
+        .form-check:has(input[name="addressId"]:checked) {
+            border-color: var(--dark-sea-green) !important;
+            background: rgba(46, 139, 87, 0.05);
+            box-shadow: 0 4px 14px rgba(46, 139, 87, 0.12);
+        }
+        .form-check:has(input[name="addressId"]) .form-check-label {
+            line-height: 1.55;
+        }
+
+        /* Order Summary */
+        .order-summary-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            position: sticky;
+            top: 120px;
+        }
+        
+        .order-summary-title {
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            color: var(--dark-text);
+        }
+        
+        /* Order Items */
+        .order-items {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 10px;
+        }
+        
+        .order-item {
+            display: flex;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .order-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .order-item-image {
+            width: 70px;
+            height: 90px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .order-item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .order-item-details {
+            flex: 1;
+        }
+        
+        .order-item-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+        }
+        
+        .order-item-meta {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .order-item-price {
+            font-weight: 600;
+            color: var(--dark-sea-green);
+            font-size: 1rem;
+        }
+        
+        /* Order Summary Details */
+        .summary-details {
+            margin-top: 20px;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+        
+        .summary-label {
+            color: #666;
+        }
+        
+        .summary-value {
+            font-weight: 600;
+        }
+        
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 20px 0;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+            color: var(--dark-text);
+        }
+        
+        /* Payment Methods */
+        .payment-methods {
+            margin: 25px 0;
+        }
+        
+        .payment-option {
+            border: 2px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .payment-option:hover {
+            border-color: #ddd;
+            background: #fafafa;
+        }
+        
+        .payment-option.selected {
+            border-color: var(--dark-sea-green);
+            background: rgba(46, 139, 87, 0.05);
+        }
+        
+        .payment-icon {
+            width: 50px;
+            height: 40px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #555;
+        }
+        
+        .payment-content {
+            flex: 1;
+        }
+        
+        .payment-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .payment-description {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* Card Payment Form */
+        .card-payment-form {
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .card-payment-form.active {
+            display: block;
+        }
+        
+        .card-input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .card-input {
+            flex: 1;
+        }
+        
+        .card-input.half {
+            flex: 0.5;
+        }
+        
+        /* Terms and Conditions */
+        .terms-check {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 15px;
+        }
+        
+        .btn-back {
+            background: transparent;
+            border: 2px solid #ddd;
+            color: #666;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+        }
+        
+        .btn-back:hover {
+            background: #f8f9fa;
+            border-color: #ccc;
+        }
+        
+        .btn-place-order {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-place-order:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(46, 139, 87, 0.3);
+        }
+        
+        .btn-place-order:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Secure Checkout */
+        .secure-checkout {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .secure-checkout i {
+            color: #28a745;
+            margin-right: 5px;
+        }
+        
+        /* Footer */
+        .footer-section {
+            background: #1a1a1a;
+            color: #ddd;
+            padding: 60px 0 30px;
+            margin-top: 60px;
+        }
+        
+        .footer-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        
+        .footer-logo span {
+            color: var(--light-sea-green);
+        }
+        
+        .footer-title {
+            color: white;
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .footer-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background: var(--light-sea-green);
+        }
+        
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+        
+        .footer-links a {
+            color: #aaa;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--light-sea-green);
+            padding-left: 5px;
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            background: #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .social-icon:hover {
+            background: var(--light-sea-green);
+            transform: translateY(-5px);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            margin-top: 50px;
+            border-top: 1px solid #333;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        /* Success Modal */
+        .success-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .success-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .success-content {
+            background: white;
+            border-radius: 15px;
+            padding: 50px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            transform: translateY(30px);
+            transition: transform 0.5s;
+        }
+        
+        .success-modal.active .success-content {
+            transform: translateY(0);
+        }
+        
+        .success-icon {
+            font-size: 5rem;
+            color: var(--dark-sea-green);
+            margin-bottom: 20px;
+        }
+        
+        .success-title {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--dark-text);
+        }
+        
+        .success-message {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .order-details {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        
+        .order-id {
+            font-weight: 600;
+            color: var(--dark-sea-green);
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .success-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .success-btn {
+            flex: 1;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            color: white;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(46, 139, 87, 0.2);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--dark-sea-green);
+            color: var(--dark-sea-green);
+        }
+        
+        .btn-outline:hover {
+            background: rgba(46, 139, 87, 0.05);
+        }
+        
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+
+        /* ---- Tablet & below ---- */
+        @media (max-width: 991.98px) {
+            /* A sticky progress bar wastes scarce vertical space on small screens */
+            .checkout-header {
+                position: static;
+                top: auto;
+                padding: 18px 0;
+            }
+
+            .checkout-container { padding: 10px 0 30px; }
+
+            .order-summary-container {
+                position: static;
+                /* Now sits at the top on mobile, so the gap goes below it */
+                margin-top: 0;
+                margin-bottom: 22px;
+            }
+
+            /* Stack actions with the primary "Place Order" button on top */
+            .action-buttons {
+                flex-direction: column-reverse;
+                gap: 12px;
+            }
+            .btn-back,
+            .btn-place-order { width: 100%; flex: none; }
+        }
+
+        /* ---- Phones ---- */
+        @media (max-width: 767.98px) {
+            .checkout-form-container { padding: 24px 18px; border-radius: 12px; margin-bottom: 20px; }
+            .order-summary-container { padding: 22px 18px; border-radius: 12px; }
+            .form-section-title { font-size: 1.25rem; margin-bottom: 20px; }
+
+            /* Progress bar: one tidy row that scrolls if it must, never wraps/breaks */
+            .checkout-progress {
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding-bottom: 6px;
+                -webkit-overflow-scrolling: touch;
+            }
+            .checkout-progress::-webkit-scrollbar { display: none; }
+            .progress-step { width: auto; min-width: 64px; flex: 0 0 auto; margin-bottom: 0; }
+            .step-number { width: 34px; height: 34px; margin-bottom: 6px; }
+            .step-label { font-size: 0.78rem; white-space: nowrap; }
+            .progress-line { flex: 0 0 24px; max-width: 24px; top: -22px; }
+
+            .card-input-group { flex-direction: column; gap: 15px; }
+            .card-input.half { flex: 1; }
+
+            .success-content { padding: 30px 20px; }
+            .success-buttons { flex-direction: column; }
+
+            /* Compact order summary rows */
+            .order-item-image { width: 56px; height: 72px; margin-right: 12px; }
+            .order-items { max-height: 260px; }
+        }
+
+        /* ---- Small phones ---- */
+        @media (max-width: 479.98px) {
+            .checkout-form-container { padding: 20px 14px; }
+            .step-label { font-size: 0.72rem; }
+            .progress-step { min-width: 58px; }
+            .summary-total { font-size: 1.15rem; }
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Top Bar -->
+    <div class="header-top">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <span th:if="${user != null}" th:text="'Welcome back, ' + ${user.firstName} + '!'">Welcome back!</span>
+                    <span th:unless="${user != null}">
+                        <i class="fas fa-phone-alt"></i> +91 98765 43210 &nbsp;&nbsp;|&nbsp;&nbsp;
+                        <i class="fas fa-envelope"></i> info@mokshithacollections.com
+                    </span>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <span>Secure Checkout · SSL Encrypted</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="main-header py-3">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-3 col-md-4 col-6">
+                    <a th:href="@{/home}" class="logo">Mokshitha<span>.</span></a>
+                </div>
+                <div class="col-lg-6 col-md-4 d-none d-md-block">
+                    <nav class="navbar navbar-expand-lg justify-content-center">
+                        <ul class="navbar-nav">
+                            <li class="nav-item"><a class="nav-link" th:href="@{/home}">Home</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Shop</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Collections</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/about}">About</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/contact}">Contact</a></li>
+                            <li class="nav-item" th:if="${user != null and user.isAdmin}">
+                                <a class="nav-link" th:href="@{/admin}" style="color: var(--dark-sea-green); font-weight: 600;">
+                                    <i class="fas fa-cog"></i> Admin
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="col-lg-3 col-md-4 col-6 text-end">
+                    <div class="header-icons d-inline-flex align-items-center">
+                        <div class="icon search-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="icon user-icon" onclick="window.location.href='/user_redirect'">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="icon wishlist-icon" onclick="window.location.href='/user_redirect'">
+                            <i class="far fa-heart"></i>
+                            <span class="cart-count" th:text="${wishlistCount != null ? wishlistCount : 0}">0</span>
+                        </div>
+                        <div class="icon cart-icon" onclick="window.location.href='/cart'">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span class="cart-count" th:text="${cartCount != null ? cartCount : 0}">0</span>
+                        </div>
+                        <button class="navbar-toggler d-md-none ms-3" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div class="collapse d-md-none" id="mobileMenu">
+                <ul class="navbar-nav mt-3">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/home}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Shop</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Collections</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/about}">About</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/contact}">Contact</a></li>
+                    <li class="nav-item" th:if="${user != null and user.isAdmin}">
+                        <a class="nav-link" th:href="@{/admin}" style="color: var(--dark-sea-green); font-weight: 600;">
+                            <i class="fas fa-cog"></i> Admin
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- Checkout Container -->
+    <section class="checkout-container">
+        <div class="container">
+            <!-- Nothing checkoutable: cart empty, or every item is out of stock -->
+            <div class="alert alert-warning text-center"
+                 th:if="${checkoutItems == null or #lists.isEmpty(checkoutItems)}">
+                <span th:if="${cart == null or #lists.isEmpty(cart.items)}">
+                    Your cart is empty. <a th:href="@{/shop}">Browse the shop</a> to add items.
+                </span>
+                <span th:if="${cart != null and not #lists.isEmpty(cart.items)}">
+                    All items in your cart are currently out of stock.
+                    <a th:href="@{/cart}">Back to cart</a>.
+                </span>
+            </div>
+
+            <!-- Heads-up when some (but not all) items were dropped for being out of stock -->
+            <div class="alert alert-info" th:if="${droppedCount != null and droppedCount > 0 and not #lists.isEmpty(checkoutItems)}">
+                <i class="fas fa-info-circle me-2"></i>
+                <span th:text="${droppedCount} + (${droppedCount == 1} ? ' item was' : ' items were') + ' removed from this order because it is out of stock.'">
+                    Some items were removed because they are out of stock.
+                </span>
+            </div>
+
+            <form id="checkoutForm" th:if="${checkoutItems != null and not #lists.isEmpty(checkoutItems)}">
+                <div class="row">
+                    <!-- Left Column: Form. On mobile it comes AFTER the summary
+                         (order-2); on desktop it returns to the left (order-lg-1). -->
+                    <div class="col-lg-8 order-2 order-lg-1">
+                        <!-- Contact Information (read-only — comes from the logged-in user) -->
+                        <div class="checkout-form-container">
+                            <h3 class="form-section-title">Contact Information</h3>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">First Name</label>
+                                        <input type="text" class="form-control"
+                                               th:value="${user != null ? user.firstName : ''}"
+                                               readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Last Name</label>
+                                        <input type="text" class="form-control"
+                                               th:value="${user != null ? user.lastName : ''}"
+                                               readonly>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" class="form-control"
+                                       th:value="${user != null ? user.email : ''}"
+                                       readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control"
+                                       th:value="${user != null ? user.phone : ''}"
+                                       readonly>
+                            </div>
+                        </div>
+                        
+                        <!-- Shipping Address — pick from saved addresses -->
+                        <div class="checkout-form-container">
+                            <h3 class="form-section-title">Shipping Address</h3>
+
+                            <!-- No saved addresses yet: send user to /account to add one -->
+                            <div th:if="${user == null or user.addresses == null or #lists.isEmpty(user.addresses)}"
+                                 class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                You don't have any saved addresses yet.
+                                <a th:href="@{/user_redirect}" class="alert-link">Add one from your account</a>
+                                before placing an order.
+                            </div>
+
+                            <!-- Pick from saved addresses; default address is pre-selected -->
+                            <div th:if="${user != null and user.addresses != null and not #lists.isEmpty(user.addresses)}">
+                                <div class="form-check mb-3"
+                                     th:each="addr : ${user.addresses}"
+                                     style="border:1px solid #eee;border-radius:8px;padding:14px;">
+                                    <input type="radio" class="form-check-input" name="addressId"
+                                           th:id="'addr-' + ${addr.addressId}"
+                                           th:value="${addr.addressId}"
+                                           th:checked="${addr.isDefault != null and addr.isDefault}">
+                                    <label class="form-check-label" th:for="'addr-' + ${addr.addressId}">
+                                        <strong th:text="${addr.firstName} + ' ' + ${addr.lastName}">Name</strong>
+                                        <span class="badge bg-secondary ms-2"
+                                              th:if="${addr.isDefault != null and addr.isDefault}">Default</span>
+                                        <br>
+                                        <span th:text="${addr.streetAddress}">Street</span>,
+                                        <span th:text="${addr.city}">City</span>,
+                                        <span th:text="${addr.state}">State</span> -
+                                        <span th:text="${addr.pinCode}">PIN</span><br>
+                                        <span th:text="${addr.country}">Country</span> ·
+                                        <span th:text="${addr.phone}">Phone</span>
+                                    </label>
+                                </div>
+                                <a th:href="@{/user_redirect}" class="small">+ Add a new address</a>
+                            </div>
+                        </div>
+
+                        <!-- Payment Method — only Cash on Delivery is wired today.
+                             Other rails (Card / UPI / Net Banking) need a payment gateway integration. -->
+                        <div class="checkout-form-container">
+                            <h3 class="form-section-title">Payment Method</h3>
+
+                            <div class="payment-methods">
+                                <div class="payment-option selected" data-payment="cod">
+                                    <input type="radio" name="paymentMethod" value="COD" id="codRadio" checked
+                                           style="display:none;">
+                                    <div class="payment-icon">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </div>
+                                    <div class="payment-content">
+                                        <div class="payment-title">Cash on Delivery</div>
+                                        <div class="payment-description">Pay in cash when your order arrives.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Online payments (Card / UPI / Net Banking) are coming soon.
+                            </div>
+                        </div>
+
+                        <!-- Terms -->
+                        <div class="terms-check">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="termsAgree" required>
+                                <label class="form-check-label" for="termsAgree">
+                                    I agree to the <a th:href="@{/contact}" target="_blank">Terms &amp; Conditions</a>
+                                    and <a th:href="@{/contact}" target="_blank">Privacy Policy</a>.
+                                </label>
+                                <div class="invalid-feedback">You must agree to the terms and conditions</div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <a th:href="@{/cart}" class="btn-back" style="text-decoration:none;display:inline-block;">
+                                <i class="fas fa-arrow-left me-2"></i> Back to Cart
+                            </a>
+                            <button type="submit" class="btn-place-order" id="placeOrderBtn">
+                                <i class="fas fa-lock me-2"></i> Place Order
+                            </button>
+                        </div>
+                        
+                        <div class="secure-checkout">
+                            <i class="fas fa-shield-alt"></i> Secure Checkout · SSL Encrypted · Your information is safe with us
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column: Order Summary. On mobile it moves to the TOP
+                         (order-1) so the customer sees items + total first. -->
+                    <div class="col-lg-4 order-1 order-lg-2">
+                        <div class="order-summary-container">
+                            <h3 class="order-summary-title">Order Summary</h3>
+
+                            <!-- Only in-stock items are listed (out-of-stock dropped) -->
+                            <div class="order-items">
+                                <div class="order-item" th:each="item : ${checkoutItems}">
+                                    <div class="order-item-image">
+                                        <img th:src="${item.imageUrl}" th:alt="${item.productName}">
+                                    </div>
+                                    <div class="order-item-details">
+                                        <div class="order-item-title" th:text="${item.productName}">Product</div>
+                                        <div class="order-item-meta">
+                                            <span th:if="${item.color != null}" th:text="${item.color}">Color</span>
+                                            <span th:if="${item.size != null}" th:text="' · Size ' + ${item.size}"> Size</span>
+                                            <span th:text="' · Qty: ' + ${item.quantity}"> Qty</span>
+                                        </div>
+                                        <div class="order-item-price" th:text="'₹' + ${item.lineTotal}">₹0</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Totals — delivery is ₹100 below ₹5000, free at/above ₹5000 -->
+                            <div class="summary-details">
+                                <div class="summary-row">
+                                    <span class="summary-label">Subtotal</span>
+                                    <span class="summary-value"
+                                          th:text="'₹' + ${checkoutSubtotal}">₹0</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Delivery Charge</span>
+                                    <span class="summary-value"
+                                          th:if="${shippingFee != null and shippingFee > 0}"
+                                          th:text="'₹' + ${shippingFee}">₹100</span>
+                                    <span class="summary-value"
+                                          th:if="${shippingFee == null or shippingFee == 0}"
+                                          style="color: var(--dark-sea-green);">FREE</span>
+                                </div>
+                                <div class="summary-total">
+                                    <span>Total</span>
+                                    <span th:text="'₹' + ${orderTotal != null ? orderTotal : checkoutSubtotal}">₹0</span>
+                                </div>
+                                <small class="text-muted"
+                                       th:if="${shippingFee != null and shippingFee > 0}">
+                                    Add ₹<span th:text="${5000 - checkoutSubtotal}">0</span> more to get free delivery.
+                                </small>
+                                <small class="text-muted"
+                                       th:if="${shippingFee == null or shippingFee == 0}">
+                                    🎉 You've got free delivery on this order.
+                                </small>
+                            </div>
+
+                            <!-- Delivery Estimate -->
+                            <div class="mt-4 pt-3 border-top">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-shipping-fast text-primary me-3"></i>
+                                    <div>
+                                        <div class="small">Estimated Delivery</div>
+                                        <div class="fw-bold">5-7 business days</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Need Help -->
+                            <div class="mt-4 pt-3 border-top">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-headset text-success me-3"></i>
+                                    <div>
+                                        <div class="small">Need help with your order?</div>
+                                        <div class="fw-bold">+91 98765 43210</div>
+                                        <div class="small text-muted">Available 10AM - 8PM</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="footer-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <a th:href="@{/home}" class="footer-logo">Mokshitha<span>.</span></a>
+                    <p class="footer-about">
+                        Bringing you the finest collection of traditional sarees and contemporary dresses since 2010. Our mission is to make every woman feel elegant and confident.
+                    </p>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-pinterest-p"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h4 class="footer-title">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a th:href="@{/home}">Home</a></li>
+                        <li><a th:href="@{/shop}">Shop</a></li>
+                        <li><a th:href="@{/shop(categorySlug='sarees')}">Sarees</a></li>
+                        <li><a th:href="@{/shop(categorySlug='dresses')}">Dresses</a></li>
+                        <li><a th:href="@{/about}">About Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h4 class="footer-title">Support</h4>
+                    <ul class="footer-links">
+                        <li><a th:href="@{/contact}">Contact Us</a></li>
+                        <li><a th:href="@{/contact}">FAQ</a></li>
+                        <li><a th:href="@{/contact}">Shipping Policy</a></li>
+                        <li><a th:href="@{/contact}">Returns &amp; Exchange</a></li>
+                        <li><a th:href="@{/contact}">Privacy Policy</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-4 col-md-4 mb-4">
+                    <h4 class="footer-title">Contact Info</h4>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt me-2"></i> 123 Fashion Street, Chennai, India</li>
+                        <li><i class="fas fa-phone-alt me-2"></i> +91 98765 43210</li>
+                        <li><i class="fas fa-envelope me-2"></i> info@mokshithacollections.com</li>
+                        <li><i class="fas fa-clock me-2"></i> Mon-Sat: 10AM - 8PM</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="copyright">
+                <p>
+                    <span th:text="'&copy; ' + ${#temporals.format(#temporals.createNow(), 'yyyy')} + ' Mokshitha Collections. All rights reserved. |'">&copy; 2026 Mokshitha Collections. All rights reserved. |</span>
+                    Designed with <i class="fas fa-heart" style="color: var(--light-sea-green);"></i> for elegant women
+                </p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Success Modal — replaced by direct redirect to /user_redirect on order placement.
+         Kept in source as a layout reference but stripped from rendered output. -->
+    <div class="success-modal" id="successModal" th:remove="all">
+        <div class="success-content">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2 class="success-title">Order Confirmed!</h2>
+            <p class="success-message">
+                Thank you for your purchase! Your order has been successfully placed and is being processed. You will receive a confirmation email shortly.
+            </p>
+            
+            <div class="order-details">
+                <div class="order-id">Order ID: #MC2023-<span id="orderId">78945</span></div>
+                <p>We've sent an order confirmation to <span id="confirmationEmail">customer@email.com</span></p>
+                <p>Estimated Delivery: <span id="confirmationDelivery">5-7 business days</span></p>
+            </div>
+            
+            <div class="success-buttons">
+                <a href="index.html" class="success-btn btn-primary">
+                    <i class="fas fa-home me-2"></i> Back to Home
+                </a>
+                <a href="track-order.html" class="success-btn btn-outline">
+                    <i class="fas fa-map-marker-alt me-2"></i> Track Order
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ----- Place Order (COD) -----
+        // Reads CSRF token from cookie, posts to /api/orders, redirects on success.
+        function getCsrfToken() {
+            const m = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+            return m ? decodeURIComponent(m[1]) : '';
+        }
+
+        const checkoutForm = document.getElementById('checkoutForm');
+        if (checkoutForm) {
+            checkoutForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const addressRadio = document.querySelector('input[name="addressId"]:checked');
+                if (!addressRadio) {
+                    alert('Please select a shipping address.');
+                    return;
+                }
+                if (!document.getElementById('termsAgree').checked) {
+                    alert('Please agree to the terms and conditions.');
+                    return;
+                }
+
+                const btn = document.getElementById('placeOrderBtn');
+                const originalLabel = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Placing order...';
+
+                fetch('/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-XSRF-TOKEN': getCsrfToken()
+                    },
+                    body: new URLSearchParams({
+                        addressId: addressRadio.value,
+                        paymentMethod: 'COD'
+                    })
+                })
+                .then(res => res.json().then(data => ({ ok: res.ok, status: res.status, data })))
+                .then(({ ok, status, data }) => {
+                    if (ok) {
+                        // Redirect to the dedicated celebration page, which:
+                        //   - shows an animated checkmark + confetti
+                        //   - displays the order details and shipping address
+                        //   - has a "View My Orders" button that lands on the My Orders tab
+                        //   - auto-redirects to My Orders after 10 seconds (cancellable)
+                        const orderId = data.orderId;
+                        if (orderId) {
+                            window.location.href = '/orders/' + orderId + '/success';
+                        } else {
+                            // Fallback if the server didn't return an id for some reason
+                            localStorage.setItem('activeAccountTab', 'orders');
+                            window.location.href = '/user_redirect';
+                        }
+                    } else {
+                        alert(data.message || ('Failed to place order (HTTP ' + status + ')'));
+                        btn.disabled = false;
+                        btn.innerHTML = originalLabel;
+                    }
+                })
+                .catch(err => {
+                    alert('Network error placing order. Please try again.');
+                    console.error(err);
+                    btn.disabled = false;
+                    btn.innerHTML = originalLabel;
+                });
+            });
+        }
+    </script>
+
+    <!-- Old multi-step checkout JS removed (it referenced UI we no longer render). -->
+    <script th:remove="all">
+        // Form Validation
+        const form = document.getElementById('checkoutForm');
+        const inputs = form.querySelectorAll('input[required], select[required]');
+        const placeOrderBtn = document.getElementById('placeOrderBtn');
+        
+        // Order Summary Data
+        let orderData = {
+            subtotal: 7498,
+            shipping: 0,
+            shippingMethod: 'standard',
+            tax: 375,
+            codCharge: 50,
+            total: 7873,
+            paymentMethod: 'card'
+        };
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateOrderSummary();
+            setupEventListeners();
+        });
+        
+        function setupEventListeners() {
+            // Shipping method selection
+            document.querySelectorAll('.option-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('.option-item').forEach(i => i.classList.remove('selected'));
+                    this.classList.add('selected');
+                    const radio = this.querySelector('input[type="radio"]');
+                    if (radio) radio.checked = true;
+                    
+                    const shippingMethod = this.getAttribute('data-shipping');
+                    orderData.shippingMethod = shippingMethod;
+                    
+                    // Update shipping cost
+                    if (shippingMethod === 'standard') {
+                        orderData.shipping = 0;
+                    } else if (shippingMethod === 'express') {
+                        orderData.shipping = 199;
+                    } else if (shippingMethod === 'nextday') {
+                        orderData.shipping = 499;
+                    }
+                    
+                    // Update delivery estimate
+                    updateDeliveryEstimate();
+                    updateOrderSummary();
+                });
+            });
+            
+            // Same as shipping checkbox
+            document.getElementById('sameAsShipping').addEventListener('change', function() {
+                const billingSection = document.getElementById('billingAddressSection');
+                if (this.checked) {
+                    billingSection.style.display = 'none';
+                } else {
+                    billingSection.style.display = 'block';
+                }
+            });
+            
+            // Payment method selection
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    
+                    const paymentMethod = this.getAttribute('data-payment');
+                    orderData.paymentMethod = paymentMethod;
+                    
+                    // Show/hide payment forms
+                    document.querySelectorAll('.card-payment-form').forEach(form => {
+                        form.classList.remove('active');
+                    });
+                    
+                    document.getElementById(`${paymentMethod}Form`).classList.add('active');
+                    
+                    // Show/hide COD charge
+                    const codChargeRow = document.getElementById('orderCodCharge');
+                    if (paymentMethod === 'cod') {
+                        codChargeRow.style.display = 'flex';
+                        orderData.total = orderData.subtotal + orderData.shipping + orderData.tax + orderData.codCharge;
+                    } else {
+                        codChargeRow.style.display = 'none';
+                        orderData.total = orderData.subtotal + orderData.shipping + orderData.tax;
+                    }
+                    
+                    updateOrderSummary();
+                });
+            });
+            
+            // Back to cart button
+            document.getElementById('backToCart').addEventListener('click', function() {
+                window.location.href = 'cart.html';
+            });
+            
+            // Form validation on input
+            inputs.forEach(input => {
+                input.addEventListener('blur', validateField);
+                input.addEventListener('input', function() {
+                    if (this.classList.contains('is-invalid')) {
+                        validateField.call(this);
+                    }
+                });
+            });
+            
+            // Format card number
+            document.getElementById('cardNumber').addEventListener('input', function() {
+                let value = this.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+                let formatted = value.replace(/(\d{4})/g, '$1 ').trim();
+                this.value = formatted.substring(0, 19);
+            });
+            
+            // Format expiry date
+            document.getElementById('expiryDate').addEventListener('input', function() {
+                let value = this.value.replace(/[^0-9]/g, '');
+                if (value.length >= 2) {
+                    this.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                }
+            });
+            
+            // Format CVV (numbers only)
+            document.getElementById('cvv').addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+            
+            // Format phone number
+            document.getElementById('phone').addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9+]/g, '');
+            });
+            
+            // Format PIN code
+            document.getElementById('pincode').addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+            
+            // Form submission
+            form.addEventListener('submit', submitOrder);
+        }
+        
+        function validateField() {
+            const field = this;
+            const value = field.value.trim();
+            const isValid = field.checkValidity();
+            
+            if (!isValid) {
+                field.classList.add('is-invalid');
+                field.nextElementSibling.style.display = 'block';
+                return false;
+            } else {
+                field.classList.remove('is-invalid');
+                field.nextElementSibling.style.display = 'none';
+                return true;
+            }
+        }
+        
+        function updateDeliveryEstimate() {
+            const estimateElement = document.getElementById('deliveryEstimate');
+            const confirmationElement = document.getElementById('confirmationDelivery');
+            
+            switch(orderData.shippingMethod) {
+                case 'standard':
+                    estimateElement.textContent = '5-7 business days';
+                    confirmationElement.textContent = '5-7 business days';
+                    break;
+                case 'express':
+                    estimateElement.textContent = '2-3 business days';
+                    confirmationElement.textContent = '2-3 business days';
+                    break;
+                case 'nextday':
+                    estimateElement.textContent = 'Tomorrow (if ordered before 12 PM)';
+                    confirmationElement.textContent = 'Tomorrow';
+                    break;
+            }
+        }
+        
+        function updateOrderSummary() {
+            // Format currency
+            const formatCurrency = (amount) => {
+                return '₹' + amount.toLocaleString('en-IN');
+            };
+            
+            // Update display
+            document.getElementById('orderSubtotal').textContent = formatCurrency(orderData.subtotal);
+            document.getElementById('orderShipping').textContent = orderData.shipping === 0 ? 'FREE' : formatCurrency(orderData.shipping);
+            document.getElementById('orderTax').textContent = formatCurrency(orderData.tax);
+            document.getElementById('orderTotal').textContent = formatCurrency(orderData.total);
+        }
+        
+        function submitOrder(e) {
+            e.preventDefault();
+            
+            // Validate all required fields
+            let isValid = true;
+            inputs.forEach(input => {
+                if (!validateField.call(input)) {
+                    isValid = false;
+                }
+            });
+            
+            // Validate terms agreement
+            const termsCheckbox = document.getElementById('termsAgree');
+            if (!termsCheckbox.checked) {
+                termsCheckbox.classList.add('is-invalid');
+                termsCheckbox.nextElementSibling.nextElementSibling.style.display = 'block';
+                isValid = false;
+            } else {
+                termsCheckbox.classList.remove('is-invalid');
+                termsCheckbox.nextElementSibling.nextElementSibling.style.display = 'none';
+            }
+            
+            // Validate payment method specific fields
+            if (orderData.paymentMethod === 'card') {
+                const cardFields = ['cardNumber', 'expiryDate', 'cvv', 'cardName'];
+                cardFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field.value.trim() === '') {
+                        field.classList.add('is-invalid');
+                        field.nextElementSibling.style.display = 'block';
+                        isValid = false;
+                    }
+                });
+                
+                // Validate card number length
+                const cardNumber = document.getElementById('cardNumber').value.replace(/\s+/g, '');
+                if (cardNumber.length < 16) {
+                    document.getElementById('cardNumber').classList.add('is-invalid');
+                    document.getElementById('cardNumber').nextElementSibling.style.display = 'block';
+                    isValid = false;
+                }
+            } else if (orderData.paymentMethod === 'upi') {
+                const upiField = document.getElementById('upiId');
+                if (upiField.value.trim() === '') {
+                    upiField.classList.add('is-invalid');
+                    upiField.nextElementSibling.style.display = 'block';
+                    isValid = false;
+                }
+            } else if (orderData.paymentMethod === 'netbanking') {
+                const bankField = document.getElementById('bank');
+                if (bankField.value === '') {
+                    bankField.classList.add('is-invalid');
+                    bankField.nextElementSibling.style.display = 'block';
+                    isValid = false;
+                }
+            }
+            
+            if (!isValid) {
+                showNotification('Please fill in all required fields correctly.', 'error');
+                return;
+            }
+            
+            // Show loading state
+            placeOrderBtn.innerHTML = '<span class="spinner"></span> Processing Order...';
+            placeOrderBtn.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Generate random order ID
+                const orderId = Math.floor(10000 + Math.random() * 90000);
+                document.getElementById('orderId').textContent = orderId;
+                
+                // Set confirmation email
+                const email = document.getElementById('email').value;
+                document.getElementById('confirmationEmail').textContent = email;
+                
+                // Show success modal
+                document.getElementById('successModal').classList.add('active');
+                
+                // Reset form (in real app, you would redirect or clear cart)
+                placeOrderBtn.innerHTML = '<i class="fas fa-lock me-2"></i> Place Order';
+                placeOrderBtn.disabled = false;
+                
+                // In a real application, you would:
+                // 1. Send order data to backend
+                // 2. Process payment
+                // 3. Clear cart
+                // 4. Send confirmation email
+                // 5. Redirect to order confirmation page
+                
+            }, 2000);
+        }
+        
+        // Search functionality
+        document.querySelector('.search-icon').addEventListener('click', showSearchModal);
+        
+        // Common functions
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: ${type === 'error' ? '#ff6b6b' : 'linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green))'};
+                color: white;
+                padding: 15px 25px;
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                z-index: 10000;
+                transform: translateX(150%);
+                transition: transform 0.3s ease;
+                max-width: 300px;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(150%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        function showSearchModal() {
+            const searchBox = document.createElement('div');
+            searchBox.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                z-index: 10001;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            searchBox.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 600px; position: relative;">
+                    <button class="close-search" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
+                    <h3 style="margin-bottom: 20px; color: var(--dark-text);">Search Products</h3>
+                    <div style="display: flex;">
+                        <input type="text" placeholder="Search for sarees, dresses, collections..." 
+                               style="flex: 1; padding: 15px; border: 2px solid #eee; border-radius: 5px 0 0 5px; font-size: 1rem;">
+                        <button style="background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green)); color: white; border: none; padding: 0 30px; border-radius: 0 5px 5px 0; cursor: pointer;">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div style="margin-top: 20px; color: #666; font-size: 0.9rem;">
+                        <p>Popular searches: <a href="#" style="color: var(--dark-sea-green); margin-right: 10px;">Silk Sarees</a> 
+                        <a href="#" style="color: var(--dark-sea-green); margin-right: 10px;">Evening Dresses</a> 
+                        <a href="#" style="color: var(--dark-sea-green);">Party Wear</a></p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(searchBox);
+            
+            searchBox.querySelector('.close-search').addEventListener('click', function() {
+                document.body.removeChild(searchBox);
+            });
+            
+            searchBox.addEventListener('click', function(e) {
+                if (e.target === searchBox) {
+                    document.body.removeChild(searchBox);
+                }
+            });
+        }
+        
+        // Mobile optimizations
+        if (window.innerWidth <= 768) {
+            // Make form inputs larger for mobile
+            document.querySelectorAll('.form-control').forEach(input => {
+                input.style.minHeight = '48px';
+                input.style.fontSize = '16px'; // Prevents zoom on iOS
+            });
+            
+            // Make checkboxes and radio buttons larger
+            document.querySelectorAll('.form-check-input, .option-radio').forEach(input => {
+                input.style.transform = 'scale(1.2)';
+            });
+            
+            // Make buttons larger
+            document.querySelectorAll('button').forEach(btn => {
+                btn.style.minHeight = '48px';
+            });
+        }
+    </script>
+</body>
+</html>

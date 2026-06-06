@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Users')}"></head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/_layout :: sidebar('users')}"></aside>
+
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <div>
+                <h1>Users</h1>
+                <div class="breadcrumb"
+                     th:text="${users.totalElements} + ' users'">0 users</div>
+            </div>
+        </div>
+
+        <form class="filters" method="get" th:action="@{/admin/users}">
+            <input type="text" name="search" placeholder="Search by email / name"
+                   th:value="${search}">
+            <button class="btn btn-outline btn-sm" type="submit">Search</button>
+            <a class="btn btn-outline btn-sm" th:href="@{/admin/users}">Clear</a>
+        </form>
+
+        <div class="table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Joined</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="u : ${users.content}">
+                        <td>
+                            <a th:href="@{/admin/users/{id}(id=${u.userId})}"
+                               style="font-weight:500;"
+                               th:text="${u.firstName + ' ' + (u.lastName != null ? u.lastName : '')}">Name</a>
+                        </td>
+                        <td th:text="${u.email}">email</td>
+                        <td th:text="${u.phone != null ? u.phone : '—'}">—</td>
+                        <td th:text="${u.createdAt != null ? #temporals.format(u.createdAt, 'd MMM yyyy') : '—'}">—</td>
+                        <td>
+                            <span class="pill" th:if="${u.admin}" th:classappend="'pill-admin'">ADMIN</span>
+                            <span class="pill" th:unless="${u.admin}">CUSTOMER</span>
+                        </td>
+                        <td>
+                            <span class="pill" th:classappend="${u.active} ? 'pill-active' : 'pill-inactive'"
+                                  th:text="${u.active} ? 'Active' : 'Inactive'">Active</span>
+                        </td>
+                        <td>
+                            <a class="btn btn-outline btn-sm"
+                               th:href="@{/admin/users/{id}(id=${u.userId})}">View</a>
+
+                            <button th:if="${u.active}" type="button" class="btn btn-outline btn-sm"
+                                    th:attr="data-id=${u.userId}, data-name=${u.firstName}"
+                                    onclick="setActive(this, false)">Deactivate</button>
+                            <button th:unless="${u.active}" type="button" class="btn btn-outline btn-sm"
+                                    th:attr="data-id=${u.userId}, data-name=${u.firstName}"
+                                    onclick="setActive(this, true)">Activate</button>
+
+                            <button th:if="${!u.admin}" type="button" class="btn btn-outline btn-sm"
+                                    th:attr="data-id=${u.userId}, data-name=${u.firstName}"
+                                    onclick="setAdmin(this, true)">Promote</button>
+                            <button th:if="${u.admin}" type="button" class="btn btn-outline btn-sm"
+                                    th:attr="data-id=${u.userId}, data-name=${u.firstName}"
+                                    onclick="setAdmin(this, false)">Demote</button>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(users.content)}">
+                        <td class="empty-row" colspan="7">No users match.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <ul class="pagination" th:if="${users.totalPages > 1}">
+            <li th:classappend="${!users.hasPrevious()} ? 'disabled'">
+                <a th:if="${users.hasPrevious()}"
+                   th:href="@{/admin/users(page=${users.number - 1}, search=${search})}">Previous</a>
+                <span th:unless="${users.hasPrevious()}">Previous</span>
+            </li>
+            <li th:each="i : ${#numbers.sequence(0, users.totalPages - 1)}"
+                th:classappend="${i == users.number} ? 'active'">
+                <a th:href="@{/admin/users(page=${i}, search=${search})}" th:text="${i + 1}">1</a>
+            </li>
+            <li th:classappend="${!users.hasNext()} ? 'disabled'">
+                <a th:if="${users.hasNext()}"
+                   th:href="@{/admin/users(page=${users.number + 1}, search=${search})}">Next</a>
+                <span th:unless="${users.hasNext()}">Next</span>
+            </li>
+        </ul>
+    </main>
+</div>
+
+<div th:replace="~{admin/_layout :: scripts}"></div>
+<script>
+    async function setActive(btn, on) {
+        const id = btn.dataset.id;
+        const name = btn.dataset.name;
+        const verb = on ? 'Activate' : 'Deactivate';
+        confirmThen(verb + ' ' + name + '?', async () => {
+            try {
+                await adminApi('POST', '/api/admin/users/' + id + (on ? '/activate' : '/deactivate'));
+                toast(verb + 'd ' + name, 'success');
+                setTimeout(() => location.reload(), 500);
+            } catch (e) { toast(e.message, 'error'); }
+        });
+    }
+
+    async function setAdmin(btn, promote) {
+        const id = btn.dataset.id;
+        const name = btn.dataset.name;
+        const verb = promote ? 'Promote' : 'Demote';
+        confirmThen(verb + ' ' + name + (promote ? ' to admin?' : ' from admin?'), async () => {
+            try {
+                await adminApi('POST', '/api/admin/users/' + id + (promote ? '/promote' : '/demote'));
+                toast(name + (promote ? ' promoted to admin' : ' demoted'), 'success');
+                setTimeout(() => location.reload(), 500);
+            } catch (e) { toast(e.message, 'error'); }
+        });
+    }
+</script>
+</body>
+</html>

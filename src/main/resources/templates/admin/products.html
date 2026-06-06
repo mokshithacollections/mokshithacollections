@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Products')}"></head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/_layout :: sidebar('products')}"></aside>
+
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <div>
+                <h1>Products</h1>
+                <div class="breadcrumb"
+                     th:text="${products.totalElements} + ' total · including inactive'">0 total</div>
+            </div>
+            <a class="btn btn-primary" th:href="@{/admin/products/new}">
+                <i class="fas fa-plus"></i> New product
+            </a>
+        </div>
+
+        <div class="table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>SKU</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="p : ${products.content}">
+                        <td>
+                            <img th:if="${p.imageUrl != null}" th:src="${p.imageUrl}"
+                                 alt="" style="width:48px;height:48px;object-fit:cover;border-radius:4px;">
+                            <span th:unless="${p.imageUrl != null}" style="color:#bbb;">—</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/admin/products/{id}(id=${p.productId})}"
+                               th:text="${p.name}" style="font-weight:500;">Product</a>
+                            <div th:if="${p.isFeatured != null and p.isFeatured}"
+                                 style="font-size:0.75rem;color:#d97706;">
+                                <i class="fas fa-star"></i> Featured
+                            </div>
+                        </td>
+                        <td th:text="${p.sku}">—</td>
+                        <td th:text="${p.categoryName != null ? p.categoryName : '—'}">—</td>
+                        <td>
+                            <span th:if="${p.discountPrice != null}"
+                                  th:text="'₹' + ${p.discountPrice}">₹0</span>
+                            <span th:unless="${p.discountPrice != null}"
+                                  th:text="'₹' + ${p.price}">₹0</span>
+                            <s th:if="${p.discountPrice != null}"
+                               style="color:#aaa;font-size:0.8rem;"
+                               th:text="'₹' + ${p.price}">₹0</s>
+                        </td>
+                        <td>
+                            <!-- listAll() returns ProductSummaryResponse which doesn't carry isActive,
+                                 so render placeholder; the form page shows the real state. -->
+                            <span class="pill pill-active">Listed</span>
+                        </td>
+                        <td>
+                            <a class="btn btn-outline btn-sm"
+                               th:href="@{/admin/products/{id}(id=${p.productId})}">Edit</a>
+                            <button type="button" class="btn btn-danger btn-sm"
+                                    th:attr="data-id=${p.productId}, data-name=${p.name}"
+                                    onclick="onDelete(this)">Deactivate</button>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(products.content)}">
+                        <td class="empty-row" colspan="7">
+                            No products yet.
+                            <a th:href="@{/admin/products/new}">Create the first one</a>.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <ul class="pagination" th:if="${products.totalPages > 1}">
+            <li th:classappend="${!products.hasPrevious()} ? 'disabled'">
+                <a th:if="${products.hasPrevious()}"
+                   th:href="@{/admin/products(page=${products.number - 1})}">Previous</a>
+                <span th:unless="${products.hasPrevious()}">Previous</span>
+            </li>
+            <li th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}"
+                th:classappend="${i == products.number} ? 'active'">
+                <a th:href="@{/admin/products(page=${i})}" th:text="${i + 1}">1</a>
+            </li>
+            <li th:classappend="${!products.hasNext()} ? 'disabled'">
+                <a th:if="${products.hasNext()}"
+                   th:href="@{/admin/products(page=${products.number + 1})}">Next</a>
+                <span th:unless="${products.hasNext()}">Next</span>
+            </li>
+        </ul>
+    </main>
+</div>
+
+<div th:replace="~{admin/_layout :: scripts}"></div>
+<script>
+    function onDelete(btn) {
+        const id = btn.dataset.id;
+        const name = btn.dataset.name;
+        confirmThen('Deactivate "' + name + '"? Existing orders will keep referencing it.', async () => {
+            try {
+                await adminApi('DELETE', '/api/admin/products/' + id);
+                toast('Product deactivated', 'success');
+                setTimeout(() => location.reload(), 600);
+            } catch (e) {
+                toast(e.message, 'error');
+            }
+        });
+    }
+</script>
+</body>
+</html>

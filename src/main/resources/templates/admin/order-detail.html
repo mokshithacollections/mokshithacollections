@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Order detail')}"></head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/_layout :: sidebar('orders')}"></aside>
+
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <div>
+                <h1 th:text="${order.orderNumber}">#MC-000000</h1>
+                <div class="breadcrumb">
+                    <a th:href="@{/admin/orders}">Orders</a> /
+                    <span th:text="${order.orderNumber}">#MC-000000</span>
+                </div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <!-- Opens the printable packing slip in a new tab so the admin
+                     can keep this page open while they print. -->
+                <a class="btn btn-primary"
+                   th:href="@{/admin/orders/{id}/packing-slip(id=${order.orderId})}"
+                   target="_blank" rel="noopener">
+                    <i class="fas fa-print"></i> Print Packing Slip
+                </a>
+                <a class="btn btn-outline" th:href="@{/admin/orders}">Back to list</a>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;">
+            <!-- Items -->
+            <div class="card">
+                <h2>Items (<span th:text="${#lists.size(order.items)}">0</span>)</h2>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Variant</th>
+                            <th>Qty</th>
+                            <th>Unit price</th>
+                            <th>Line total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="i : ${order.items}">
+                            <td>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <!-- The ordered variant's first image (falls back to the
+                                         snapshot hero image when the variant has none). -->
+                                    <img th:src="${variantImages != null and variantImages.containsKey(i.variantId)
+                                                  ? variantImages.get(i.variantId) : i.productImageUrl}"
+                                         th:alt="${i.productName}"
+                                         onerror="this.style.visibility='hidden'"
+                                         style="width:48px;height:60px;object-fit:cover;border-radius:6px;flex-shrink:0;background:#f1f1f1;">
+                                    <a th:href="@{/admin/products/{id}(id=${i.productId})}"
+                                       th:text="${i.productName}">Product</a>
+                                </div>
+                            </td>
+                            <td>
+                                <span th:text="${i.variantColor}">color</span>
+                                <span th:if="${i.variantSize != null}" th:text="' / ' + ${i.variantSize}"> / size</span>
+                            </td>
+                            <td th:text="${i.quantity}">0</td>
+                            <td th:text="'₹' + ${i.unitPrice}">₹0</td>
+                            <td th:text="'₹' + ${i.lineTotal}">₹0</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table class="admin-table" style="margin-top:16px;">
+                    <tr><td>Subtotal</td><td style="text-align:right;" th:text="'₹' + ${order.subtotal}">₹0</td></tr>
+                    <tr><td>Shipping</td><td style="text-align:right;" th:text="'₹' + ${order.shippingFee}">₹0</td></tr>
+                    <tr style="font-weight:700;font-size:1.05rem;">
+                        <td>Total</td>
+                        <td style="text-align:right;" th:text="'₹' + ${order.totalAmount}">₹0</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div>
+                <!-- Status panel -->
+                <div class="card">
+                    <h2>Status</h2>
+                    <div style="margin-bottom:8px;">
+                        Order:
+                        <span class="pill"
+                              th:classappend="'pill-' + ${#strings.toLowerCase(order.status.name())}"
+                              th:text="${order.status.name()}">PLACED</span>
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        Payment:
+                        <span class="pill"
+                              th:classappend="${order.paymentStatus.name() == 'PAID'} ? 'pill-active' :
+                                              (${order.paymentStatus.name() == 'REFUNDED'} ? 'pill-cancelled' : '')"
+                              th:text="${order.paymentStatus.name()}">PENDING</span>
+                    </div>
+
+                    <form id="statusForm">
+                        <div class="form-row">
+                            <label>Update order status</label>
+                            <select name="status">
+                                <option th:each="s : ${statuses}"
+                                        th:value="${s.name()}"
+                                        th:text="${s.name()}"
+                                        th:selected="${s.name() == order.status.name()}"></option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label>Update payment status (optional)</label>
+                            <select name="paymentStatus">
+                                <option value="">— don't change —</option>
+                                <option value="PENDING">PENDING</option>
+                                <option value="PAID">PAID</option>
+                                <option value="FAILED">FAILED</option>
+                                <option value="REFUNDED">REFUNDED</option>
+                            </select>
+                        </div>
+
+                        <!-- Shipping info — shown when SHIPPED is selected and stays visible
+                             so the admin can edit/correct it later. -->
+                        <div id="shippingFields"
+                             th:style="${order.status.name() == 'SHIPPED' or order.status.name() == 'DELIVERED' or order.trackingNumber != null} ? 'display:block;' : 'display:none;'"
+                             style="border-top:1px solid var(--admin-border); margin-top:12px; padding-top:12px;">
+                            <div style="font-size:0.85rem; font-weight:600; color:var(--admin-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
+                                Shipping info
+                            </div>
+                            <div class="form-row">
+                                <label>Tracking number</label>
+                                <input type="text" name="trackingNumber" maxlength="64"
+                                       th:value="${order.trackingNumber}"
+                                       placeholder="e.g. DLH123456789">
+                            </div>
+                            <div class="form-row">
+                                <label>Courier</label>
+                                <input type="text" name="courier" maxlength="64"
+                                       th:value="${order.courier}"
+                                       placeholder="e.g. Delhivery, BlueDart">
+                            </div>
+                            <div class="form-row">
+                                <label>Tracking URL</label>
+                                <input type="text" name="trackingUrl"
+                                       th:value="${order.trackingUrl}"
+                                       placeholder="https://www.delhivery.com/track/DLH123456789">
+                                <div class="helper">Customer clicks this link to track the parcel on the courier's site.</div>
+                            </div>
+                            <div class="form-row">
+                                <label>Expected delivery date</label>
+                                <input type="date" name="expectedDeliveryDate"
+                                       th:value="${order.expectedDeliveryDate}">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="margin-top:12px;">
+                            <i class="fas fa-check"></i> Update
+                        </button>
+                    </form>
+                    <p class="breadcrumb" style="margin-top:12px;font-size:0.8rem;">
+                        Cancelling re-stocks every variant. Paid → cancelled flips payment to refunded automatically.
+                        Shipping fields appear when status is SHIPPED.
+                    </p>
+                </div>
+
+                <!-- Customer + shipping -->
+                <div class="card">
+                    <h2>Shipping address</h2>
+                    <div th:if="${order.shippingAddress != null}">
+                        <strong th:text="${order.shippingAddress.firstName + ' ' + order.shippingAddress.lastName}">Name</strong><br>
+                        <span th:text="${order.shippingAddress.streetAddress}">Street</span><br>
+                        <span th:text="${order.shippingAddress.city + ', ' + order.shippingAddress.state + ' ' + order.shippingAddress.pinCode}">City</span><br>
+                        <span th:text="${order.shippingAddress.country}">Country</span><br>
+                        Phone: <span th:text="${order.shippingAddress.phone}">Phone</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Order info</h2>
+                    <div>Placed: <span th:text="${#temporals.format(order.placedAt, 'd MMM yyyy, HH:mm')}">—</span></div>
+                    <div>Updated: <span th:text="${#temporals.format(order.updatedAt, 'd MMM yyyy, HH:mm')}">—</span></div>
+                    <div>Method: <span th:text="${order.paymentMethod.name()}">COD</span></div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div th:replace="~{admin/_layout :: scripts}"></div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const ORDER_ID = /*[[${order.orderId}]]*/ 0;
+    /*]]>*/
+
+    // Toggle the shipping-info inputs based on the selected status. We show
+    // them for SHIPPED and DELIVERED, or whenever tracking is already set so
+    // the admin can correct it.
+    const statusSelect   = document.querySelector('#statusForm select[name="status"]');
+    const shippingFields = document.getElementById('shippingFields');
+    function refreshShippingVisibility() {
+        const s = statusSelect.value;
+        const hasExistingTracking = shippingFields.querySelector('input[name="trackingNumber"]').value;
+        const show = s === 'SHIPPED' || s === 'DELIVERED' || !!hasExistingTracking;
+        shippingFields.style.display = show ? 'block' : 'none';
+    }
+    statusSelect.addEventListener('change', refreshShippingVisibility);
+    refreshShippingVisibility();
+
+    document.getElementById('statusForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const body = { status: fd.get('status') };
+        if (fd.get('paymentStatus'))        body.paymentStatus        = fd.get('paymentStatus');
+        if (fd.get('trackingNumber'))       body.trackingNumber       = fd.get('trackingNumber');
+        if (fd.get('courier'))              body.courier              = fd.get('courier');
+        if (fd.get('trackingUrl'))          body.trackingUrl          = fd.get('trackingUrl');
+        if (fd.get('expectedDeliveryDate')) body.expectedDeliveryDate = fd.get('expectedDeliveryDate');
+        try {
+            await adminApi('POST', '/api/admin/orders/' + ORDER_ID + '/status', body);
+            toast('Order updated', 'success');
+            setTimeout(() => location.reload(), 600);
+        } catch (e) { toast(e.message, 'error'); }
+    });
+</script>
+</body>
+</html>

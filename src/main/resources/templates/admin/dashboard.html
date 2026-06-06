@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Dashboard')}"></head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/_layout :: sidebar('dashboard')}"></aside>
+
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <div>
+                <h1>Dashboard</h1>
+                <div class="breadcrumb">Welcome back, <span th:text="${user != null ? user.firstName : 'Admin'}">Admin</span></div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="label">Products</div>
+                <div class="value" th:text="${productCount}">0</div>
+                <a th:href="@{/admin/products}" class="accent">Manage products &rarr;</a>
+            </div>
+            <div class="stat-card">
+                <div class="label">Orders</div>
+                <div class="value" th:text="${orderCount}">0</div>
+                <a th:href="@{/admin/orders}" class="accent"
+                   th:text="${placedOrderCount} + ' awaiting fulfilment'">0 awaiting fulfilment</a>
+            </div>
+            <div class="stat-card">
+                <div class="label">Users</div>
+                <div class="value" th:text="${userCount}">0</div>
+                <a th:href="@{/admin/users}" class="accent">Manage users &rarr;</a>
+            </div>
+            <div class="stat-card">
+                <div class="label">Pending Reviews</div>
+                <div class="value" th:text="${pendingReviewCount}">0</div>
+                <a th:href="@{/admin/reviews}" class="accent">Moderate &rarr;</a>
+            </div>
+        </div>
+
+        <!-- Recent orders -->
+        <div class="card">
+            <h2>Recent orders</h2>
+            <div class="table-wrap" style="border:0; padding:0;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Date</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="o : ${recentOrders}">
+                            <td><strong th:text="${o.orderNumber}">#MC-000000</strong></td>
+                            <td th:text="${#temporals.format(o.placedAt, 'd MMM yyyy, HH:mm')}">date</td>
+                            <td th:text="${o.itemCount}">0</td>
+                            <td th:text="'₹' + ${o.totalAmount}">₹0</td>
+                            <td>
+                                <span class="pill"
+                                      th:classappend="'pill-' + ${#strings.toLowerCase(o.status.name())}"
+                                      th:text="${o.status.name()}">PLACED</span>
+                            </td>
+                            <td>
+                                <a class="btn btn-outline btn-sm"
+                                   th:href="@{/admin/orders/{id}(id=${o.orderId})}">View</a>
+                            </td>
+                        </tr>
+                        <tr th:if="${recentOrders == null or #lists.isEmpty(recentOrders)}">
+                            <td class="empty-row" colspan="6">No orders placed yet.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div th:replace="~{admin/_layout :: scripts}"></div>
+</body>
+</html>

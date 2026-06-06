@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Orders')}"></head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/_layout :: sidebar('orders')}"></aside>
+
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <div>
+                <h1>Orders</h1>
+                <div class="breadcrumb"
+                     th:text="${orders.totalElements} + ' orders' +
+                              (${statusFilter != null} ? ' · status: ' + ${statusFilter.name()} : '')">
+                    0 orders
+                </div>
+            </div>
+        </div>
+
+        <!-- Status filter -->
+        <form class="filters" method="get" th:action="@{/admin/orders}">
+            <label>Status:</label>
+            <select name="status" onchange="this.form.submit()">
+                <option value="">All</option>
+                <option th:each="s : ${statuses}"
+                        th:value="${s.name()}"
+                        th:text="${s.name()}"
+                        th:selected="${statusFilter != null and statusFilter.name() == s.name()}">
+                </option>
+            </select>
+        </form>
+
+        <div class="table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Order</th>
+                        <th>Date</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Payment</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="o : ${orders.content}">
+                        <td>
+                            <a th:href="@{/admin/orders/{id}(id=${o.orderId})}"
+                               th:text="${o.orderNumber}" style="font-weight:500;">#MC-000000</a>
+                        </td>
+                        <td th:text="${#temporals.format(o.placedAt, 'd MMM yyyy, HH:mm')}">date</td>
+                        <td th:text="${o.itemCount}">0</td>
+                        <td th:text="'₹' + ${o.totalAmount}">₹0</td>
+                        <td>
+                            <span class="pill"
+                                  th:classappend="'pill-' + ${#strings.toLowerCase(o.status.name())}"
+                                  th:text="${o.status.name()}">PLACED</span>
+                        </td>
+                        <td>
+                            <span class="pill"
+                                  th:classappend="${o.paymentStatus.name() == 'PAID'} ? 'pill-active' :
+                                                  (${o.paymentStatus.name() == 'REFUNDED'} ? 'pill-cancelled' : '')"
+                                  th:text="${o.paymentStatus.name()}">PENDING</span>
+                        </td>
+                        <td>
+                            <a class="btn btn-outline btn-sm"
+                               th:href="@{/admin/orders/{id}(id=${o.orderId})}">View</a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(orders.content)}">
+                        <td class="empty-row" colspan="7">No orders match the filter.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <ul class="pagination" th:if="${orders.totalPages > 1}">
+            <li th:classappend="${!orders.hasPrevious()} ? 'disabled'">
+                <a th:if="${orders.hasPrevious()}"
+                   th:href="@{/admin/orders(page=${orders.number - 1}, status=${statusFilter})}">Previous</a>
+                <span th:unless="${orders.hasPrevious()}">Previous</span>
+            </li>
+            <li th:each="i : ${#numbers.sequence(0, orders.totalPages - 1)}"
+                th:classappend="${i == orders.number} ? 'active'">
+                <a th:href="@{/admin/orders(page=${i}, status=${statusFilter})}" th:text="${i + 1}">1</a>
+            </li>
+            <li th:classappend="${!orders.hasNext()} ? 'disabled'">
+                <a th:if="${orders.hasNext()}"
+                   th:href="@{/admin/orders(page=${orders.number + 1}, status=${statusFilter})}">Next</a>
+                <span th:unless="${orders.hasNext()}">Next</span>
+            </li>
+        </ul>
+    </main>
+</div>
+
+<div th:replace="~{admin/_layout :: scripts}"></div>
+</body>
+</html>

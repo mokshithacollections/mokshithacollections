@@ -1,0 +1,2053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop All | Mokshitha Collections</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Import all CSS from index.html */
+        :root {
+            --dark-sea-green: #2E8B57;
+            --light-sea-green: #20B2AA;
+            --light-cream: #FFF8F0;
+            --gold-accent: #D4AF37;
+            --dark-text: #2C3E50;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--dark-text);
+            background-color: #fefefe;
+        }
+        
+        h1, h2, h3, h4, h5 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+        }
+        
+        /* Reuse Header & Footer Styles from index.html */
+        .header-top {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            color: white;
+            padding: 8px 0;
+            font-size: 0.9rem;
+        }
+        
+        .main-header {
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        
+        .logo span {
+            color: var(--gold-accent);
+        }
+        
+        .nav-link {
+            color: var(--dark-text) !important;
+            font-weight: 500;
+            margin: 0 10px;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover {
+            color: var(--dark-sea-green) !important;
+        }
+        
+        .nav-link.active {
+            color: var(--dark-sea-green) !important;
+            font-weight: 600;
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--dark-sea-green), var(--light-sea-green));
+        }
+        
+        .header-icons .icon {
+            position: relative;
+            margin-left: 20px;
+            font-size: 1.2rem;
+            color: var(--dark-text);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .header-icons .icon:hover {
+            color: var(--dark-sea-green);
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--light-sea-green);
+            color: white;
+            font-size: 0.7rem;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Shop Page Specific Styles */
+        .shop-header {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                        url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+        }
+        
+        .shop-title {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            justify-content: center;
+            margin-bottom: 0;
+        }
+        
+        .breadcrumb-item a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: var(--gold-accent);
+        }
+        
+        /* Shop Layout */
+        .shop-container {
+            padding: 60px 0;
+        }
+        
+        /* Sidebar Filters */
+        .filter-sidebar {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            position: sticky;
+            top: 100px;
+        }
+        
+        .filter-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+            color: var(--dark-text);
+        }
+        
+        .filter-group {
+            margin-bottom: 25px;
+        }
+        
+        .filter-group h5 {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            color: #555;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+        
+        .filter-options {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .filter-options li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .filter-options input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--dark-sea-green);
+        }
+        
+        .filter-options label {
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s;
+            flex: 1;
+        }
+        
+        .filter-options label:hover {
+            color: var(--dark-sea-green);
+        }
+        
+        .color-option {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid #ddd;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .color-option:hover, .color-option.active {
+            transform: scale(1.2);
+            border-color: var(--dark-sea-green);
+        }
+        
+        .price-range {
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .price-values {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .filter-btn {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            width: 100%;
+            font-weight: 600;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(46, 139, 87, 0.2);
+        }
+        
+        .clear-filters {
+            background: transparent;
+            border: 2px solid #ddd;
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        .clear-filters:hover {
+            background: #f8f9fa;
+            border-color: #ccc;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* Mobile filter-drawer controls — hidden on desktop, shown ≤991px */
+        .filter-toggle-btn { display: none; }
+        .filter-close-btn { display: none; }
+        .filter-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1190;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .filter-backdrop.show { display: block; opacity: 1; }
+        body.filter-open { overflow: hidden; }
+
+        /* Shop Top Bar */
+        .shop-top-bar {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .sort-options select {
+            border: 2px solid #eee;
+            padding: 8px 15px;
+            border-radius: 5px;
+            background: white;
+            color: #555;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .view-options button {
+            background: transparent;
+            border: 2px solid #eee;
+            padding: 8px 15px;
+            margin-left: 5px;
+            border-radius: 5px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .view-options button.active, .view-options button:hover {
+            border-color: var(--dark-sea-green);
+            color: var(--dark-sea-green);
+            background: rgba(46, 139, 87, 0.05);
+        }
+        
+        .product-count {
+            color: #666;
+            font-size: 0.95rem;
+        }
+        
+        /* Product Grid */
+        .product-card {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+            background: white;
+            margin-bottom: 30px;
+            height: 100%;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .product-image {
+            height: 280px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+        
+        /* Badge stack — multiple promo badges sit in a column so they never overlap. */
+        .product-badges {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-start;
+            z-index: 2;
+        }
+
+        .product-badge {
+            background: var(--light-sea-green);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+        }
+
+        .product-badge.new {
+            background: var(--gold-accent);
+        }
+
+        .product-badge.sale {
+            background: #ff6b6b;
+        }
+
+        .product-badge.bestseller {
+            background: #f59e0b;
+        }
+
+        .product-badge.trending {
+            background: #8b5cf6;
+        }
+        
+        .product-wishlist {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #888;
+            transition: all 0.3s;
+        }
+        
+        .product-wishlist:hover, .product-wishlist.active {
+            color: #ff4757;
+        }
+        
+        .product-content {
+            padding: 20px;
+        }
+        
+        .product-title {
+            font-size: 1.1rem;
+            color: var(--dark-text);
+            margin-bottom: 8px;
+            font-weight: 600;
+            height: 2.8rem;
+            overflow: hidden;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .product-title:hover {
+            color: var(--dark-sea-green);
+        }
+        
+        .product-variants {
+            font-size: 0.82rem;
+            color: #6b7280;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .product-variants::before {
+            content: '\f53f'; /* font-awesome palette icon */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: var(--light-sea-green);
+            font-size: 0.85rem;
+        }
+
+        .product-price {
+            color: var(--dark-sea-green);
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .product-price .old-price {
+            color: #999;
+            text-decoration: line-through;
+            font-size: 0.9rem;
+            margin-left: 8px;
+            font-weight: 400;
+        }
+        
+        .product-rating {
+            color: var(--gold-accent);
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .product-rating span {
+            color: #666;
+            font-size: 0.85rem;
+            margin-left: 5px;
+        }
+        
+        .product-btn {
+            background: transparent;
+            border: 2px solid var(--light-sea-green);
+            color: var(--dark-sea-green);
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .product-btn:hover {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            color: white;
+        }
+
+        /* ===== Quick variant-select modal (shop "Add to Cart") ===== */
+        .vmodal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 11000; padding: 20px;
+        }
+        .vmodal {
+            background: #fff; border-radius: 14px; width: 100%; max-width: 460px;
+            max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .vmodal-head {
+            display: flex; gap: 14px; align-items: center; padding: 18px 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .vmodal-head img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; }
+        .vmodal-head .t { flex-grow: 1; }
+        .vmodal-head .t h5 { margin: 0; font-family: 'Playfair Display', serif; font-size: 1.1rem; }
+        .vmodal-head .t .p { color: var(--dark-sea-green); font-weight: 700; }
+        .vmodal-head .x { background: none; border: none; font-size: 1.4rem; color: #999; cursor: pointer; line-height: 1; }
+        .vmodal-body { padding: 18px 20px; }
+        .vmodal-body .lbl { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: #888; margin-bottom: 10px; }
+        .vchip-list { display: flex; flex-wrap: wrap; gap: 10px; }
+        .vchip {
+            display: inline-flex; align-items: center; gap: 9px; padding: 7px 13px 7px 7px;
+            border: 2px solid #e5e7eb; border-radius: 999px; background: #fff; cursor: pointer;
+            font-family: inherit; transition: all .15s;
+        }
+        .vchip:hover:not(.disabled) { border-color: var(--dark-sea-green); background: #f0fdf4; }
+        .vchip.active { border-color: var(--dark-sea-green); background: linear-gradient(135deg,#f0fdf4,#ecfdf5); box-shadow: 0 4px 12px rgba(46,139,87,0.18); }
+        .vchip.disabled { opacity: .5; cursor: not-allowed; text-decoration: line-through; }
+        .vchip .sw { width: 28px; height: 28px; border-radius: 50%; background: #cbd5e1; border: 1px solid rgba(0,0,0,0.12); box-shadow: inset 0 2px 4px rgba(0,0,0,0.12); flex-shrink: 0; }
+        .vchip .ci { display: flex; flex-direction: column; line-height: 1.2; text-align: left; }
+        .vchip .ci .c { font-weight: 600; font-size: 0.9rem; color: var(--dark-text); }
+        .vchip .ci .m { font-size: 0.72rem; color: #6b7280; }
+        .vmodal-foot { padding: 0 20px 20px; }
+        .vmodal-foot .add {
+            width: 100%; padding: 13px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+            color: #fff; background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+        }
+        .vmodal-foot .add:disabled { opacity: .6; cursor: not-allowed; }
+
+        /* List View 
+        .list-view .product-card {
+            display: flex;
+            height: auto;
+        }
+        
+        .list-view .product-image {
+            width: 300px;
+            height: 300px;
+            flex-shrink: 0;
+        }
+        
+        .list-view .product-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .list-view .product-title {
+            height: auto;
+            margin-bottom: 15px;
+        }
+        
+        .list-view .product-desc {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        } */
+
+        /* Apply list view only when container has .list-view */
+.products-container.list-view .product-card {
+    display: flex;
+    height: auto;
+    padding: 15px;
+}
+
+/* Image area in list view */
+.products-container.list-view .product-image {
+    width: 300px;
+    height: 300px;
+    flex-shrink: 0;
+}
+
+.products-container.list-view .product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Content area in list view */
+.products-container.list-view .product-content {
+    flex: 1;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.products-container.list-view .product-title {
+    margin-bottom: 15px;
+}
+
+.products-container.list-view .product-desc {
+    color: #666;
+    margin-bottom: 15px;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+/* Make columns full width in list view */
+.products-container.list-view .col-xl-4,
+.products-container.list-view .col-lg-4,
+.products-container.list-view .col-md-6 {
+    width: 100%;
+}
+
+        
+        /* Pagination */
+        .pagination {
+            justify-content: center;
+            margin-top: 50px;
+        }
+        
+        .page-link {
+            color: var(--dark-sea-green);
+            border: 1px solid #dee2e6;
+            margin: 0 5px;
+            border-radius: 5px;
+        }
+        
+        .page-link:hover {
+            background: rgba(46, 139, 87, 0.1);
+            border-color: var(--dark-sea-green);
+            color: var(--dark-sea-green);
+        }
+        
+        .page-item.active .page-link {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            border-color: var(--dark-sea-green);
+        }
+        
+        /* Footer (Reuse from index.html) */
+        .footer-section {
+            background: #1a1a1a;
+            color: #ddd;
+            padding: 60px 0 30px;
+        }
+        
+        .footer-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        
+        .footer-logo span {
+            color: var(--light-sea-green);
+        }
+        
+        .footer-title {
+            color: white;
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .footer-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background: var(--light-sea-green);
+        }
+        
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+        
+        .footer-links a {
+            color: #aaa;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--light-sea-green);
+            padding-left: 5px;
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            background: #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .social-icon:hover {
+            background: var(--light-sea-green);
+            transform: translateY(-5px);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            margin-top: 50px;
+            border-top: 1px solid #333;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+
+        /* ---- Tablet & below: filters become a slide-in drawer ---- */
+        @media (max-width: 991.98px) {
+            .shop-container { padding: 30px 0; }
+
+            /* The "Filters & Sort" trigger button */
+            .filter-toggle-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                width: 100%;
+                padding: 12px;
+                margin-bottom: 18px;
+                background: #fff;
+                border: 2px solid var(--dark-sea-green);
+                color: var(--dark-sea-green);
+                border-radius: 10px;
+                font-weight: 600;
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            }
+
+            /* Sidebar slides in from the left as an off-canvas drawer */
+            .filter-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                width: 86%;
+                max-width: 340px;
+                margin: 0;
+                border-radius: 0;
+                z-index: 1200;
+                overflow-y: auto;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                box-shadow: 0 0 40px rgba(0, 0, 0, 0.25);
+            }
+            .filter-sidebar.open { transform: translateX(0); }
+
+            .filter-close-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: absolute;
+                top: 14px;
+                right: 14px;
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                border: none;
+                background: #f1f1f1;
+                color: #444;
+                cursor: pointer;
+                font-size: 1rem;
+            }
+
+            /* List view stacks cleanly */
+            .products-container.list-view .product-card {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .products-container.list-view .product-image {
+                width: 100% !important;
+                height: auto !important;
+            }
+            .products-container.list-view .product-image img {
+                width: 100%;
+                height: auto;
+                object-fit: cover;
+            }
+            .products-container.list-view .product-content {
+                width: 100%;
+                padding: 15px 0;
+            }
+        }
+
+        /* ---- Phones: two products per row, tighter cards ---- */
+        @media (max-width: 767.98px) {
+            .shop-title { font-size: 2.2rem; }
+
+            .shop-top-bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+                padding: 14px;
+            }
+            .sort-options select { width: 100%; }
+            .view-options { display: flex; justify-content: center; }
+
+            /* Portrait, consistent grid images for the 2-up layout */
+            .products-container:not(.list-view) .product-image {
+                height: auto;
+                aspect-ratio: 3 / 4;
+            }
+            .product-card { margin-bottom: 18px; border-radius: 12px; }
+            .product-content { padding: 14px 12px; }
+            .product-title { font-size: 0.95rem; height: 2.6rem; margin-bottom: 6px; }
+            .product-variants { font-size: 0.72rem; margin-bottom: 6px; }
+            .product-price { font-size: 1.05rem; margin-bottom: 8px; }
+            .product-btn { padding: 9px; font-size: 0.9rem; }
+            .product-badge { font-size: 0.7rem; padding: 4px 9px; }
+            .product-wishlist { width: 32px; height: 32px; }
+
+            /* List view keeps a single column */
+            .products-container.list-view .product-image { height: auto !important; }
+        }
+
+        /* ---- Small phones ---- */
+        @media (max-width: 359.98px) {
+            .product-content { padding: 12px 10px; }
+            .product-title { font-size: 0.88rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Top Bar -->
+    <div class="header-top">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <span th:if="${user != null}" th:text="'Welcome back, ' + ${user.firstName} + '!'">Welcome back!</span>
+                    <span th:unless="${user != null}">
+                        <i class="fas fa-phone-alt"></i> +91 98765 43210 &nbsp;&nbsp;|&nbsp;&nbsp;
+                        <i class="fas fa-envelope"></i> info@mokshithacollections.com
+                    </span>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <span>Free Shipping on Orders Above ₹1999</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="main-header py-3">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-3 col-md-4 col-6">
+                    <a th:href="@{/home}" class="logo">Mokshitha<span>.</span></a>
+                </div>
+                <div class="col-lg-6 col-md-4 d-none d-md-block">
+                    <nav class="navbar navbar-expand-lg justify-content-center">
+                        <ul class="navbar-nav">
+                            <li class="nav-item"><a class="nav-link" th:href="@{/home}">Home</a></li>
+                            <li class="nav-item"><a class="nav-link active" th:href="@{/shop}">Shop</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Collections</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/about}">About</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/contact}">Contact</a></li>
+                            <li class="nav-item" th:if="${user != null and user.isAdmin}">
+                                <a class="nav-link" th:href="@{/admin}" style="color: var(--dark-sea-green); font-weight: 600;">
+                                    <i class="fas fa-cog"></i> Admin
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="col-lg-3 col-md-4 col-6 text-end">
+                    <div class="header-icons d-inline-flex align-items-center">
+                        <div class="icon search-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="icon user-icon" id="userIcon" onclick="window.location.href='/user_redirect'">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="icon wishlist-icon" onclick="window.location.href='/user_redirect'">
+                            <i class="far fa-heart"></i>
+                            <span class="cart-count" th:text="${wishlistCount != null ? wishlistCount : 0}">0</span>
+                        </div>
+                        <div class="icon cart-icon" id="cartIcon" onclick="window.location.href='/cart'">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span class="cart-count" th:text="${cartCount != null ? cartCount : 0}">0</span>
+                        </div>
+                        <button class="navbar-toggler d-md-none ms-3" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div class="collapse d-md-none" id="mobileMenu">
+                <ul class="navbar-nav mt-3">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/home}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" th:href="@{/shop}">Shop</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Collections</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/about}">About</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/contact}">Contact</a></li>
+                    <li class="nav-item" th:if="${user != null and user.isAdmin}">
+                        <a class="nav-link" th:href="@{/admin}" style="color: var(--dark-sea-green); font-weight: 600;">
+                            <i class="fas fa-cog"></i> Admin
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- Shop Header -->
+    <!--<section class="shop-header">
+        <div class="container">
+            <h1 class="shop-title">Shop All Collections</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/home}">Home</a></li>
+                    <li class="breadcrumb-item active">Shop</li>
+                </ol>
+            </nav>
+        </div>
+    </section>-->
+    
+    <!-- Shop Content -->
+    <section class="shop-container">
+        <div class="container">
+            <div class="row">
+                <!-- Sidebar Filters -->
+                <div class="col-lg-3">
+                    <form class="filter-sidebar" id="filterSidebar" method="get" th:action="@{/shop}">
+                        <button type="button" class="filter-close-btn" id="closeFilters" aria-label="Close filters">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <h3 class="filter-title">Filter Products</h3>
+
+                        <!-- Search -->
+                        <div class="filter-group">
+                            <h5>Search</h5>
+                            <input type="text" name="search" class="form-control"
+                                   placeholder="Product name or SKU"
+                                   th:value="${filters != null ? filters.search : ''}">
+                        </div>
+
+                        <!-- Category Filter (clickable list, server-side filter) -->
+                        <div class="filter-group">
+                            <h5>Category</h5>
+                            <ul class="filter-options" style="list-style:none; padding:0;">
+                                <li>
+                                    <a th:href="@{/shop}"
+                                       th:classappend="${filters == null or filters.categorySlug == null} ? 'fw-bold text-success'"
+                                       style="text-decoration:none;">All categories</a>
+                                </li>
+                                <li th:each="cat : ${categories}">
+                                    <a th:href="@{/shop(categorySlug=${cat.slug})}"
+                                       th:text="${cat.name}"
+                                       th:classappend="${filters != null and filters.categorySlug != null and filters.categorySlug == cat.slug} ? 'fw-bold text-success'"
+                                       style="text-decoration:none;">Category</a>
+                                </li>
+                                <li th:if="${categories == null or #lists.isEmpty(categories)}"
+                                    class="text-muted small">No categories yet.</li>
+                            </ul>
+                            <!-- Preserve the active category when other filters are submitted -->
+                            <input type="hidden" name="categorySlug"
+                                   th:if="${filters != null and filters.categorySlug != null}"
+                                   th:value="${filters.categorySlug}">
+                        </div>
+
+                        <!-- Price Range (numeric inputs — backend supports min/max) -->
+                        <div class="filter-group">
+                            <h5>Price Range (₹)</h5>
+                            <div class="d-flex gap-2">
+                                <input type="number" name="minPrice" class="form-control" placeholder="Min" min="0"
+                                       th:value="${filters != null ? filters.minPrice : ''}">
+                                <input type="number" name="maxPrice" class="form-control" placeholder="Max" min="0"
+                                       th:value="${filters != null ? filters.maxPrice : ''}">
+                            </div>
+                        </div>
+
+                        <!-- Color / Size / Fabric / Occasion filters: visual only for now;
+                             backend specifications don't filter on these yet. -->
+                        <div class="filter-group">
+                            <h5>Color</h5>
+                            <div class="d-flex flex-wrap gap-2">
+                                <div class="color-option" style="background: #2E8B57;" title="Sea Green"></div>
+                                <div class="color-option" style="background: #8B0000;" title="Red"></div>
+                                <div class="color-option" style="background: #00008B;" title="Blue"></div>
+                                <div class="color-option" style="background: #4B0082;" title="Purple"></div>
+                                <div class="color-option" style="background: #FFD700;" title="Gold"></div>
+                                <div class="color-option" style="background: #000000;" title="Black"></div>
+                                <div class="color-option" style="background: #FFFFFF; border: 1px solid #ccc;" title="White"></div>
+                                <div class="color-option" style="background: #FF69B4;" title="Pink"></div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="filter-btn">Apply Filters</button>
+                        <a th:href="@{/shop}" class="filter-btn clear-filters" style="display:inline-block; text-decoration:none; text-align:center;">Clear All</a>
+                    </form>
+                </div>
+                
+                <!-- Products Section -->
+                <div class="col-lg-9">
+                    <!-- Mobile-only: opens the filter drawer -->
+                    <button type="button" class="filter-toggle-btn" id="openFilters">
+                        <i class="fas fa-sliders-h"></i> Filter Products
+                    </button>
+
+                    <!-- Shop Top Bar -->
+                    <div class="shop-top-bar">
+                        <div class="product-count">
+                            <span th:if="${products != null and products.totalElements > 0}"
+                                  th:text="'Showing ' + (${products.number} * ${products.size} + 1) + '-' +
+                                          (${products.number} * ${products.size} + ${products.numberOfElements}) +
+                                          ' of ' + ${products.totalElements} + ' products'">
+                                Showing 1-12 of 0 products
+                            </span>
+                            <span th:if="${products == null or products.totalElements == 0}">No products found</span>
+                        </div>
+                        <div class="sort-options">
+                            <!-- Sort dropdown submits to the same form via JS so the rest of the filters tag along -->
+                            <select class="form-select" id="sortSelect" onchange="applySort(this.value)">
+                                <option value="createdAt,desc"
+                                        th:selected="${filters != null and filters.sort == 'createdAt,desc'}">Sort by: Newest</option>
+                                <option value="price,asc"
+                                        th:selected="${filters != null and filters.sort == 'price,asc'}">Sort by: Price Low to High</option>
+                                <option value="price,desc"
+                                        th:selected="${filters != null and filters.sort == 'price,desc'}">Sort by: Price High to Low</option>
+                                <option value="name,asc"
+                                        th:selected="${filters != null and filters.sort == 'name,asc'}">Sort by: Name A-Z</option>
+                            </select>
+                        </div>
+                        <div class="view-options">
+                            <button class="grid-view active" title="Grid View">
+                                <i class="fas fa-th"></i>
+                            </button>
+                            <button class="list-view" title="List View">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Products Grid -->
+                    <div class="row products-container">
+                        <!-- Dynamic product cards from ${products.content} (PageController.shop) -->
+                        <div class="col-6 col-md-6 col-lg-4 col-xl-4"
+                             th:each="product : ${products != null ? products.content : null}">
+                            <div class="product-card">
+                                <div class="product-image">
+                                    <a th:href="@{/product-detail/{id}(id=${product.productId})}">
+                                        <img th:src="${product.imageUrl}" th:alt="${product.name}">
+                                    </a>
+                                    <div class="product-badges">
+                                        <div class="product-badge bestseller" th:if="${product.isBestseller != null and product.isBestseller}">Bestseller</div>
+                                        <div class="product-badge trending" th:if="${product.isTrending != null and product.isTrending}">Trending</div>
+                                        <div class="product-badge" th:if="${product.isFeatured != null and product.isFeatured}">Featured</div>
+                                    </div>
+                                    <div class="product-wishlist"
+                                         th:classappend="${wishlistProductIds != null and wishlistProductIds.contains(product.productId)} ? 'active'"
+                                         th:attr="data-product-id=${product.productId}, data-name=${product.name}">
+                                        <i th:class="${wishlistProductIds != null and wishlistProductIds.contains(product.productId)} ? 'fas fa-heart' : 'far fa-heart'"></i>
+                                    </div>
+                                </div>
+                                <div class="product-content">
+                                    <a th:href="@{/product-detail/{id}(id=${product.productId})}"
+                                       class="product-title"
+                                       th:text="${product.name}">Product Name</a>
+                                    <div class="product-variants"
+                                         th:if="${product.colorCount != null and product.colorCount > 1}"
+                                         th:text="'Available in ' + ${product.colorCount} + ' colours'">
+                                        Available in 3 colours
+                                    </div>
+                                    <div class="product-price">
+                                        <span th:if="${product.discountPrice != null}" th:text="'₹' + ${product.discountPrice}">₹0</span>
+                                        <span th:unless="${product.discountPrice != null}" th:text="'₹' + ${product.price}">₹0</span>
+                                        <span class="old-price" th:if="${product.discountPrice != null}"
+                                              th:text="'₹' + ${product.price}">₹0</span>
+                                    </div>
+                                    <button class="product-btn"
+                                            th:classappend="${cartProductIds != null and cartProductIds.contains(product.productId)} ? 'in-cart'"
+                                            th:attr="data-product-id=${product.productId}"
+                                            th:text="${cartProductIds != null and cartProductIds.contains(product.productId)} ? 'View Cart' : 'Add to Cart'">Add to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Empty state -->
+                        <div class="col-12 text-center py-5"
+                             th:if="${products == null or products.totalElements == 0}">
+                            <p class="text-muted">No products match your filters.</p>
+                            <a th:href="@{/shop}" class="filter-btn d-inline-block mt-3">Clear filters</a>
+                        </div>
+                    </div>
+
+                    <!-- The original template included 8 more hardcoded product cards; they
+                         lived under <!-- Product 2 --> through <!-- Product 9 -->. The single
+                         th:each loop above replaces all of them. -->
+                    <div th:remove="all">
+                        <!-- Product 1 -->
+                        <div class="col-xl-4 col-lg-4 col-md-6">
+                            <div class="product-card">
+                                <div class="product-image">
+                                    <img src="https://cdn.pixabay.com/photo/2015/04/15/15/02/saree-723940_640.jpg" alt="Silk Saree">
+                                    <div class="product-badge">Bestseller</div>
+                                    <div class="product-wishlist">
+                                        <i class="far fa-heart"></i>
+                                    </div>
+                                </div>
+                                <div class="product-content">
+                                    <a href="product-detail.html" class="product-title">Royal Blue Silk Saree with Zari Border</a>
+                                    <div class="product-rating">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star-half-alt"></i>
+                                        <span>(42)</span>
+                                    </div>
+                                    <div class="product-price">
+                                        ₹4,599 <span class="old-price">₹6,499</span>
+                                    </div>
+                                    <button class="product-btn">Add to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Product 2 -->
+                        <div class="col-xl-4 col-lg-4 col-md-6">
+                            <div class="product-card">
+                                <div class="product-image">
+                                    <img src="https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Floral Dress">
+                                    <div class="product-badge new">New</div>
+                                    <div class="product-wishlist">
+                                        <i class="far fa-heart"></i>
+                                    </div>
+                                </div>
+                                <div class="product-content">
+                                    <a href="product-detail.html" class="product-title">Floral Printed Maxi Dress with Belt</a>
+                                    <div class="product-rating">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="far fa-star"></i>
+                                        <span>(28)</span>
+                                    </div>
+                                    <div class="product-price">
+                                        ₹2,899 <span class="old-price">₹3,499</span>
+                                    </div>
+                                    <button class="product-btn">Add to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Product 3 -->
+                        <div class="col-xl-4 col-lg-4 col-md-6">
+                            <div class="product-card">
+                                <div class="product-image">
+                                    <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Banarasi Saree">
+                                    <div class="product-badge sale">-30%</div>
+                                    <div class="product-wishlist">
+                                        <i class="far fa-heart"></i>
+                                    </div>
+                                </div>
+                                <div class="product-content">
+                                    <a href="product-detail.html" class="product-title">Red Banarasi Silk Wedding Saree</a>
+                                    <div class="product-rating">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <span>(56)</span>
+                                    </div>
+                                    <div class="product-price">
+                                        ₹7,999 <span class="old-price">₹11,499</span>
+                                    </div>
+                                    <button class="product-btn">Add to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Product 4 -->
+                        <div class="col-xl-4 col-lg-4 col-md-6">
+                            <div class="product-card">
+                                <div class="product-image">
+                                    <img src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Evening Gown">
+                                    <div class="product-wishlist active">
+                                        <i class="fas fa-heart"></i>
+                                    </div>
+                                </div>
+                                <div class="product-content">
+                                    <a href="product-detail.html" class="product-title">Black Evening Gown with Sequins</a>
+                                    <div class="product-rating">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star-half-alt"></i>
+                                        <span>(35)</span>
+                                    </div>
+                                    <div class="product-price">
+                                        ₹5,499
+                                    </div>
+                                    <button class="product-btn">Add to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Product 5 -->
+                        <div class="col-xl-4 col-lg-4 col-md-6">
+                            <div class="product-card">
+                                <div class="product-image">
+                                    <img src="https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Cotton Saree">
+                                    <div class="product-badge">Cotton</div>
+                                    <div class="product-wishlist">
+                                        <i class="far fa-heart"></i>
+                                    </div>
+                                </div>
+                                <div class="product-content">
+                                    <a href="product-detail.html" class="product-title">Light Green Cotton Printed Saree</a>
+                                    <div class="product-rating">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="far fa-star"></i>
+                                        <span>(41)</span>
+                                    </div>
+                                    <div class="product-price">
+                                        ₹1,899 <span class="old-price">₹2,499</span>
+                                    </div>
+                                    <button class="product-btn">Add to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Product 6 -->
+                        <div class="col-xl-4 col-lg-4 col-md-6">
+                            <div class="product-card">
+                                <div class="product-image">
+                                    <img src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Office Dress">
+                                    <div class="product-badge new">New</div>
+                                    <div class="product-wishlist">
+                                        <i class="far fa-heart"></i>
+                                    </div>
+                                </div>
+                                <div class="product-content">
+                                    <a href="product-detail.html" class="product-title">Formal Office Wear Dress Set</a>
+                                    <div class="product-rating">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star-half-alt"></i>
+                                        <span>(22)</span>
+                                    </div>
+                                    <div class="product-price">
+                                        ₹3,299
+                                    </div>
+                                    <button class="product-btn">Add to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Product 7 -->
+                        <div class="col-xl-4 col-lg-4 col-md-6">
+                            <div class="product-card">
+                                <div class="product-image">
+                                    <img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Designer Saree">
+                                    <div class="product-badge">Designer</div>
+                                    <div class="product-wishlist">
+                                        <i class="far fa-heart"></i>
+                                    </div>
+                                </div>
+                                <div class="product-content">
+                                    <a href="product-detail.html" class="product-title">Designer Georgette Saree with Embroidery</a>
+                                    <div class="product-rating">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="far fa-star"></i>
+                                        <span>(38)</span>
+                                    </div>
+                                    <div class="product-price">
+                                        ₹6,499 <span class="old-price">₹8,999</span>
+                                    </div>
+                                    <button class="product-btn">Add to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Product 8 -->
+                        <div class="col-xl-4 col-lg-4 col-md-6">
+                            <div class="product-card">
+                                <div class="product-image">
+                                    <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Summer Dress">
+                                    <div class="product-badge sale">-25%</div>
+                                    <div class="product-wishlist">
+                                        <i class="far fa-heart"></i>
+                                    </div>
+                                </div>
+                                <div class="product-content">
+                                    <a href="product-detail.html" class="product-title">Yellow Flowy Summer Dress</a>
+                                    <div class="product-rating">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star-half-alt"></i>
+                                        <i class="far fa-star"></i>
+                                        <span>(19)</span>
+                                    </div>
+                                    <div class="product-price">
+                                        ₹2,199 <span class="old-price">₹2,999</span>
+                                    </div>
+                                    <button class="product-btn">Add to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Product 9 -->
+                        <div class="col-xl-4 col-lg-4 col-md-6">
+                            <div class="product-card">
+                                <div class="product-image">
+                                    <img src="https://th.bing.com/th/id/OIP.yKHWfugBcarf87lulrN0VAHaJ4?w=203&h=271&c=7&r=0&o=7&cb=ucfimg2&pid=1.7&rm=3&ucfimg=1" alt="Party Lehenga">
+                                    <div class="product-badge">Lehenga</div>
+                                    <div class="product-wishlist active">
+                                        <i class="fas fa-heart"></i>
+                                    </div>
+                                </div>
+                                <div class="product-content">
+                                    <a href="product-detail.html" class="product-title">Party Wear Lehenga Choli Set</a>
+                                    <div class="product-rating">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <span>(47)</span>
+                                    </div>
+                                    <div class="product-price">
+                                        ₹9,999 <span class="old-price">₹12,999</span>
+                                    </div>
+                                    <button class="product-btn">Add to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end th:remove="all" wrapper -->
+
+                    <!-- Pagination — driven by Spring Data Page -->
+                    <nav aria-label="Page navigation"
+                         th:if="${products != null and products.totalPages > 1}">
+                        <ul class="pagination">
+                            <!-- Previous -->
+                            <li class="page-item" th:classappend="${!products.hasPrevious()} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{/shop(page=${products.number - 1},
+                                              categorySlug=${filters?.categorySlug},
+                                              search=${filters?.search},
+                                              minPrice=${filters?.minPrice},
+                                              maxPrice=${filters?.maxPrice},
+                                              sort=${filters?.sort})}">Previous</a>
+                            </li>
+                            <!-- Numbered pages -->
+                            <li class="page-item"
+                                th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}"
+                                th:classappend="${i == products.number} ? 'active'">
+                                <a class="page-link"
+                                   th:href="@{/shop(page=${i},
+                                              categorySlug=${filters?.categorySlug},
+                                              search=${filters?.search},
+                                              minPrice=${filters?.minPrice},
+                                              maxPrice=${filters?.maxPrice},
+                                              sort=${filters?.sort})}"
+                                   th:text="${i + 1}">1</a>
+                            </li>
+                            <!-- Next -->
+                            <li class="page-item" th:classappend="${!products.hasNext()} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{/shop(page=${products.number + 1},
+                                              categorySlug=${filters?.categorySlug},
+                                              search=${filters?.search},
+                                              minPrice=${filters?.minPrice},
+                                              maxPrice=${filters?.maxPrice},
+                                              sort=${filters?.sort})}">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <!-- Dimmed backdrop shown behind the mobile filter drawer -->
+        <div class="filter-backdrop" id="filterBackdrop"></div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <a th:href="@{/home}" class="footer-logo">Mokshitha<span>.</span></a>
+                    <p class="footer-about">
+                        Bringing you the finest collection of traditional sarees and contemporary dresses since 2010. Our mission is to make every woman feel elegant and confident.
+                    </p>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-pinterest-p"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h4 class="footer-title">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a th:href="@{/home}">Home</a></li>
+                        <li><a th:href="@{/shop}">Shop</a></li>
+                        <li><a th:href="@{/shop(categorySlug='sarees')}">Sarees</a></li>
+                        <li><a th:href="@{/shop(categorySlug='dresses')}">Dresses</a></li>
+                        <li><a th:href="@{/about}">About Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h4 class="footer-title">Support</h4>
+                    <ul class="footer-links">
+                        <li><a th:href="@{/contact}">Contact Us</a></li>
+                        <li><a th:href="@{/contact}">FAQ</a></li>
+                        <li><a th:href="@{/contact}">Shipping Policy</a></li>
+                        <li><a th:href="@{/contact}">Returns &amp; Exchange</a></li>
+                        <li><a th:href="@{/contact}">Privacy Policy</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-4 col-md-4 mb-4">
+                    <h4 class="footer-title">Contact Info</h4>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt me-2"></i> 123 Fashion Street, Chennai, India</li>
+                        <li><i class="fas fa-phone-alt me-2"></i> +91 98765 43210</li>
+                        <li><i class="fas fa-envelope me-2"></i> info@mokshithacollections.com</li>
+                        <li><i class="fas fa-clock me-2"></i> Mon-Sat: 10AM - 8PM</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="copyright">
+                <p>
+                    <span th:text="'&copy; ' + ${#temporals.format(#temporals.createNow(), 'yyyy')} + ' Mokshitha Collections. All rights reserved. |'">&copy; 2026 Mokshitha Collections. All rights reserved. |</span>
+                    Designed with <i class="fas fa-heart" style="color: var(--light-sea-green);"></i> for elegant women
+                </p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        // Variant ids already in this user's wishlist — used to mark "already
+        // added" rows in the wishlist picker.
+        window.WISHLIST_VARIANT_IDS = new Set(/*[[${wishlistVariantIds}]]*/ []);
+    </script>
+    <script>
+        // Read CSRF token written into the XSRF-TOKEN cookie by Spring Security.
+        function getCsrfToken() {
+            const m = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+            return m ? decodeURIComponent(m[1]) : '';
+        }
+
+        // Tiny toast used by all the handlers below.
+        function showToast(msg, kind) {
+            const el = document.createElement('div');
+            const bg = kind === 'error' ? '#dc2626' : 'linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green))';
+            el.style.cssText = 'position:fixed;top:100px;right:20px;background:' + bg + ';color:#fff;padding:14px 22px;border-radius:8px;box-shadow:0 5px 15px rgba(0,0,0,0.2);z-index:10000;transition:transform .3s;max-width:320px;';
+            el.textContent = msg;
+            document.body.appendChild(el);
+            setTimeout(() => el.style.transform = 'translateX(0)', 10);
+            setTimeout(() => { el.style.transform = 'translateX(150%)'; setTimeout(() => el.remove(), 300); }, 3000);
+        }
+
+        // POST wrapper that surfaces server-side errors instead of swallowing them.
+        async function postJson(url) {
+            const res = await fetch(url, { method: 'POST', headers: { 'X-XSRF-TOKEN': getCsrfToken() } });
+            if (res.status === 401) { window.location.href = '/user_redirect'; throw new Error('not authenticated'); }
+            let body = null;
+            try { body = await res.json(); } catch (_) {}
+            if (!res.ok) {
+                throw new Error((body && body.message) || ('HTTP ' + res.status));
+            }
+            return body;
+        }
+
+        // ----- Add-to-Cart / View-Cart on product cards -----
+        function pulseBadge(badge) {
+            if (!badge) return;
+            badge.style.transition = 'transform 0.3s ease, background-color 0.3s ease';
+            const original = badge.style.background;
+            badge.style.transform = 'scale(1.6)';
+            badge.style.background = '#16a34a';
+            badge.style.color = '#fff';
+            setTimeout(() => {
+                badge.style.transform = 'scale(1)';
+                badge.style.background = original;
+            }, 350);
+        }
+
+        // Load a product's variants (public JSON endpoint).
+        async function fetchProductVariants(productId) {
+            const res = await fetch('/api/products/' + productId, { headers: { 'Accept': 'application/json' } });
+            if (!res.ok) throw new Error('Could not load product options');
+            const product = await res.json();
+            return product || {};
+        }
+
+        // Add a specific variant to the cart (form-encoded, matches AddCartItemRequest).
+        async function addVariantToCart(variantId, qty) {
+            const res = await fetch('/api/cart/items', {
+                method: 'POST',
+                headers: {
+                    'X-XSRF-TOKEN': getCsrfToken(),
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ variantId: variantId, quantity: qty || 1 })
+            });
+            if (res.status === 401) { window.location.href = '/user_redirect'; throw new Error('not authenticated'); }
+            let body = null;
+            try { body = await res.json(); } catch (_) {}
+            if (!res.ok) throw new Error((body && body.message) || ('HTTP ' + res.status));
+            return body; // CartResponse
+        }
+
+        // Reflect a successful add on the originating card button + the header badge.
+        function markAdded(btn, cart, name) {
+            const cartBadge = document.querySelector('.cart-icon .cart-count');
+            if (cartBadge && cart && typeof cart.totalQuantity === 'number') {
+                cartBadge.textContent = cart.totalQuantity;
+                pulseBadge(cartBadge);
+            }
+            if (btn) { btn.textContent = 'View Cart'; btn.classList.add('in-cart'); }
+            showToast(name + ' added to cart!');
+        }
+
+        // Build + open the quick variant-select modal.
+        function openVariantModal(product, originBtn) {
+            const variants = product.variants || [];
+            const overlay = document.createElement('div');
+            overlay.className = 'vmodal-overlay';
+
+            const hero = product.imageUrl || '';
+            const priceVal = (product.discountPrice != null ? product.discountPrice : product.price);
+
+            overlay.innerHTML =
+                '<div class="vmodal" role="dialog" aria-modal="true">' +
+                  '<div class="vmodal-head">' +
+                    (hero ? '<img src="' + hero + '" alt="">' : '') +
+                    '<div class="t"><h5></h5><span class="p"></span></div>' +
+                    '<button class="x" aria-label="Close">&times;</button>' +
+                  '</div>' +
+                  '<div class="vmodal-body">' +
+                    '<div class="lbl">Choose a variant</div>' +
+                    '<div class="vchip-list"></div>' +
+                  '</div>' +
+                  '<div class="vmodal-foot">' +
+                    '<button class="add" disabled>Select a variant</button>' +
+                  '</div>' +
+                '</div>';
+
+            // Fill text safely (avoid HTML injection from product names).
+            overlay.querySelector('.t h5').textContent = product.name || 'Product';
+            overlay.querySelector('.t .p').textContent = priceVal != null ? ('₹' + priceVal) : '';
+
+            const list = overlay.querySelector('.vchip-list');
+            const addBtn = overlay.querySelector('.add');
+            let selectedVariantId = null;
+
+            variants.forEach(v => {
+                const stock = v.stockQuantity == null ? 0 : v.stockQuantity;
+                const out = stock <= 0;
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'vchip' + (out ? ' disabled' : '');
+                if (out) chip.disabled = true;
+
+                const swatchColor = (v.color || '').toLowerCase().replace(/\s+/g, '');
+                const meta = (v.size ? ('Size ' + v.size + ' · ') : '') +
+                             (out ? 'Out of stock' : (stock + ' in stock'));
+
+                const sw = document.createElement('span');
+                sw.className = 'sw';
+                if (swatchColor) sw.style.backgroundColor = swatchColor;
+
+                const ci = document.createElement('span');
+                ci.className = 'ci';
+                const c = document.createElement('span'); c.className = 'c'; c.textContent = v.color || 'Variant';
+                const m = document.createElement('span'); m.className = 'm'; m.textContent = meta;
+                ci.appendChild(c); ci.appendChild(m);
+
+                chip.appendChild(sw); chip.appendChild(ci);
+
+                if (!out) {
+                    chip.addEventListener('click', () => {
+                        list.querySelectorAll('.vchip').forEach(x => x.classList.remove('active'));
+                        chip.classList.add('active');
+                        selectedVariantId = v.variantId;
+                        addBtn.disabled = false;
+                        addBtn.textContent = 'Add to Cart';
+                    });
+                }
+                list.appendChild(chip);
+            });
+
+            function close() { overlay.remove(); }
+            overlay.querySelector('.x').addEventListener('click', close);
+            overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+
+            addBtn.addEventListener('click', async () => {
+                if (!selectedVariantId) return;
+                addBtn.disabled = true;
+                addBtn.textContent = 'Adding...';
+                try {
+                    const cart = await addVariantToCart(selectedVariantId, 1);
+                    markAdded(originBtn, cart, product.name || 'Item');
+                    close();
+                } catch (e) {
+                    showToast(e.message, 'error');
+                    addBtn.disabled = false;
+                    addBtn.textContent = 'Add to Cart';
+                }
+            });
+
+            document.body.appendChild(overlay);
+        }
+
+        document.querySelectorAll('.product-btn').forEach(btn => {
+            btn.addEventListener('click', async function () {
+                // Already in cart? Just navigate to the cart.
+                if (this.classList.contains('in-cart')) {
+                    window.location.href = '/cart';
+                    return;
+                }
+                const card = this.closest('.product-card');
+                const wishBtn = card ? card.querySelector('.product-wishlist') : null;
+                const productId = (wishBtn && wishBtn.dataset.productId) || this.dataset.productId;
+                const name = card ? card.querySelector('.product-title').textContent.trim() : 'Item';
+                if (!productId) return;
+
+                const original = this.textContent;
+                this.disabled = true;
+                this.textContent = 'Loading...';
+                try {
+                    const product = await fetchProductVariants(productId);
+                    const variants = (product.variants || []).filter(
+                        v => v.stockQuantity != null && v.stockQuantity > 0);
+
+                    if (variants.length === 0) {
+                        showToast('Sorry, this product is out of stock.', 'error');
+                    } else if (variants.length === 1) {
+                        // Only one option — add it straight away, no need to ask.
+                        const cart = await addVariantToCart(variants[0].variantId, 1);
+                        markAdded(this, cart, name);
+                    } else {
+                        // Multiple variants — let the customer choose.
+                        openVariantModal(product, this);
+                    }
+                } catch (e) {
+                    showToast(e.message, 'error');
+                } finally {
+                    this.disabled = false;
+                    if (!this.classList.contains('in-cart')) this.textContent = original;
+                }
+            });
+        });
+
+        // ----- Wishlist: pick a variant before saving -----
+        // Toggle one variant in the wishlist; updates the shared set + badge.
+        async function toggleWishlistVariant(variantId) {
+            const data = await postJson('/wishlist/toggle/' + variantId);
+            const wishBadge = document.querySelector('.wishlist-icon .cart-count');
+            if (data.added) window.WISHLIST_VARIANT_IDS.add(variantId);
+            else window.WISHLIST_VARIANT_IDS.delete(variantId);
+            if (wishBadge) {
+                const n = parseInt(wishBadge.textContent || '0', 10) + (data.added ? 1 : -1);
+                wishBadge.textContent = Math.max(0, n);
+            }
+            return data.added;
+        }
+
+        // Build + open the variant picker for the wishlist (multiple variants of
+        // the same product can be saved; already-saved ones are shown as added).
+        function openWishlistModal(product, heartEl) {
+            const variants = product.variants || [];
+            const overlay = document.createElement('div');
+            overlay.className = 'vmodal-overlay';
+            const hero = product.imageUrl || '';
+
+            overlay.innerHTML =
+                '<div class="vmodal" role="dialog" aria-modal="true">' +
+                  '<div class="vmodal-head">' +
+                    (hero ? '<img src="' + hero + '" alt="">' : '') +
+                    '<div class="t"><h5></h5><span class="p">Save your favourite colours</span></div>' +
+                    '<button class="x" aria-label="Close">&times;</button>' +
+                  '</div>' +
+                  '<div class="vmodal-body"><div class="lbl">Tap a variant to add/remove</div><div class="vchip-list"></div></div>' +
+                  '<div class="vmodal-foot"><button class="add">Done</button></div>' +
+                '</div>';
+            overlay.querySelector('.t h5').textContent = product.name || 'Product';
+
+            const list = overlay.querySelector('.vchip-list');
+
+            variants.forEach(v => {
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'vchip' + (window.WISHLIST_VARIANT_IDS.has(v.variantId) ? ' active' : '');
+
+                const swatchColor = (v.color || '').toLowerCase().replace(/\s+/g, '');
+                const sw = document.createElement('span');
+                sw.className = 'sw';
+                if (swatchColor) sw.style.backgroundColor = swatchColor;
+
+                const ci = document.createElement('span');
+                ci.className = 'ci';
+                const c = document.createElement('span'); c.className = 'c'; c.textContent = v.color || 'Variant';
+                const m = document.createElement('span'); m.className = 'm';
+                m.textContent = (v.size ? ('Size ' + v.size + ' · ') : '') +
+                                (window.WISHLIST_VARIANT_IDS.has(v.variantId) ? 'In wishlist ♥' : 'Tap to add');
+                ci.appendChild(c); ci.appendChild(m);
+                chip.appendChild(sw); chip.appendChild(ci);
+
+                chip.addEventListener('click', async () => {
+                    chip.disabled = true;
+                    try {
+                        const added = await toggleWishlistVariant(v.variantId);
+                        chip.classList.toggle('active', added);
+                        m.textContent = (v.size ? ('Size ' + v.size + ' · ') : '') +
+                                        (added ? 'In wishlist ♥' : 'Tap to add');
+                        // Heart on the card is filled if the product has any saved variant.
+                        const anySaved = variants.some(x => window.WISHLIST_VARIANT_IDS.has(x.variantId));
+                        const icon = heartEl ? heartEl.querySelector('i') : null;
+                        if (heartEl) heartEl.classList.toggle('active', anySaved);
+                        if (icon) { icon.classList.toggle('fas', anySaved); icon.classList.toggle('far', !anySaved); }
+                        showToast(added ? (product.name + ' (' + (v.color || '') + ') added to wishlist!')
+                                        : 'Removed from wishlist');
+                    } catch (e) { showToast(e.message, 'error'); }
+                    finally { chip.disabled = false; }
+                });
+                list.appendChild(chip);
+            });
+
+            function close() { overlay.remove(); }
+            overlay.querySelector('.x').addEventListener('click', close);
+            overlay.querySelector('.add').addEventListener('click', close);
+            overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+            document.body.appendChild(overlay);
+        }
+
+        document.querySelectorAll('.product-wishlist').forEach(btn => {
+            btn.addEventListener('click', async function () {
+                const productId = this.dataset.productId;
+                if (!productId) return;
+                try {
+                    const product = await fetchProductVariants(productId);
+                    const variants = product.variants || [];
+                    if (variants.length === 0) {
+                        showToast('This product has no variants to wishlist.', 'error');
+                    } else if (variants.length === 1) {
+                        // Single variant — just toggle it, no need to ask.
+                        const added = await toggleWishlistVariant(variants[0].variantId);
+                        const icon = this.querySelector('i');
+                        this.classList.toggle('active', added);
+                        if (icon) { icon.classList.toggle('fas', added); icon.classList.toggle('far', !added); }
+                        showToast(added ? (product.name + ' added to wishlist!') : 'Removed from wishlist');
+                    } else {
+                        openWishlistModal(product, this);
+                    }
+                } catch (e) { showToast(e.message, 'error'); }
+            });
+        });
+
+        // Sort dropdown — preserves the current category/search/price filters in the URL.
+        function applySort(sortValue) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('sort', sortValue);
+            url.searchParams.set('page', '0'); // reset to first page on sort change
+            window.location.href = url.toString();
+        }
+
+        // ----- Mobile filter drawer -----
+        (function () {
+            const openBtn  = document.getElementById('openFilters');
+            const closeBtn = document.getElementById('closeFilters');
+            const sidebar  = document.getElementById('filterSidebar');
+            const backdrop = document.getElementById('filterBackdrop');
+            if (!sidebar) return;
+            const openDrawer  = () => { sidebar.classList.add('open'); if (backdrop) backdrop.classList.add('show'); document.body.classList.add('filter-open'); };
+            const closeDrawer = () => { sidebar.classList.remove('open'); if (backdrop) backdrop.classList.remove('show'); document.body.classList.remove('filter-open'); };
+            if (openBtn)  openBtn.addEventListener('click', openDrawer);
+            if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+            if (backdrop) backdrop.addEventListener('click', closeDrawer);
+            // Close the drawer if the viewport grows back to desktop.
+            window.addEventListener('resize', () => { if (window.innerWidth > 991.98) closeDrawer(); });
+        })();
+
+        // View Toggle
+        const gridViewBtn = document.querySelector('.grid-view');
+        const listViewBtn = document.querySelector('.list-view');
+        const productsContainer = document.querySelector('.products-container');
+        
+        gridViewBtn.addEventListener('click', function() {
+            this.classList.add('active');
+            listViewBtn.classList.remove('active');
+            productsContainer.classList.remove('list-view');
+        });
+        
+        listViewBtn.addEventListener('click', function() {
+            this.classList.add('active');
+            gridViewBtn.classList.remove('active');
+            productsContainer.classList.add('list-view');
+        });
+        
+        // Color Filter Selection
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.color-option').forEach(opt => {
+                    opt.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
+        });
+        
+        // Size Filter Selection
+        document.querySelectorAll('.btn-outline-secondary').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.classList.toggle('active');
+                if (this.classList.contains('active')) {
+                    this.style.background = 'linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green))';
+                    this.style.color = 'white';
+                    this.style.borderColor = 'var(--dark-sea-green)';
+                } else {
+                    this.style.background = '';
+                    this.style.color = '';
+                    this.style.borderColor = '';
+                }
+            });
+        });
+        
+        // Price Range Display
+        const priceRange = document.querySelector('.price-range');
+        const priceValues = document.querySelector('.price-values');
+        
+        priceRange.addEventListener('input', function() {
+            const maxPrice = parseInt(this.value).toLocaleString('en-IN');
+            priceValues.innerHTML = `<span>₹0</span><span>₹${maxPrice}</span>`;
+        });
+        
+        // Filter Button
+        document.querySelector('.filter-btn').addEventListener('click', function() {
+            showNotification('Filters applied successfully!');
+        });
+        
+        // Clear Filters
+        document.querySelector('.clear-filters').addEventListener('click', function() {
+            // Reset checkboxes
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+            });
+            
+            // Reset color options
+            document.querySelectorAll('.color-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            
+            // Reset size buttons
+            document.querySelectorAll('.btn-outline-secondary').forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.background = '';
+                btn.style.color = '';
+                btn.style.borderColor = '';
+            });
+            
+            // Reset price range
+            priceRange.value = 50000;
+            priceValues.innerHTML = `<span>₹0</span><span>₹50,000</span>`;
+            
+            showNotification('All filters cleared!');
+        });
+        
+        // Wishlist toggle (same as index.html)
+        document.querySelectorAll('.product-wishlist').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const icon = this.querySelector('i');
+                if (icon.classList.contains('far')) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    this.classList.add('active');
+                    
+                    // Update wishlist count
+                    const wishlistCount = document.querySelector('.wishlist-icon .cart-count');
+                    let count = parseInt(wishlistCount.textContent);
+                    wishlistCount.textContent = count + 1;
+                } else {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                    this.classList.remove('active');
+                    
+                    // Update wishlist count
+                    const wishlistCount = document.querySelector('.wishlist-icon .cart-count');
+                    let count = parseInt(wishlistCount.textContent);
+                    if (count > 0) {
+                        wishlistCount.textContent = count - 1;
+                    }
+                }
+            });
+        });
+
+        const userIcon = document.getElementById('userIcon');
+        userIcon.addEventListener('click', () => {
+            window.location.href = 'account.html';
+        });
+
+        const cartIcon = document.getElementById('cartIcon');
+        if (cartIcon) {
+            cartIcon.addEventListener('click', () => { window.location.href = '/cart'; });
+        }
+
+        // NOTE: the real Add-to-Cart handler (with variant selection) is defined
+        // earlier in this file. The old placeholder handler that lived here only
+        // faked the cart count, so it was removed to avoid double-binding.
+
+        // Search functionality (reuse from index.html)
+        document.querySelector('.search-icon').addEventListener('click', function() {
+            // Same search modal code from index.html
+            showSearchModal();
+        });
+        
+        // Common functions
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+                color: white;
+                padding: 15px 25px;
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                z-index: 10000;
+                transform: translateX(150%);
+                transition: transform 0.3s ease;
+                max-width: 300px;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(150%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        function showSearchModal() {
+            const searchBox = document.createElement('div');
+            searchBox.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                z-index: 10001;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            searchBox.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 600px; position: relative;">
+                    <button class="close-search" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
+                    <h3 style="margin-bottom: 20px; color: var(--dark-text);">Search Products</h3>
+                    <div style="display: flex;">
+                        <input type="text" placeholder="Search for sarees, dresses, collections..." 
+                               style="flex: 1; padding: 15px; border: 2px solid #eee; border-radius: 5px 0 0 5px; font-size: 1rem;">
+                        <button style="background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green)); color: white; border: none; padding: 0 30px; border-radius: 0 5px 5px 0; cursor: pointer;">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div style="margin-top: 20px; color: #666; font-size: 0.9rem;">
+                        <p>Popular searches: <a href="#" style="color: var(--dark-sea-green); margin-right: 10px;">Silk Sarees</a> 
+                        <a href="#" style="color: var(--dark-sea-green); margin-right: 10px;">Evening Dresses</a> 
+                        <a href="#" style="color: var(--dark-sea-green);">Party Wear</a></p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(searchBox);
+            
+            searchBox.querySelector('.close-search').addEventListener('click', function() {
+                document.body.removeChild(searchBox);
+            });
+            
+            searchBox.addEventListener('click', function(e) {
+                if (e.target === searchBox) {
+                    document.body.removeChild(searchBox);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

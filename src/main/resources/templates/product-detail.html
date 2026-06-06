@@ -1,0 +1,2321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royal Blue Silk Saree | Mokshitha Collections</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Image Zoom Library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/zoomove/1.0.0/zoomove.min.css">
+    <style>
+        :root {
+            --dark-sea-green: #2E8B57;
+            --light-sea-green: #20B2AA;
+            --light-cream: #FFF8F0;
+            --gold-accent: #D4AF37;
+            --dark-text: #2C3E50;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--dark-text);
+            background-color: #fefefe;
+        }
+        
+        h1, h2, h3, h4, h5 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+        }
+        
+        /* Header Styles (Reuse from shop.html) */
+        .header-top {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            color: white;
+            padding: 8px 0;
+            font-size: 0.9rem;
+        }
+        
+        .main-header {
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        
+        .logo span {
+            color: var(--gold-accent);
+        }
+        
+        .nav-link {
+            color: var(--dark-text) !important;
+            font-weight: 500;
+            margin: 0 10px;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover {
+            color: var(--dark-sea-green) !important;
+        }
+        
+        .nav-link.active {
+            color: var(--dark-sea-green) !important;
+            font-weight: 600;
+        }
+        
+        .header-icons .icon {
+            position: relative;
+            margin-left: 20px;
+            font-size: 1.2rem;
+            color: var(--dark-text);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .header-icons .icon:hover {
+            color: var(--dark-sea-green);
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--light-sea-green);
+            color: white;
+            font-size: 0.7rem;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Product Detail Page Styles */
+        .product-detail-header {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                        url('https://images.unsplash.com/photo-1569396116182-6a42e5dd3c6d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 20px 0;
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            margin-bottom: 0;
+        }
+        
+        .breadcrumb-item a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: var(--gold-accent);
+        }
+        
+        /* Product Detail Container */
+        .product-detail-container {
+            padding: 60px 0;
+        }
+        
+        /* Product Gallery */
+        .product-gallery {
+            position: sticky;
+            top: 100px;
+        }
+        
+        .main-image-container {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            cursor: zoom-in;
+        }
+        
+        .main-image {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+        
+        .thumbnail-container {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+        
+        .thumbnail {
+            width: 90px;
+            height: 90px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 3px solid transparent;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+        
+        .thumbnail.active {
+            border-color: var(--dark-sea-green);
+        }
+        
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* Product Info */
+        .product-info {
+            padding-left: 40px;
+        }
+        
+        .product-category {
+            color: var(--light-sea-green);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .product-title {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+        
+        .product-rating {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .stars {
+            color: var(--gold-accent);
+            margin-right: 10px;
+        }
+        
+        .rating-count {
+            color: #666;
+            margin: 0 15px;
+        }
+        
+        .product-price {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark-sea-green);
+            margin-bottom: 10px;
+        }
+        
+        .old-price {
+            font-size: 1.3rem;
+            color: #999;
+            text-decoration: line-through;
+            margin-left: 10px;
+            font-weight: 400;
+        }
+        
+        .discount-badge {
+            background: #ff6b6b;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-left: 15px;
+            vertical-align: middle;
+        }
+        
+        .product-description {
+            color: #666;
+            line-height: 1.7;
+            margin: 25px 0;
+            font-size: 1.05rem;
+        }
+        
+        /* Product Meta */
+        .product-meta {
+            display: flex;
+            gap: 30px;
+            margin: 25px 0;
+            padding: 20px 0;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .meta-icon {
+            background: rgba(46, 139, 87, 0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: var(--dark-sea-green);
+        }
+        
+        .meta-text h6 {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .meta-text p {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        /* Options */
+        .option-group {
+            margin-bottom: 25px;
+        }
+        
+        .option-title {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: var(--dark-text);
+        }
+        
+        .color-options {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .color-option.active {
+            border-color: var(--dark-sea-green);
+            transform: scale(1.1);
+        }
+        
+        .color-option.active::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+        
+        .size-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .size-option {
+            padding: 10px 20px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .size-option:hover {
+            border-color: var(--light-sea-green);
+            color: var(--dark-sea-green);
+        }
+        
+        .size-option.active {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            color: white;
+            border-color: var(--dark-sea-green);
+        }
+        
+        .size-option.disabled {
+            background: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+        }
+        
+        /* Quantity */
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .qty-btn {
+            width: 45px;
+            height: 45px;
+            background: #f8f9fa;
+            border: 2px solid #eee;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .qty-btn:hover {
+            background: #e9ecef;
+            border-color: #ddd;
+        }
+        
+        .qty-input {
+            width: 70px;
+            height: 45px;
+            border: 2px solid #eee;
+            border-left: none;
+            border-right: none;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .qty-input:focus {
+            outline: none;
+            border-color: var(--dark-sea-green);
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            border: none;
+            padding: 15px 35px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(46, 139, 87, 0.3);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--dark-sea-green);
+            padding: 15px 35px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            color: var(--dark-sea-green);
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(46, 139, 87, 0.05);
+        }
+        
+        .wishlist-btn {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #666;
+            font-size: 1.3rem;
+            transition: all 0.3s;
+        }
+        
+        .wishlist-btn:hover, .wishlist-btn.active {
+            color: #ff4757;
+            border-color: #ff4757;
+            background: rgba(255, 71, 87, 0.05);
+        }
+        
+        /* Product Tabs */
+        .product-tabs {
+            margin: 60px 0;
+        }
+        
+        .nav-tabs {
+            border-bottom: 2px solid #eee;
+            justify-content: center;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            color: #666;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 15px 30px;
+            position: relative;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            color: var(--dark-sea-green);
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--dark-sea-green);
+            background: transparent;
+        }
+        
+        .nav-tabs .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--dark-sea-green), var(--light-sea-green));
+        }
+        
+        .tab-content {
+            padding: 40px 0;
+        }
+        
+        .tab-pane h4 {
+            margin-bottom: 20px;
+            color: var(--dark-text);
+        }
+        
+        .specifications table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .specifications tr {
+            border-bottom: 1px solid #eee;
+        }
+        
+        .specifications td {
+            padding: 15px 10px;
+        }
+        
+        .specifications td:first-child {
+            font-weight: 600;
+            color: #555;
+            width: 30%;
+        }
+        
+        .reviews-container {
+            max-width: 800px;
+        }
+        
+        .review-item {
+            border-bottom: 1px solid #eee;
+            padding: 25px 0;
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .reviewer-name {
+            font-weight: 600;
+            color: var(--dark-text);
+        }
+        
+        .review-date {
+            color: #999;
+            font-size: 0.9rem;
+        }
+        
+        .review-rating {
+            color: var(--gold-accent);
+            margin-bottom: 10px;
+        }
+        
+        .review-text {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        /* Size Guide Modal */
+        .size-guide-btn {
+            background: transparent;
+            border: none;
+            color: var(--light-sea-green);
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-left: 20px;
+        }
+        
+        /* Related Products */
+        .related-products {
+            padding: 60px 0;
+            background: #f9f9f9;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--dark-text);
+            display: inline-block;
+            padding-bottom: 15px;
+            position: relative;
+        }
+        
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--dark-sea-green), var(--light-sea-green));
+        }
+        
+        /* Product Card (reuse from shop) */
+        .product-card {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+            background: white;
+            margin-bottom: 30px;
+            height: 100%;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .product-image {
+            height: 250px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+        
+        .product-content {
+            padding: 20px;
+        }
+        
+        .product-title-sm {
+            font-size: 1rem;
+            color: var(--dark-text);
+            margin-bottom: 8px;
+            font-weight: 600;
+            height: 2.5rem;
+            overflow: hidden;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .product-price-sm {
+            color: var(--dark-sea-green);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        /* Footer (Reuse) */
+        .footer-section {
+            background: #1a1a1a;
+            color: #ddd;
+            padding: 60px 0 30px;
+        }
+        
+        .footer-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        
+        .footer-logo span {
+            color: var(--light-sea-green);
+        }
+        
+        .footer-title {
+            color: white;
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .footer-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background: var(--light-sea-green);
+        }
+        
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+        
+        .footer-links a {
+            color: #aaa;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--light-sea-green);
+            padding-left: 5px;
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            background: #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .social-icon:hover {
+            background: var(--light-sea-green);
+            transform: translateY(-5px);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            margin-top: 50px;
+            border-top: 1px solid #333;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        /* Modal */
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            overflow: hidden;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            color: white;
+            border: none;
+        }
+        
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 992px) {
+            .product-info {
+                padding-left: 0;
+                margin-top: 40px;
+            }
+            
+            .main-image {
+                height: 400px;
+            }
+            
+            .product-title {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn-primary, .btn-secondary {
+                width: 100%;
+            }
+            
+            .product-meta {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .main-image {
+                height: 350px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .product-title {
+                font-size: 1.8rem;
+            }
+            
+            .main-image {
+                height: 300px;
+            }
+            
+            .nav-tabs .nav-link {
+                padding: 10px 15px;
+                font-size: 1rem;
+            }
+        }
+        
+        /* Zoom Container */
+        .zoom-container {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .zoom-lens {
+            position: absolute;
+            border: 1px solid var(--dark-sea-green);
+            background: rgba(46, 139, 87, 0.1);
+            cursor: crosshair;
+            display: none;
+        }
+        
+        .zoom-result {
+            position: absolute;
+            border: 1px solid #ddd;
+            background: white;
+            overflow: hidden;
+            display: none;
+            z-index: 1000;
+        }
+
+        /* ===== Variant picker (the new chip-style swatches) ===== */
+        .variant-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .variant-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px 8px 8px;
+            background: #fff;
+            border: 2px solid #e5e7eb;
+            border-radius: 999px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: border-color .15s, background .15s, box-shadow .15s, transform .15s;
+        }
+        .variant-chip:hover:not(:disabled):not(.out-of-stock) {
+            border-color: var(--dark-sea-green);
+            background: #f0fdf4;
+        }
+        .variant-chip.active {
+            border-color: var(--dark-sea-green);
+            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+            box-shadow: 0 4px 14px rgba(46, 139, 87, 0.18);
+        }
+        .variant-chip.out-of-stock {
+            opacity: 0.55;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+        .variant-swatch {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            /* Fallback colour when the variant's name doesn't resolve as a CSS
+               colour (e.g. "Lemon Glow" → stays grey, but the label still
+               makes the variant identifiable). */
+            background-color: #cbd5e1;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.12);
+            flex-shrink: 0;
+            position: relative;
+        }
+        .variant-chip.active .variant-swatch::after {
+            content: '✓';
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+        }
+        .variant-info {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+            text-align: left;
+        }
+        .variant-color-name {
+            font-weight: 600;
+            font-size: 0.92rem;
+            color: var(--dark-text, #1f2937);
+        }
+        .variant-meta {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Top Bar -->
+    <div class="header-top">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <span th:if="${user != null}" th:text="'Welcome back, ' + ${user.firstName} + '!'">Welcome back!</span>
+                    <span th:unless="${user != null}">
+                        <i class="fas fa-phone-alt"></i> +91 98765 43210 &nbsp;&nbsp;|&nbsp;&nbsp;
+                        <i class="fas fa-envelope"></i> info@mokshithacollections.com
+                    </span>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <span>Free Shipping on Orders Above ₹1999</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="main-header py-3">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-3 col-md-4 col-6">
+                    <a th:href="@{/home}" class="logo">Mokshitha<span>.</span></a>
+                </div>
+                <div class="col-lg-6 col-md-4 d-none d-md-block">
+                    <nav class="navbar navbar-expand-lg justify-content-center">
+                        <ul class="navbar-nav">
+                            <li class="nav-item"><a class="nav-link" th:href="@{/home}">Home</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Shop</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Collections</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/about}">About</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/contact}">Contact</a></li>
+                            <li class="nav-item" th:if="${user != null and user.isAdmin}">
+                                <a class="nav-link" th:href="@{/admin}" style="color: var(--dark-sea-green); font-weight: 600;">
+                                    <i class="fas fa-cog"></i> Admin
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="col-lg-3 col-md-4 col-6 text-end">
+                    <div class="header-icons d-inline-flex align-items-center">
+                        <div class="icon search-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="icon user-icon" onclick="window.location.href='/user_redirect'">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="icon wishlist-icon" onclick="window.location.href='/user_redirect'">
+                            <i class="far fa-heart"></i>
+                            <span class="cart-count" th:text="${wishlistCount != null ? wishlistCount : 0}">0</span>
+                        </div>
+                        <div class="icon cart-icon" id="cartIcon" onclick="window.location.href='/cart'">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span class="cart-count" th:text="${cartCount != null ? cartCount : 0}">0</span>
+                        </div>
+                        <button class="navbar-toggler d-md-none ms-3" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div class="collapse d-md-none" id="mobileMenu">
+                <ul class="navbar-nav mt-3">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/home}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Shop</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Collections</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/about}">About</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/contact}">Contact</a></li>
+                    <li class="nav-item" th:if="${user != null and user.isAdmin}">
+                        <a class="nav-link" th:href="@{/admin}" style="color: var(--dark-sea-green); font-weight: 600;">
+                            <i class="fas fa-cog"></i> Admin
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- Product Header -->
+    <section class="product-detail-header">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/home}">Home</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/shop}">Shop</a></li>
+                    <li class="breadcrumb-item" th:if="${product != null and product.category != null}">
+                        <a th:href="@{/shop(categorySlug=${product.category.slug})}"
+                           th:text="${product.category.name}">Category</a>
+                    </li>
+                    <li class="breadcrumb-item active" th:text="${product != null ? product.name : 'Product'}">Product</li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+    
+    <!-- Product Detail -->
+    <section class="product-detail-container">
+        <div class="container">
+            <div class="row">
+                <!-- Product Gallery -->
+                <div class="col-lg-6">
+                    <div class="product-gallery">
+                        <div class="main-image-container" id="mainImageContainer">
+                            <img th:src="${product.imageUrl}"
+                                 th:alt="${product.name}"
+                                 class="main-image"
+                                 id="mainImage"
+                                 th:attr="data-zoom-image=${product.imageUrl}">
+                        </div>
+
+                        <!-- Thumbnails are tagged with the variant they belong to so the
+                             gallery can show only the selected variant's images. The hero
+                             thumbnail (data-hero) is the fallback when a variant has none. -->
+                        <div class="thumbnail-container" id="thumbnailContainer">
+                            <div class="thumbnail" th:if="${product.imageUrl != null}"
+                                 data-hero="true"
+                                 th:attr="data-image=${product.imageUrl}, data-zoom=${product.imageUrl}">
+                                <img th:src="${product.imageUrl}" th:alt="${product.name}">
+                            </div>
+                            <th:block th:each="variant : ${product.variants}">
+                                <div class="thumbnail"
+                                     th:each="img : ${variant.images}"
+                                     th:attr="data-image=${img.imageUrl}, data-zoom=${img.imageUrl},
+                                              data-variant-id=${variant.variantId},
+                                              data-primary=${img.isPrimary}">
+                                    <img th:src="${img.imageUrl}" th:alt="${variant.color}">
+                                </div>
+                            </th:block>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Product Information -->
+                <div class="col-lg-6">
+                    <div class="product-info">
+                        <span class="product-category"
+                              th:text="${product.category != null} ? 'Mokshitha Collections • ' + ${product.category.name} : 'Mokshitha Collections'">
+                            Mokshitha Collections
+                        </span>
+                        <h1 class="product-title" th:text="${product.name}">Product Title</h1>
+
+                        <div class="product-rating">
+                            <div class="stars">
+                                <!-- Render full stars based on rounded average rating -->
+                                <i class="fas fa-star"
+                                   th:each="i : ${#numbers.sequence(1, 5)}"
+                                   th:classappend="${product.averageRating == null or i &gt; product.averageRating} ? 'far' : 'fas'"></i>
+                            </div>
+                            <span class="rating-count"
+                                  th:text="${product.averageRating != null}
+                                           ? ${#numbers.formatDecimal(product.averageRating, 1, 1)} + ' (' + ${product.reviewCount} + ' Reviews)'
+                                           : 'No reviews yet'">
+                                No reviews yet
+                            </span>
+                        </div>
+
+                        <div class="product-price">
+                            <!-- Show discount price if set, otherwise the regular price -->
+                            <span th:if="${product.discountPrice != null}" th:text="'₹' + ${product.discountPrice}">₹0</span>
+                            <span th:unless="${product.discountPrice != null}" th:text="'₹' + ${product.price}">₹0</span>
+                            <span class="old-price" th:if="${product.discountPrice != null}"
+                                  th:text="'₹' + ${product.price}">₹0</span>
+                            <!-- Discount % only when there's a discount price strictly less than the price -->
+                            <span class="discount-badge"
+                                  th:if="${product.discountPrice != null and product.price != null
+                                          and product.discountPrice.compareTo(product.price) &lt; 0}"
+                                  th:text="'Save ' + ${T(java.lang.Math).round((1 - (product.discountPrice.doubleValue() / product.price.doubleValue())) * 100)} + '%'">Save 0%</span>
+                        </div>
+
+                        <p class="product-description"
+                           th:text="${product.description != null and !#strings.isEmpty(product.description)}
+                                    ? ${product.description}
+                                    : 'A stunning piece from our latest collection.'">
+                            Product description
+                        </p>
+                        
+                        <!--<div class="product-meta">
+                            <div class="meta-item">
+                                <div class="meta-icon">
+                                    <i class="fas fa-truck"></i>
+                                </div>
+                                <div class="meta-text">
+                                    <h6>Free Shipping</h6>
+                                    <p>Above ₹1999</p>
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-icon">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </div>
+                                <div class="meta-text">
+                                    <h6>Easy Returns</h6>
+                                    <p>15 Days Policy</p>
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-icon">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div class="meta-text">
+                                    <h6>Quality Assurance</h6>
+                                    <p>100% Authentic</p>
+                                </div>
+                            </div>
+                        </div>-->
+                        
+                        <!-- Variants — colour + size are properties of one variant row -->
+                        <div class="option-group" th:if="${not #lists.isEmpty(product.variants)}">
+                            <h4 class="option-title">
+                                Choose variant:
+                                <span id="selectedColor" th:text="${product.variants[0].color}">—</span>
+                            </h4>
+                            <div class="variant-list">
+                                <button type="button"
+                                        th:each="variant, iter : ${product.variants}"
+                                        class="variant-chip"
+                                        th:classappend="(${iter.first} ? ' active' : '') + (${variant.stockQuantity == 0} ? ' out-of-stock' : '')"
+                                        th:disabled="${variant.stockQuantity == 0}"
+                                        th:attr="data-variant-id=${variant.variantId},
+                                                 data-color=${variant.color},
+                                                 data-color-name=${variant.color},
+                                                 data-size=${variant.size != null ? variant.size : ''},
+                                                 data-stock=${variant.stockQuantity}"
+                                        th:title="${variant.color} + (${variant.size != null} ? ' / ' + ${variant.size} : '')">
+                                    <!-- Swatch: tries the colour name minus spaces as a CSS named colour
+                                         (e.g. 'Royal Blue' → 'royalblue', 'Sea Green' → 'seagreen').
+                                         If the name doesn't resolve, the circle stays a neutral grey but
+                                         the text label below still tells the user what it is. -->
+                                    <span class="variant-swatch"
+                                          th:style="'background-color: ' + ${#strings.replace(#strings.toLowerCase(variant.color), ' ', '')} + ';'"></span>
+                                    <span class="variant-info">
+                                        <span class="variant-color-name" th:text="${variant.color}">Color</span>
+                                        <small class="variant-meta">
+                                            <span th:if="${variant.size != null}" th:text="'Size ' + ${variant.size} + ' · '">Size — · </span>
+                                            <!-- Only surface the exact count as a low-stock nudge (<10);
+                                                 otherwise just say it's in stock. -->
+                                            <span th:if="${variant.stockQuantity == 0}" style="color:#dc2626;">Out of stock</span>
+                                            <span th:if="${variant.stockQuantity > 0 and variant.stockQuantity &lt; 10}"
+                                                  style="color:#d9480f; font-weight:600;"
+                                                  th:text="'Only ' + ${variant.stockQuantity} + ' left'">Only 3 left</span>
+                                            <span th:if="${variant.stockQuantity >= 10}" style="color:#16a34a;">In stock</span>
+                                        </small>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="option-group">
+                            <h4 class="option-title">Quantity</h4>
+                            <div class="quantity-selector">
+                                <button class="qty-btn" id="decreaseQty">-</button>
+                                <input type="number" class="qty-input" id="quantity" value="1" min="1" max="10">
+                                <button class="qty-btn" id="increaseQty">+</button>
+                            </div>
+                            <!-- Filled in by selectVariant(): a low-stock alert when <10 left,
+                                 otherwise a plain "In stock". -->
+                            <small class="stock-note" id="stockNote"
+                                   th:if="${not #lists.isEmpty(product.variants)}"></small>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <button class="btn-primary" id="addToCartBtn"
+                                    th:attr="data-product-id=${product.productId},
+                                             data-variant-id=${not #lists.isEmpty(product.variants) ? product.variants[0].variantId : ''}">
+                                <i class="fas fa-shopping-bag me-2"></i> Add to Cart
+                            </button>
+                            <button class="btn-secondary" id="buyNowBtn"
+                                    th:attr="data-product-id=${product.productId}">
+                                <i class="fas fa-bolt me-2"></i> Buy Now
+                            </button>
+                            <button class="wishlist-btn" id="wishlistBtn"
+                                    th:classappend="${wishlistProductIds != null and wishlistProductIds.contains(product.productId)} ? 'active'"
+                                    th:attr="data-product-id=${product.productId}">
+                                <i th:class="${wishlistProductIds != null and wishlistProductIds.contains(product.productId)} ? 'fas fa-heart' : 'far fa-heart'"></i>
+                            </button>
+                        </div>
+
+                        <!-- Product Tags -->
+                        <div class="mt-4" th:if="${product.fabricType != null or product.occasion != null or product.sku != null}">
+                            <span class="badge bg-light text-dark me-2 p-2"
+                                  th:if="${product.fabricType != null}"
+                                  th:text="${product.fabricType}">Fabric</span>
+                            <span class="badge bg-light text-dark me-2 p-2"
+                                  th:if="${product.occasion != null}"
+                                  th:text="${product.occasion}">Occasion</span>
+                            <span class="badge bg-light text-dark p-2"
+                                  th:if="${product.sku != null}"
+                                  th:text="'SKU: ' + ${product.sku}">SKU</span>
+                        </div>
+                        
+                        <!-- Share — links point at the currently selected variant's URL
+                             (?variant=<id>) and update live as the colour changes. -->
+                        <div class="mt-4">
+                            <p class="mb-2">Share this variant:</p>
+                            <div class="social-icons">
+                                <a href="#" class="social-icon social-share" data-net="whatsapp" style="background: #25D366;" title="Share on WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                                <a href="#" class="social-icon social-share" data-net="facebook" style="background: #3b5998;" title="Share on Facebook"><i class="fab fa-facebook-f"></i></a>
+                                <a href="#" class="social-icon social-share" data-net="twitter" style="background: #1da1f2;" title="Share on X"><i class="fab fa-twitter"></i></a>
+                                <a href="#" class="social-icon social-share" data-net="pinterest" style="background: #bd081c;" title="Pin it"><i class="fab fa-pinterest-p"></i></a>
+                                <a href="#" class="social-icon social-share" data-net="linkedin" style="background: #0e76a8;" title="Share on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                                <button type="button" class="social-icon" id="copyLinkBtn" style="background:#6b7280;border:none;" title="Copy link"><i class="fas fa-link"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Product Tabs -->
+            <div class="product-tabs">
+                <ul class="nav nav-tabs" id="productTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab">Description</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="specifications-tab" data-bs-toggle="tab" data-bs-target="#specifications" type="button" role="tab">Specifications</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="care-tab" data-bs-toggle="tab" data-bs-target="#care" type="button" role="tab">Care Instructions</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab"
+                                th:text="'Reviews (' + ${product.reviewCount != null ? product.reviewCount : 0} + ')'">
+                            Reviews (0)
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="shipping-tab" data-bs-toggle="tab" data-bs-target="#shipping" type="button" role="tab">Shipping & Returns</button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="productTabContent">
+                    <!-- Description Tab -->
+                    <div class="tab-pane fade show active" id="description" role="tabpanel">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <h4>Product Details</h4>
+                                <p class="mb-4"
+                                   th:text="${product.description != null and !#strings.isEmpty(product.description)}
+                                            ? ${product.description}
+                                            : 'No detailed description available for this product yet.'">
+                                    No description.
+                                </p>
+
+                                <h5 th:if="${product.fabricType != null or product.occasion != null}">At a glance</h5>
+                                <ul class="mb-4">
+                                    <li th:if="${product.fabricType != null}">
+                                        <strong>Fabric:</strong> <span th:text="${product.fabricType}">Fabric</span>
+                                    </li>
+                                    <li th:if="${product.occasion != null}">
+                                        <strong>Occasion:</strong> <span th:text="${product.occasion}">Occasion</span>
+                                    </li>
+                                    <li th:if="${product.category != null}">
+                                        <strong>Category:</strong> <span th:text="${product.category.name}">Category</span>
+                                    </li>
+                                    <li><strong>SKU:</strong> <span th:text="${product.sku}">SKU</span></li>
+                                </ul>
+                            </div>
+                            <div class="col-lg-4">
+                                <img th:src="${product.imageUrl}"
+                                     th:alt="${product.name}"
+                                     class="img-fluid rounded">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Specifications Tab -->
+                    <div class="tab-pane fade" id="specifications" role="tabpanel">
+                        <div class="specifications">
+                            <table>
+                                <tr><td>Name</td><td th:text="${product.name}">—</td></tr>
+                                <tr><td>SKU</td><td th:text="${product.sku}">—</td></tr>
+                                <tr th:if="${product.category != null}">
+                                    <td>Category</td><td th:text="${product.category.name}">—</td>
+                                </tr>
+                                <tr th:if="${product.fabricType != null}">
+                                    <td>Fabric Type</td><td th:text="${product.fabricType}">—</td>
+                                </tr>
+                                <tr th:if="${product.occasion != null}">
+                                    <td>Occasion</td><td th:text="${product.occasion}">—</td>
+                                </tr>
+                                <!-- Variant rows: one per available variant -->
+                                <tr th:each="v : ${product.variants}">
+                                    <td th:text="'Variant — ' + ${v.color}">Variant</td>
+                                    <td>
+                                        <span th:if="${v.size != null}" th:text="'Size ' + ${v.size} + ' • '">Size — • </span>
+                                        <!-- Reveal the exact count only as a low-stock alert (<10). -->
+                                        <span th:if="${v.stockQuantity == 0}" style="color:#dc2626;">Out of stock</span>
+                                        <span th:if="${v.stockQuantity > 0 and v.stockQuantity &lt; 10}"
+                                              style="color:#d9480f;" th:text="'Only ' + ${v.stockQuantity} + ' left'">Only 3 left</span>
+                                        <span th:if="${v.stockQuantity >= 10}">In stock</span>
+                                    </td>
+                                </tr>
+                                <tr><td>Country of Origin</td><td>India</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Care Instructions Tab -->
+                    <div class="tab-pane fade" id="care" role="tabpanel">
+                        <h4>Care Instructions for Silk Sarees</h4>
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-check-circle text-success me-2"></i> Do's</h5>
+                                <ul>
+                                    <li>Always dry clean your silk saree</li>
+                                    <li>Store in a cool, dry place away from direct sunlight</li>
+                                    <li>Wrap in muslin cloth or cotton for storage</li>
+                                    <li>Use padded hangers for storage if needed</li>
+                                    <li>Iron on low heat with a cloth barrier</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-times-circle text-danger me-2"></i> Don'ts</h5>
+                                <ul>
+                                    <li>Never machine wash or soak in water</li>
+                                    <li>Avoid contact with perfumes and deodorants</li>
+                                    <li>Don't store in plastic covers for long periods</li>
+                                    <li>Avoid direct heat while ironing</li>
+                                    <li>Don't hang with metal clips</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="alert alert-info mt-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Pro Tip:</strong> To maintain the zari work, sprinkle some talcum powder on the zari portions before storing to prevent tarnishing.
+                        </div>
+                    </div>
+                    
+                    <!-- Reviews Tab -->
+                    <div class="tab-pane fade" id="reviews" role="tabpanel">
+                        <div class="reviews-container">
+                            <h4>Customer Reviews</h4>
+
+                            <!-- Aggregate -->
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="me-4">
+                                    <div class="display-4 fw-bold"
+                                         th:text="${product.averageRating != null}
+                                                  ? ${#numbers.formatDecimal(product.averageRating, 1, 1)}
+                                                  : '—'">—</div>
+                                    <div class="stars">
+                                        <i class="fas fa-star"
+                                           th:each="i : ${#numbers.sequence(1, 5)}"
+                                           th:classappend="${product.averageRating == null or i &gt; product.averageRating} ? 'far' : 'fas'"></i>
+                                    </div>
+                                    <div class="text-muted"
+                                         th:text="${product.reviewCount != null}
+                                                  ? 'Based on ' + ${product.reviewCount} + ' review' + (${product.reviewCount == 1} ? '' : 's')
+                                                  : 'No reviews yet'">No reviews yet</div>
+                                </div>
+                            </div>
+
+                            <!-- Empty state -->
+                            <div th:if="${reviews == null or reviews.totalElements == 0}"
+                                 class="alert alert-light text-center">
+                                Be the first to review this product.
+                            </div>
+
+                            <!-- Review items from ${reviews.content} -->
+                            <div class="review-item" th:each="r : ${reviews != null ? reviews.content : null}">
+                                <div class="review-header">
+                                    <div>
+                                        <span class="reviewer-name" th:text="${r.reviewerFirstName}">—</span>
+                                        <div class="review-rating">
+                                            <i th:each="i : ${#numbers.sequence(1, 5)}"
+                                               th:class="${i &lt;= r.rating} ? 'fas fa-star' : 'far fa-star'"></i>
+                                        </div>
+                                    </div>
+                                    <div class="review-date"
+                                         th:text="${r.createdAt != null}
+                                                  ? ${#temporals.format(r.createdAt, 'd MMM yyyy')}
+                                                  : ''">—</div>
+                                </div>
+                                <p class="review-text" th:text="${r.comment}">—</p>
+                            </div>
+
+                            <!-- Action buttons -->
+                            <button class="btn btn-primary mt-4"
+                                    data-bs-toggle="modal" data-bs-target="#writeReviewModal"
+                                    th:if="${user != null}">
+                                <i class="fas fa-pen me-2"></i> Write a Review
+                            </button>
+                            <a th:href="@{/login_register}" class="btn btn-outline-primary mt-4"
+                               th:unless="${user != null}">
+                                <i class="fas fa-sign-in-alt me-2"></i> Sign in to write a review
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Shipping Tab -->
+                    <div class="tab-pane fade" id="shipping" role="tabpanel">
+                        <h4>Shipping Information</h4>
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-shipping-fast text-primary me-2"></i> Delivery</h5>
+                                <ul>
+                                    <li><strong>Processing Time:</strong> 1-2 business days</li>
+                                    <li><strong>Shipping Time:</strong> 3-7 business days</li>
+                                    <li><strong>Express Delivery:</strong> Available at extra cost</li>
+                                    <li><strong>Free Shipping:</strong> On orders above ₹1999</li>
+                                    <li><strong>Shipping Partners:</strong> Delhivery, BlueDart, India Post</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-exchange-alt text-success me-2"></i> Returns & Exchange</h5>
+                                <ul>
+                                    <li><strong>Return Period:</strong> 15 days from delivery</li>
+                                    <li><strong>Condition:</strong> Unworn, unwashed with original tags</li>
+                                    <li><strong>Exchange:</strong> Free size/color exchange</li>
+                                    <li><strong>Refund:</strong> Processed within 7 business days</li>
+                                    <li><strong>Contact:</strong> support@mokshithacollections.com</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="alert alert-warning mt-4">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Note:</strong> Customized/blouse stitched products cannot be returned unless defective.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Related Products — hidden until a backend loader supplies them. The
+                 hardcoded cards below are kept in source as a layout reference but are
+                 stripped from the rendered page by th:remove="all". -->
+            <div class="related-products" th:remove="all">
+                <div class="section-title">
+                    <h2>You May Also Like</h2>
+                    <p class="mt-3">Similar products you might love</p>
+                </div>
+
+                <div class="row">
+                    <!-- Related Product 1 -->
+                    <div class="col-xl-3 col-lg-4 col-md-6">
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Designer Saree">
+                                <div class="product-badge">Bestseller</div>
+                            </div>
+                            <div class="product-content">
+                                <a href="#" class="product-title-sm">Maroon Designer Silk Saree</a>
+                                <div class="product-price-sm">₹5,299</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Related Product 2 -->
+                    <div class="col-xl-3 col-lg-4 col-md-6">
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img src="https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Georgette Saree">
+                                <div class="product-badge new">New</div>
+                            </div>
+                            <div class="product-content">
+                                <a href="#" class="product-title-sm">Green Georgette Printed Saree</a>
+                                <div class="product-price-sm">₹3,599</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Related Product 3 -->
+                    <div class="col-xl-3 col-lg-4 col-md-6">
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img src="https://images.unsplash.com/photo-1585487000160-6eb9ce6b5a5e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Lehenga">
+                                <div class="product-badge sale">-25%</div>
+                            </div>
+                            <div class="product-content">
+                                <a href="#" class="product-title-sm">Purple Lehenga Choli Set</a>
+                                <div class="product-price-sm">₹8,499 <span class="old-price">₹11,299</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Related Product 4 -->
+                    <div class="col-xl-3 col-lg-4 col-md-6">
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Dress">
+                            </div>
+                            <div class="product-content">
+                                <a href="#" class="product-title-sm">Floral Summer Maxi Dress</a>
+                                <div class="product-price-sm">₹2,899</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="footer-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <a th:href="@{/home}" class="footer-logo">Mokshitha<span>.</span></a>
+                    <p class="footer-about">
+                        Bringing you the finest collection of traditional sarees and contemporary dresses since 2010. Our mission is to make every woman feel elegant and confident.
+                    </p>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-pinterest-p"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h4 class="footer-title">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a th:href="@{/home}">Home</a></li>
+                        <li><a th:href="@{/shop}">Shop</a></li>
+                        <li><a th:href="@{/shop(categorySlug='sarees')}">Sarees</a></li>
+                        <li><a th:href="@{/shop(categorySlug='dresses')}">Dresses</a></li>
+                        <li><a th:href="@{/about}">About Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h4 class="footer-title">Support</h4>
+                    <ul class="footer-links">
+                        <li><a th:href="@{/contact}">Contact Us</a></li>
+                        <li><a th:href="@{/contact}">FAQ</a></li>
+                        <li><a th:href="@{/contact}">Shipping Policy</a></li>
+                        <li><a th:href="@{/contact}">Returns &amp; Exchange</a></li>
+                        <li><a th:href="@{/contact}">Privacy Policy</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-4 col-md-4 mb-4">
+                    <h4 class="footer-title">Contact Info</h4>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt me-2"></i> 123 Fashion Street, Chennai, India</li>
+                        <li><i class="fas fa-phone-alt me-2"></i> +91 98765 43210</li>
+                        <li><i class="fas fa-envelope me-2"></i> info@mokshithacollections.com</li>
+                        <li><i class="fas fa-clock me-2"></i> Mon-Sat: 10AM - 8PM</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="copyright">
+                <p>
+                    <span th:text="'&copy; ' + ${#temporals.format(#temporals.createNow(), 'yyyy')} + ' Mokshitha Collections. All rights reserved. |'">&copy; 2026 Mokshitha Collections. All rights reserved. |</span>
+                    Designed with <i class="fas fa-heart" style="color: var(--light-sea-green);"></i> for elegant women
+                </p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Size Guide Modal -->
+    <div class="modal fade" id="sizeGuideModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Saree Size Guide</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Size</th>
+                                    <th>Blouse Size (Inches)</th>
+                                    <th>Bust</th>
+                                    <th>Waist</th>
+                                    <th>Hip</th>
+                                    <th>Saree Length</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>S</td>
+                                    <td>30-32</td>
+                                    <td>34"</td>
+                                    <td>28"</td>
+                                    <td>36"</td>
+                                    <td>5.5m</td>
+                                </tr>
+                                <tr>
+                                    <td>M</td>
+                                    <td>32-34</td>
+                                    <td>36"</td>
+                                    <td>30"</td>
+                                    <td>38"</td>
+                                    <td>5.5m</td>
+                                </tr>
+                                <tr>
+                                    <td>L</td>
+                                    <td>34-36</td>
+                                    <td>38"</td>
+                                    <td>32"</td>
+                                    <td>40"</td>
+                                    <td>5.5m</td>
+                                </tr>
+                                <tr>
+                                    <td>XL</td>
+                                    <td>36-38</td>
+                                    <td>40"</td>
+                                    <td>34"</td>
+                                    <td>42"</td>
+                                    <td>5.5m</td>
+                                </tr>
+                                <tr>
+                                    <td>Free Size</td>
+                                    <td>Adjustable</td>
+                                    <td>34-38"</td>
+                                    <td>28-32"</td>
+                                    <td>36-40"</td>
+                                    <td>5.5m</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-ruler-combined me-2"></i>
+                        <strong>Measurement Tips:</strong> For custom blouses, measure your bust, waist, and hip while wearing your regular undergarments.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Write Review Modal -->
+    <div class="modal fade" id="writeReviewModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Write a Review</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="reviewForm">
+                        <div class="mb-3">
+                            <label class="form-label">Rating</label>
+                            <div class="star-rating">
+                                <i class="far fa-star" data-rating="1"></i>
+                                <i class="far fa-star" data-rating="2"></i>
+                                <i class="far fa-star" data-rating="3"></i>
+                                <i class="far fa-star" data-rating="4"></i>
+                                <i class="far fa-star" data-rating="5"></i>
+                            </div>
+                            <input type="hidden" id="ratingValue" value="0">
+                        </div>
+                        <div class="mb-3">
+                            <label for="reviewTitle" class="form-label">Review Title</label>
+                            <input type="text" class="form-control" id="reviewTitle" placeholder="Summarize your experience">
+                        </div>
+                        <div class="mb-3">
+                            <label for="reviewText" class="form-label">Your Review</label>
+                            <textarea class="form-control" id="reviewText" rows="4" placeholder="Share your experience with this product..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Review</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/zoomove/1.0.0/zoomove.min.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const PRODUCT_ID = /*[[${product.productId}]]*/ 0;
+        // Default variant id (set when the user clicks a colour swatch; falls
+        // back to the first variant's id if the page has variants).
+        let SELECTED_VARIANT_ID = /*[[${not #lists.isEmpty(product.variants) ? product.variants[0].variantId : null}]]*/ null;
+        const IS_LOGGED_IN = /*[[${user != null}]]*/ false;
+        // Variant ids already in this user's cart — drives the per-variant
+        // "View Cart" vs "Add to Cart" button state.
+        const CART_VARIANT_IDS = new Set(/*[[${cartVariantIds}]]*/ []);
+        // Variant ids already in this user's wishlist — drives the per-variant
+        // heart state (the wishlist is variant-level; this page already has a
+        // variant selected, so no picker is needed here).
+        const WISHLIST_VARIANT_IDS = new Set(/*[[${wishlistVariantIds}]]*/ []);
+        /*]]>*/
+
+        function getCsrfToken() {
+            const m = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+            return m ? decodeURIComponent(m[1]) : '';
+        }
+
+        async function apiPost(url, body) {
+            const opts = {
+                method: 'POST',
+                headers: { 'X-XSRF-TOKEN': getCsrfToken() }
+            };
+            if (body) {
+                opts.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+                opts.body = new URLSearchParams(body);
+            }
+            const res = await fetch(url, opts);
+            if (res.status === 401) { window.location.href = '/user_redirect'; throw new Error('not authenticated'); }
+            let data = null;
+            try { data = await res.json(); } catch (_) {}
+            if (!res.ok) throw new Error((data && data.message) || ('HTTP ' + res.status));
+            return data;
+        }
+    </script>
+    <script>
+        // Product Gallery Thumbnail Switching
+        const thumbnails = document.querySelectorAll('.thumbnail');
+        const mainImage = document.getElementById('mainImage');
+        const mainImageContainer = document.getElementById('mainImageContainer');
+        
+        thumbnails.forEach(thumb => {
+            thumb.addEventListener('click', function() {
+                // Remove active class from all thumbnails
+                thumbnails.forEach(t => t.classList.remove('active'));
+
+                // Add active class to clicked thumbnail
+                this.classList.add('active');
+
+                // Change main image
+                setMainImage(this.getAttribute('data-image'), this.getAttribute('data-zoom'));
+            });
+        });
+
+        // Swap the main hero image and re-init the zoom lens on it.
+        function setMainImage(imageUrl, zoomUrl) {
+            if (!imageUrl) return;
+            mainImage.src = imageUrl;
+            mainImage.setAttribute('data-zoom-image', zoomUrl || imageUrl);
+            initImageZoom();
+        }
+
+        // Show only the chosen variant's thumbnails and lead with its primary image.
+        // If the variant has no images, fall back to the product hero thumbnail.
+        function showVariantGallery(variantId) {
+            const all = Array.from(thumbnails);
+            const mine = all.filter(t => t.getAttribute('data-variant-id') === String(variantId));
+            const hero = all.find(t => t.getAttribute('data-hero') === 'true');
+
+            if (mine.length === 0) {
+                // No variant images — show the hero only.
+                all.forEach(t => {
+                    const isHero = t.getAttribute('data-hero') === 'true';
+                    t.style.display = isHero ? '' : 'none';
+                    t.classList.remove('active');
+                });
+                if (hero) {
+                    hero.classList.add('active');
+                    setMainImage(hero.getAttribute('data-image'), hero.getAttribute('data-zoom'));
+                }
+                return;
+            }
+
+            all.forEach(t => {
+                const show = t.getAttribute('data-variant-id') === String(variantId);
+                t.style.display = show ? '' : 'none';
+                t.classList.remove('active');
+            });
+            // Lead with the variant's primary image, else its first.
+            const lead = mine.find(t => t.getAttribute('data-primary') === 'true') || mine[0];
+            lead.classList.add('active');
+            setMainImage(lead.getAttribute('data-image'), lead.getAttribute('data-zoom'));
+        }
+        
+        // Image Zoom Functionality
+        function initImageZoom() {
+            const zoomContainer = document.createElement('div');
+            zoomContainer.className = 'zoom-container';
+            
+            const lens = document.createElement('div');
+            lens.className = 'zoom-lens';
+            
+            const result = document.createElement('div');
+            result.className = 'zoom-result';
+            
+            // Clear previous zoom elements
+            const existingZoom = mainImageContainer.querySelector('.zoom-container');
+            if (existingZoom) {
+                existingZoom.remove();
+            }
+            
+            // Setup zoom
+            mainImageContainer.addEventListener('mousemove', moveLens);
+            mainImageContainer.addEventListener('mouseenter', showZoom);
+            mainImageContainer.addEventListener('mouseleave', hideZoom);
+            
+            function showZoom(e) {
+                lens.style.display = 'block';
+                result.style.display = 'block';
+                moveLens(e);
+            }
+            
+            function hideZoom() {
+                lens.style.display = 'none';
+                result.style.display = 'none';
+            }
+            
+            function moveLens(e) {
+                e.preventDefault();
+                
+                const cx = e.clientX - mainImageContainer.getBoundingClientRect().left;
+                const cy = e.clientY - mainImageContainer.getBoundingClientRect().top;
+                
+                // Lens position
+                let x = cx - lens.offsetWidth / 2;
+                let y = cy - lens.offsetHeight / 2;
+                
+                // Keep lens within bounds
+                const maxX = mainImageContainer.offsetWidth - lens.offsetWidth;
+                const maxY = mainImageContainer.offsetHeight - lens.offsetHeight;
+                
+                x = Math.max(0, Math.min(x, maxX));
+                y = Math.max(0, Math.min(y, maxY));
+                
+                lens.style.left = x + 'px';
+                lens.style.top = y + 'px';
+                
+                // Result image position
+                const resultX = (x / maxX) * 100;
+                const resultY = (y / maxY) * 100;
+                
+                result.style.backgroundImage = `url('${mainImage.getAttribute('data-zoom-image')}')`;
+                result.style.backgroundPosition = `${resultX}% ${resultY}%`;
+                result.style.left = mainImageContainer.offsetWidth + 10 + 'px';
+                result.style.top = '0';
+                result.style.width = '400px';
+                result.style.height = '400px';
+            }
+            
+            // Create lens and result divs
+            lens.style.width = '100px';
+            lens.style.height = '100px';
+            
+            zoomContainer.appendChild(mainImage.cloneNode(true));
+            zoomContainer.appendChild(lens);
+            zoomContainer.appendChild(result);
+            
+            mainImageContainer.innerHTML = '';
+            mainImageContainer.appendChild(zoomContainer);
+        }
+        
+        // Initialize zoom on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initImageZoom();
+        });
+        
+        // Variant selection — tracks the currently chosen variant. Add-to-cart
+        // and Buy Now post this variantId to the backend.
+        const variantChips = document.querySelectorAll('.variant-chip');
+        const selectedColorSpan = document.getElementById('selectedColor');
+
+        // Central place to switch variant: updates the chip highlight, the cart
+        // target id, the colour label, the gallery, the share links and the URL.
+        function selectVariant(chip, updateHistory) {
+            if (!chip || chip.classList.contains('out-of-stock') || chip.disabled) return;
+            variantChips.forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            if (chip.dataset.variantId) {
+                SELECTED_VARIANT_ID = parseInt(chip.dataset.variantId, 10);
+            }
+            if (selectedColorSpan) {
+                selectedColorSpan.textContent = chip.getAttribute('data-color-name') ||
+                                                chip.getAttribute('data-color') || '';
+            }
+            showVariantGallery(SELECTED_VARIANT_ID);
+            updateShareLinks();
+            refreshCartButton();
+            refreshWishlistButton();
+            refreshStockNote(chip);
+            // Reflect the variant in the address bar (no reload) so a copy of the
+            // URL or browser refresh keeps this colour selected.
+            if (updateHistory && SELECTED_VARIANT_ID && window.history.replaceState) {
+                const u = new URL(window.location.href);
+                u.searchParams.set('variant', SELECTED_VARIANT_ID);
+                window.history.replaceState({}, '', u);
+            }
+        }
+
+        // Show "View Cart" when the selected variant is already in the cart,
+        // otherwise "Add to Cart". Looks the button up live to avoid any
+        // declaration-order issues with the const defined later in this file.
+        function refreshCartButton() {
+            const btn = document.getElementById('addToCartBtn');
+            if (!btn) return;
+            const inCart = SELECTED_VARIANT_ID != null && CART_VARIANT_IDS.has(SELECTED_VARIANT_ID);
+            btn.classList.toggle('in-cart', inCart);
+            btn.innerHTML = inCart
+                ? '<i class="fas fa-shopping-bag me-2"></i> View Cart'
+                : '<i class="fas fa-shopping-bag me-2"></i> Add to Cart';
+        }
+
+        // Fill the heart when the selected variant is in the wishlist.
+        function refreshWishlistButton() {
+            const btn = document.getElementById('wishlistBtn');
+            if (!btn) return;
+            const inWishlist = SELECTED_VARIANT_ID != null && WISHLIST_VARIANT_IDS.has(SELECTED_VARIANT_ID);
+            const icon = btn.querySelector('i');
+            btn.classList.toggle('active', inWishlist);
+            if (icon) { icon.classList.toggle('fas', inWishlist); icon.classList.toggle('far', !inWishlist); }
+        }
+
+        // Show the stock note for the selected variant: a low-stock alert only
+        // when fewer than 10 remain, otherwise a plain "In stock".
+        function refreshStockNote(chip) {
+            const note = document.getElementById('stockNote');
+            if (!note || !chip) return;
+            const stock = parseInt(chip.dataset.stock || '0', 10);
+            if (stock <= 0) {
+                note.textContent = 'Out of stock';
+                note.style.color = '#dc2626';
+            } else if (stock < 10) {
+                note.innerHTML = '<i class="fas fa-fire me-1"></i> Hurry! Only ' + stock + ' left in stock';
+                note.style.color = '#d9480f';
+                note.style.fontWeight = '600';
+            } else {
+                note.innerHTML = '<i class="fas fa-check-circle me-1"></i> In stock';
+                note.style.color = '#16a34a';
+                note.style.fontWeight = '500';
+            }
+        }
+
+        variantChips.forEach(chip => {
+            chip.addEventListener('click', function () { selectVariant(this, true); });
+        });
+
+        // Canonical shareable URL for the selected variant.
+        function currentShareUrl() {
+            const u = new URL(window.location.origin + '/product-detail/' + PRODUCT_ID);
+            if (SELECTED_VARIANT_ID) u.searchParams.set('variant', SELECTED_VARIANT_ID);
+            return u.toString();
+        }
+
+        // Re-point the social share buttons at the current variant URL.
+        function updateShareLinks() {
+            const url = encodeURIComponent(currentShareUrl());
+            const title = encodeURIComponent(document.title);
+            const map = {
+                whatsapp:  'https://wa.me/?text=' + title + '%20' + url,
+                facebook:  'https://www.facebook.com/sharer/sharer.php?u=' + url,
+                twitter:   'https://twitter.com/intent/tweet?url=' + url + '&text=' + title,
+                pinterest: 'https://pinterest.com/pin/create/button/?url=' + url + '&description=' + title,
+                linkedin:  'https://www.linkedin.com/sharing/share-offsite/?url=' + url
+            };
+            document.querySelectorAll('.social-share[data-net]').forEach(a => {
+                const net = a.getAttribute('data-net');
+                if (map[net]) { a.href = map[net]; a.target = '_blank'; a.rel = 'noopener'; }
+            });
+        }
+
+        // Copy-link button.
+        const copyLinkBtn = document.getElementById('copyLinkBtn');
+        if (copyLinkBtn) {
+            copyLinkBtn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(currentShareUrl());
+                    showNotification('Link copied to clipboard!');
+                } catch (_) {
+                    showNotification('Copy failed — ' + currentShareUrl(), 'error');
+                }
+            });
+        }
+
+        // On load: honour ?variant=<id> deep links, otherwise pick the first
+        // in-stock variant so the gallery and share link have a sensible default.
+        (function initVariantSelection() {
+            if (!variantChips.length) { updateShareLinks(); refreshCartButton(); refreshWishlistButton(); return; }
+            const wanted = new URLSearchParams(window.location.search).get('variant');
+            let target = null;
+            if (wanted) {
+                target = Array.from(variantChips).find(
+                    c => c.dataset.variantId === wanted && !c.classList.contains('out-of-stock'));
+            }
+            if (!target) {
+                target = Array.from(variantChips).find(c => !c.classList.contains('out-of-stock'))
+                         || variantChips[0];
+            }
+            selectVariant(target, false);
+        })();
+
+        // Quantity Selector
+        const quantityInput = document.getElementById('quantity');
+        const decreaseBtn = document.getElementById('decreaseQty');
+        const increaseBtn = document.getElementById('increaseQty');
+        if (decreaseBtn) {
+            decreaseBtn.addEventListener('click', function () {
+                let v = parseInt(quantityInput.value, 10);
+                if (v > 1) quantityInput.value = v - 1;
+            });
+        }
+        if (increaseBtn) {
+            increaseBtn.addEventListener('click', function () {
+                let v = parseInt(quantityInput.value, 10);
+                if (v < 10) quantityInput.value = v + 1;
+            });
+        }
+
+        // Wishlist button — toggles the CURRENTLY SELECTED variant (the wishlist
+        // is variant-level; the variant is already chosen on this page, so no
+        // picker is needed here).
+        const wishlistBtn = document.getElementById('wishlistBtn');
+        const wishlistBadge = document.querySelector('.wishlist-icon .cart-count');
+        if (wishlistBtn) {
+            wishlistBtn.addEventListener('click', async function () {
+                if (!SELECTED_VARIANT_ID) {
+                    showNotification('Please choose a variant first.', 'error');
+                    return;
+                }
+                try {
+                    const data = await apiPost('/wishlist/toggle/' + SELECTED_VARIANT_ID);
+                    if (data.added) {
+                        WISHLIST_VARIANT_IDS.add(SELECTED_VARIANT_ID);
+                        if (wishlistBadge) wishlistBadge.textContent = parseInt(wishlistBadge.textContent || '0', 10) + 1;
+                        showNotification('Added to wishlist!');
+                    } else {
+                        WISHLIST_VARIANT_IDS.delete(SELECTED_VARIANT_ID);
+                        if (wishlistBadge) wishlistBadge.textContent = Math.max(0, parseInt(wishlistBadge.textContent || '0', 10) - 1);
+                        showNotification('Removed from wishlist');
+                    }
+                    refreshWishlistButton();
+                } catch (e) { showNotification(e.message, 'error'); }
+            });
+        }
+
+        // Header cart icon → /cart (was incorrectly pointing at cart.html)
+        const cartIcon = document.getElementById('cartIcon');
+        if (cartIcon) {
+            cartIcon.addEventListener('click', () => { window.location.href = '/cart'; });
+        }
+
+        // Add to Cart — posts variantId + quantity to /api/cart/items.
+        // If the selected variant is already in the cart, the button acts as
+        // "View Cart" and just navigates.
+        const addToCartBtn = document.getElementById('addToCartBtn');
+        const cartBadge = document.querySelector('.cart-icon .cart-count');
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener('click', async function () {
+                if (this.classList.contains('in-cart')) {
+                    window.location.href = '/cart';
+                    return;
+                }
+                if (!SELECTED_VARIANT_ID) {
+                    showNotification('This product has no purchasable variants yet.', 'error');
+                    return;
+                }
+                const qty = parseInt(quantityInput.value, 10) || 1;
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Adding...';
+                try {
+                    const cart = await apiPost('/api/cart/items', {
+                        variantId: SELECTED_VARIANT_ID,
+                        quantity: qty
+                    });
+                    if (cartBadge && typeof cart.totalQuantity === 'number') cartBadge.textContent = cart.totalQuantity;
+                    // Remember this variant is now in the cart and flip the button.
+                    CART_VARIANT_IDS.add(SELECTED_VARIANT_ID);
+                    showNotification('Added ' + qty + ' to cart!');
+                    this.disabled = false;
+                    refreshCartButton(); // becomes "View Cart"
+                } catch (e) {
+                    showNotification(e.message, 'error');
+                    this.disabled = false;
+                    refreshCartButton(); // restore correct label
+                }
+            });
+        }
+
+        // Buy Now — add then jump to checkout
+        const buyNowBtn = document.getElementById('buyNowBtn');
+        if (buyNowBtn) {
+            buyNowBtn.addEventListener('click', async function () {
+                if (!SELECTED_VARIANT_ID) {
+                    showNotification('This product has no purchasable variants yet.', 'error');
+                    return;
+                }
+                const qty = parseInt(quantityInput.value, 10) || 1;
+                try {
+                    await apiPost('/api/cart/items', { variantId: SELECTED_VARIANT_ID, quantity: qty });
+                    window.location.href = '/checkout';
+                } catch (e) { showNotification(e.message, 'error'); }
+            });
+        }
+        
+        // Star Rating in Review Modal
+        const reviewStars = document.querySelectorAll('.star-rating i');
+        const ratingValue = document.getElementById('ratingValue');
+        
+        reviewStars.forEach(star => {
+            star.addEventListener('click', function() {
+                const rating = this.getAttribute('data-rating');
+                ratingValue.value = rating;
+                
+                reviewStars.forEach(s => {
+                    if (s.getAttribute('data-rating') <= rating) {
+                        s.classList.remove('far');
+                        s.classList.add('fas');
+                    } else {
+                        s.classList.remove('fas');
+                        s.classList.add('far');
+                    }
+                });
+            });
+            
+            star.addEventListener('mouseover', function() {
+                const hoverRating = this.getAttribute('data-rating');
+                reviewStars.forEach(s => {
+                    if (s.getAttribute('data-rating') <= hoverRating) {
+                        s.classList.add('fas');
+                        s.classList.remove('far');
+                    }
+                });
+            });
+            
+            star.addEventListener('mouseout', function() {
+                const currentRating = ratingValue.value;
+                reviewStars.forEach(s => {
+                    if (s.getAttribute('data-rating') > currentRating) {
+                        s.classList.remove('fas');
+                        s.classList.add('far');
+                    }
+                });
+            });
+        });
+        
+        // Review Form Submission — POSTs to /api/products/{id}/reviews
+        const reviewFormEl = document.getElementById('reviewForm');
+        if (reviewFormEl) {
+            reviewFormEl.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                if (!IS_LOGGED_IN) {
+                    window.location.href = '/user_redirect';
+                    return;
+                }
+                const rating = parseInt(ratingValue.value, 10);
+                const commentEl = document.getElementById('reviewText') || document.getElementById('reviewComment');
+                const comment = commentEl ? commentEl.value : '';
+                if (!rating || rating < 1 || rating > 5) {
+                    showNotification('Please select a rating between 1 and 5', 'error');
+                    return;
+                }
+                try {
+                    await apiPost('/api/products/' + PRODUCT_ID + '/reviews', {
+                        rating: rating,
+                        comment: comment
+                    });
+                    showNotification('Thanks! Your review is pending approval.');
+                    const modalEl = document.getElementById('writeReviewModal');
+                    if (modalEl) {
+                        const inst = bootstrap.Modal.getInstance(modalEl);
+                        if (inst) inst.hide();
+                    }
+                    this.reset();
+                    ratingValue.value = '0';
+                    reviewStars.forEach(s => { s.classList.remove('fas'); s.classList.add('far'); });
+                } catch (e) {
+                    showNotification(e.message, 'error');
+                }
+            });
+        }
+        
+        // Search functionality (reuse from previous pages)
+        document.querySelector('.search-icon').addEventListener('click', showSearchModal);
+        
+        // Common functions
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            const bg = type === 'error'
+                ? '#dc2626'
+                : 'linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green))';
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: ${bg};
+                color: white;
+                padding: 15px 25px;
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                z-index: 10000;
+                transform: translateX(150%);
+                transition: transform 0.3s ease;
+                max-width: 320px;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(150%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        function showSearchModal() {
+            const searchBox = document.createElement('div');
+            searchBox.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                z-index: 10001;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            searchBox.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 600px; position: relative;">
+                    <button class="close-search" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
+                    <h3 style="margin-bottom: 20px; color: var(--dark-text);">Search Products</h3>
+                    <div style="display: flex;">
+                        <input type="text" placeholder="Search for sarees, dresses, collections..." 
+                               style="flex: 1; padding: 15px; border: 2px solid #eee; border-radius: 5px 0 0 5px; font-size: 1rem;">
+                        <button style="background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green)); color: white; border: none; padding: 0 30px; border-radius: 0 5px 5px 0; cursor: pointer;">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div style="margin-top: 20px; color: #666; font-size: 0.9rem;">
+                        <p>Popular searches: <a href="#" style="color: var(--dark-sea-green); margin-right: 10px;">Silk Sarees</a> 
+                        <a href="#" style="color: var(--dark-sea-green); margin-right: 10px;">Evening Dresses</a> 
+                        <a href="#" style="color: var(--dark-sea-green);">Party Wear</a></p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(searchBox);
+            
+            searchBox.querySelector('.close-search').addEventListener('click', function() {
+                document.body.removeChild(searchBox);
+            });
+            
+            searchBox.addEventListener('click', function(e) {
+                if (e.target === searchBox) {
+                    document.body.removeChild(searchBox);
+                }
+            });
+        }
+        
+        // Mobile image zoom alternative (tap to view larger)
+        if (window.innerWidth <= 768) {
+            mainImageContainer.style.cursor = 'pointer';
+            mainImageContainer.addEventListener('click', function() {
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.9);
+                    z-index: 10000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                `;
+                
+                modal.innerHTML = `
+                    <div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                        <button class="close-zoom" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: white; font-size: 2rem; z-index: 10001;">×</button>
+                        <img src="${mainImage.src}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                modal.querySelector('.close-zoom').addEventListener('click', function() {
+                    document.body.removeChild(modal);
+                });
+                
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        document.body.removeChild(modal);
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

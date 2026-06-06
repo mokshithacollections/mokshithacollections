@@ -1,0 +1,44 @@
+# Build output
+target/
+build/
+out/
+
+# IDE / editor cruft
+.idea/
+.vscode/
+.settings/
+.classpath
+.project
+.factorypath
+*.iml
+*.iws
+*.ipr
+nbproject/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Local secrets — never let these into a published image
+.env
+.env.local
+application-local.properties
+application-secrets.properties
+
+# Runtime data
+uploads/
+logs/
+*.log
+
+# Docs (not needed inside the image)
+HELP.md
+README.md
+TEST_PLAN.md
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Pre-fetched Maven wrapper jar (the build stage uses Maven directly)
+.mvn/wrapper/maven-wrapper.jar

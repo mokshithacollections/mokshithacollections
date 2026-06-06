@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<!--
+  Reusable admin shell. Pages use it like this:
+
+  <html xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{admin/_layout :: head('Page Title')}"></head>
+    <body>
+      <div class="admin-shell">
+        <aside th:replace="~{admin/_layout :: sidebar('products')}"></aside>
+        <main class="admin-main">
+          ... page content ...
+        </main>
+      </div>
+      <div th:replace="~{admin/_layout :: scripts}"></div>
+    </body>
+  </html>
+-->
+
+<!-- Reusable <head> contents -->
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' · Mokshitha Admin'">Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/admin.css}">
+</head>
+
+<!-- Sidebar fragment. Pass the active section name: 'dashboard' | 'products' | 'categories' | 'orders' | 'reviews' | 'users' -->
+<aside class="admin-sidebar" th:fragment="sidebar(active)">
+    <div class="brand">Mokshitha<span>.</span> Admin</div>
+    <nav>
+        <ul>
+            <li>
+                <a th:href="@{/admin}" th:classappend="${active == 'dashboard'} ? 'active'">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/products}" th:classappend="${active == 'products'} ? 'active'">
+                    <i class="fas fa-box"></i> Products
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/categories}" th:classappend="${active == 'categories'} ? 'active'">
+                    <i class="fas fa-tags"></i> Categories
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/orders}" th:classappend="${active == 'orders'} ? 'active'">
+                    <i class="fas fa-shopping-bag"></i> Orders
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/reviews}" th:classappend="${active == 'reviews'} ? 'active'">
+                    <i class="fas fa-star"></i> Reviews
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/admin/users}" th:classappend="${active == 'users'} ? 'active'">
+                    <i class="fas fa-users"></i> Users
+                </a>
+            </li>
+            <li style="margin-top: 16px; border-top: 1px solid #374151;">
+                <a th:href="@{/home}" target="_blank" rel="noopener">
+                    <i class="fas fa-external-link-alt"></i> View Storefront
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <div class="sidebar-footer">
+        <div>Signed in as</div>
+        <div class="username" th:text="${user != null ? user.firstName + ' ' + user.lastName : 'Admin'}">Admin</div>
+        <div th:if="${user != null}" th:text="${user.email}" style="font-size: 0.75rem; color: #9ca3af;">admin@example.com</div>
+        <button onclick="adminLogout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </div>
+</aside>
+
+<!-- Toast container + admin.js. Pages drop this at the end of body. -->
+<div th:fragment="scripts">
+    <div class="toast-stack" id="adminToastStack"></div>
+    <script th:src="@{/js/admin/admin.js}"></script>
+</div>
+</html>

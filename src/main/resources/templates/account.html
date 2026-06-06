@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account | Mokshitha Collections</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Local CSS -->
+    <link rel="stylesheet" type="text/css" th:href="@{/css/account.css}">
+</head>
+<body>
+
+    <!-- Header Top Bar -->
+    <div class="header-top">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <i class="fas fa-phone-alt"></i> +91 98765 43210 &nbsp;&nbsp;|&nbsp;&nbsp;
+                    <i class="fas fa-envelope"></i> info@mokshithacollections.com
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <!-- Show welcome message if user is logged in, otherwise prompt login -->
+                    <span th:if="${user != null}"
+                          th:text="'Welcome back, ' + ${user.firstName} + ' ' + ${user.lastName} + '!'"
+                          id="welcomeMessage">
+                        Welcome back!
+                    </span>
+                    <span th:unless="${user != null}">
+                        Welcome! Please <a th:href="@{/login_register}" style="color: #fff; text-decoration: underline;">login</a>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="main-header py-3">
+        <div class="container">
+            <div class="row align-items-center">
+
+                <div class="col-lg-3 col-md-4 col-6">
+                    <a th:href="@{/home}" class="logo">Mokshitha<span>.</span></a>
+                </div>
+
+                <div class="col-lg-6 col-md-4 d-none d-md-block">
+                    <nav class="navbar navbar-expand-lg justify-content-center">
+                        <ul class="navbar-nav">
+                            <li class="nav-item"><a class="nav-link" th:href="@{/home}">Home</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Shop</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Collections</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/about}">About</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/contact}">Contact</a></li>
+                            <li class="nav-item" th:if="${user != null and user.isAdmin}">
+                                <a class="nav-link" th:href="@{/admin}" style="color: var(--dark-sea-green); font-weight: 600;">
+                                    <i class="fas fa-cog"></i> Admin
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="col-lg-3 col-md-4 col-6 text-end">
+                    <div class="header-icons d-inline-flex align-items-center">
+                        <div class="icon search-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="icon user-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="icon wishlist-icon" id="wishlistIcon">
+                            <i class="far fa-heart"></i>
+                            <span class="cart-count" th:text="${wishlistCount != null ? wishlistCount : 0}">0</span>
+                        </div>
+                        <div class="icon cart-icon" onclick="window.location.href='/cart'">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span class="cart-count" th:text="${cartCount != null ? cartCount : 0}">0</span>
+                        </div>
+                        <button class="navbar-toggler d-md-none ms-3" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#mobileMenu">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Mobile Menu -->
+            <div class="collapse d-md-none" id="mobileMenu">
+                <ul class="navbar-nav mt-3">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/home}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Shop</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Collections</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/about}">About</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/contact}">Contact</a></li>
+                    <li class="nav-item" th:if="${user != null and user.isAdmin}">
+                        <a class="nav-link" th:href="@{/admin}" style="color: var(--dark-sea-green); font-weight: 600;">
+                            <i class="fas fa-cog"></i> Admin
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- ======================== LOGGED-IN VIEW ======================== -->
+    <th:block th:if="${user != null}">
+
+        <!-- Welcome / stats banner -->
+        <section class="account-header">
+            <div class="container">
+                <div class="account-welcome">
+                    <div class="welcome-text">
+                        <h1 th:text="'Hello, ' + ${user.firstName} + '!'">Hello!</h1>
+                        <p>Manage your orders, wishlist and account details all in one place.</p>
+                    </div>
+                    <div class="account-stats">
+                        <div class="stat-item">
+                            <span class="stat-value"
+                                  th:text="${recentOrders != null ? #lists.size(recentOrders) : 0}">0</span>
+                            <span class="stat-label">Orders</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value"
+                                  th:text="${user.addresses != null ? #lists.size(user.addresses) : 0}">0</span>
+                            <span class="stat-label">Addresses</span>
+                        </div>
+                        <!-- 3rd stat = Wishlist (account.js updates nth-child(3)) -->
+                        <div class="stat-item">
+                            <span class="stat-value" th:text="${wishlistCount != null ? wishlistCount : 0}">0</span>
+                            <span class="stat-label">Wishlist</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Account Container -->
+        <section class="account-container">
+            <div class="container">
+                <div class="row">
+
+                    <!-- Account Sidebar -->
+                    <div class="col-lg-3">
+                        <div class="account-sidebar">
+	
+                            <!-- User Profile -->
+                            <div class="user-profile">
+                                <div class="user-avatar">
+                                    <!--
+                                        Thymeleaf equivalent of:
+                                        fn:substring(firstName,0,1) + fn:substring(lastName,0,1)
+                                    -->
+									<span th:text="${
+									    (user.firstName != null and !#strings.isEmpty(user.firstName) ? user.firstName.substring(0,1) : '?') +
+									    (user.lastName != null and !#strings.isEmpty(user.lastName) ? user.lastName.substring(0,1) : '')
+									}">AB</span>
+                                </div>
+                                <h3 class="user-name" th:text="${user.firstName + ' ' + user.lastName}">User Name</h3>
+
+                                <!-- Member since: use #dates for java.util.Date or .year for LocalDate/LocalDateTime -->
+                                <p class="member-since"
+                                   th:if="${user.createdAt != null}"
+                                   th:text="'Member since ' + ${user.createdAt.year}">
+                                    Member since 2020
+                                </p>
+                            </div>
+
+                            <!-- Account Menu -->
+                            <ul class="account-menu">
+                                <li class="menu-item">
+                                    <a href="#dashboard" class="menu-link active" data-content="dashboard">
+                                        <span class="menu-icon"><i class="fas fa-home"></i></span>
+                                        <span class="menu-text">Dashboard</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="#orders" class="menu-link" data-content="orders">
+                                        <span class="menu-icon"><i class="fas fa-shopping-bag"></i></span>
+                                        <span class="menu-text">My Orders</span>
+                                        <span class="menu-badge"
+                                              th:text="${recentOrders != null ? #lists.size(recentOrders) : 0}">0</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="#wishlist" class="menu-link" data-content="wishlist">
+                                        <span class="menu-icon"><i class="fas fa-heart"></i></span>
+                                        <span class="menu-text">Wishlist</span>
+                                        <span class="menu-badge" th:text="${wishlistCount != null ? wishlistCount : 0}">0</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="#addresses" class="menu-link" data-content="addresses">
+                                        <span class="menu-icon"><i class="fas fa-map-marker-alt"></i></span>
+                                        <span class="menu-text">Address Book</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item">
+                                    <a href="#profile" class="menu-link" data-content="profile">
+                                        <span class="menu-icon"><i class="fas fa-user"></i></span>
+                                        <span class="menu-text">Profile Details</span>
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <!-- Logout Button -->
+                            <button class="logout-btn" onclick="logout()">
+                                <i class="fas fa-sign-out-alt me-2"></i> Logout
+                            </button>
+
+                        </div>
+                    </div>
+
+                    <!-- Account Content -->
+                    <div class="col-lg-9">
+
+                        <!-- Success Message -->
+                        <div class="success-message" id="successMessage" style="display: none;">
+                            <i class="fas fa-check-circle"></i>
+                            <span id="messageText">Profile updated successfully!</span>
+                        </div>
+
+                        <!-- ---- DASHBOARD ---- -->
+                        <div id="dashboard" class="account-content active">
+                            <div class="content-header">
+                                <h2 class="content-title">Dashboard Overview</h2>
+                                <div class="last-login"
+                                     th:text="'Welcome back, ' + ${user.firstName} + '!'">
+                                    Welcome back!
+                                </div>
+                            </div>
+
+                            <!-- Overview Cards -->
+                            <div class="dashboard-overview">
+                                <div class="overview-card">
+                                    <div class="card-icon"><i class="fas fa-shopping-bag"></i></div>
+                                    <div class="card-value"
+                                         th:text="${recentOrders != null ? #lists.size(recentOrders) : 0}">0</div>
+                                    <div class="card-label">Recent Orders</div>
+                                    <a href="#orders" class="card-link" data-content="orders">
+                                        View All Orders <i class="fas fa-arrow-right"></i>
+                                    </a>
+                                </div>
+
+                                <div class="overview-card">
+                                    <div class="card-icon"><i class="fas fa-heart"></i></div>
+                                    <div class="card-value" th:text="${wishlistCount != null ? wishlistCount : 0}">0</div>
+                                    <div class="card-label">Wishlist Items</div>
+                                    <a href="#wishlist" class="card-link" data-content="wishlist">
+                                        View Wishlist <i class="fas fa-arrow-right"></i>
+                                    </a>
+                                </div>
+
+                                <div class="overview-card">
+                                    <div class="card-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                    <div class="card-value"
+                                         th:text="${user.addresses != null ? #lists.size(user.addresses) : 0}">0</div>
+                                    <div class="card-label">Saved Addresses</div>
+                                    <a href="#addresses" class="card-link" data-content="addresses">
+                                        Manage Addresses <i class="fas fa-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Recent Orders -->
+                            <div class="content-header" style="margin-top: 40px;">
+                                <h2 class="content-title">Recent Orders</h2>
+                                <a href="#orders" class="card-link" data-content="orders">
+                                    View All <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+
+                            <!-- Recent orders from ${recentOrders} (top 10 from OrderService) -->
+                            <div class="table-responsive">
+                                <table class="orders-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Date</th>
+                                            <th>Items</th>
+                                            <th>Total</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="ord : ${recentOrders}">
+                                            <td>
+                                                <span class="order-id" th:text="${ord.orderNumber}">#MC-000000</span>
+                                            </td>
+                                            <td th:text="${#temporals.format(ord.placedAt, 'd MMM yyyy')}">date</td>
+                                            <td th:text="${ord.itemCount} + ' Item' + (${ord.itemCount == 1} ? '' : 's')">0 Items</td>
+                                            <td th:text="'₹' + ${ord.totalAmount}">₹0</td>
+                                            <td>
+                                                <span class="order-status"
+                                                      th:classappend="'status-' + ${#strings.toLowerCase(ord.status.name())}"
+                                                      th:text="${ord.status.name()}">PLACED</span>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${recentOrders == null or #lists.isEmpty(recentOrders)}">
+                                            <td colspan="5" class="text-center text-muted py-4">
+                                                You haven't placed any orders yet.
+                                                <a th:href="@{/shop}">Start shopping</a>.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- ---- MY ORDERS ---- -->
+                        <div id="orders" class="account-content">
+                            <div class="content-header">
+                                <h2 class="content-title">My Orders</h2>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="orders-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Date</th>
+                                            <th>Items</th>
+                                            <th>Total</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="ord : ${recentOrders}">
+                                            <td><span class="order-id" th:text="${ord.orderNumber}">#MC-000000</span></td>
+                                            <td th:text="${#temporals.format(ord.placedAt, 'd MMM yyyy')}">date</td>
+                                            <td th:text="${ord.itemCount} + ' Item' + (${ord.itemCount == 1} ? '' : 's')">0 Items</td>
+                                            <td th:text="'₹' + ${ord.totalAmount}">₹0</td>
+                                            <td>
+                                                <span class="order-status"
+                                                      th:classappend="'status-' + ${#strings.toLowerCase(ord.status.name())}"
+                                                      th:text="${ord.status.name()}">PLACED</span>
+                                            </td>
+                                            <td>
+                                                <a class="action-btn"
+                                                   th:href="@{/orders/{id}/track(id=${ord.orderId})}">
+                                                    <i class="fas fa-truck"></i> Track
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${recentOrders == null or #lists.isEmpty(recentOrders)}">
+                                            <td colspan="6" class="text-center text-muted py-4">
+                                                You haven't placed any orders yet.
+                                                <a th:href="@{/shop}">Start shopping</a>.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- The original template included two more hardcoded order rows here.
+                             The th:each above replaces them. -->
+                        <div th:remove="all">
+                                        <tr>
+                                            <td><a th:href="@{/order-details}" class="order-id">#MC2023-77654</a></td>
+                                            <td>28 Oct 2023</td>
+                                            <td>Lehenga Choli Set, Earrings, Dupatta</td>
+                                            <td>₹14,599</td>
+                                            <td><span class="order-status status-shipped">Shipped</span></td>
+                                            <td>
+                                                <button class="action-btn">Track</button>
+                                                <button class="action-btn">View</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><a th:href="@{/order-details}" class="order-id">#MC2023-77123</a></td>
+                                            <td>15 Oct 2023</td>
+                                            <td>Georgette Saree, Blouse Piece</td>
+                                            <td>₹3,599</td>
+                                            <td><span class="order-status status-delivered">Delivered</span></td>
+                                            <td>
+                                                <button class="action-btn">View</button>
+                                                <button class="action-btn">Review</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><a th:href="@{/order-details}" class="order-id">#MC2023-76543</a></td>
+                                            <td>05 Oct 2023</td>
+                                            <td>Evening Gown, Clutch</td>
+                                            <td>₹6,299</td>
+                                            <td><span class="order-status status-delivered">Delivered</span></td>
+                                            <td>
+                                                <button class="action-btn">View</button>
+                                                <button class="action-btn">Reorder</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination (dead static — real paging will come when /orders has its own page) -->
+                            <div class="d-flex justify-content-center mt-4">
+                                <nav>
+                                    <ul class="pagination">
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#">Previous</a>
+                                        </li>
+                                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="#">Next</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                        <!-- end th:remove="all" wrapper around the orphan dead content above -->
+
+                        <!-- ---- WISHLIST ---- -->
+                        <div id="wishlist" class="account-content">
+                            <div class="content-header">
+                                <h2 class="content-title">My Wishlist</h2>
+                                <button class="btn-primary" id="addAllToCart"
+                                        th:if="${wishlistItems != null and not #lists.isEmpty(wishlistItems)}">
+                                    <i class="fas fa-shopping-bag me-2"></i> Add All to Cart
+                                </button>
+                            </div>
+
+                            <div class="wishlist-grid">
+
+                                <!-- Wishlist Items Loop -->
+                                <div class="wishlist-card"
+                                     th:each="wishlistItem : ${wishlistItems}"
+                                     th:attr="data-wishlist-id=${wishlistItem.wishlistId},
+                                              data-product-id=${wishlistItem.productId},
+                                              data-variant-id=${wishlistItem.variantId}">
+
+                                    <div class="wishlist-image">
+                                        <!-- Saved variant's image (falls back to hero), or placeholder -->
+                                        <img th:if="${wishlistItem.imageUrl != null and wishlistItem.imageUrl != ''}"
+                                             th:src="${wishlistItem.imageUrl}"
+                                             th:alt="${wishlistItem.productName}">
+                                        <img th:unless="${wishlistItem.imageUrl != null and wishlistItem.imageUrl != ''}"
+                                             src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                                             th:alt="${wishlistItem.productName}">
+                                    </div>
+
+                                    <div class="wishlist-remove" title="Remove from wishlist"
+                                         th:onclick="'removeFromWishlist(' + ${wishlistItem.variantId} + ')'">
+                                        <i class="fas fa-times"></i>
+                                    </div>
+
+                                    <div class="wishlist-content">
+                                        <div class="wishlist-title" th:text="${wishlistItem.productName}">Product Name</div>
+
+                                        <!-- Variant the customer saved -->
+                                        <div class="wishlist-variant" style="font-size:0.85rem;color:#6b7280;margin:2px 0 6px;">
+                                            <span th:text="${wishlistItem.color}">Colour</span>
+                                            <span th:if="${wishlistItem.size != null}"
+                                                  th:text="' · Size ' + ${wishlistItem.size}"> · Size</span>
+                                        </div>
+
+                                        <div class="wishlist-price">
+                                            <!-- Show discount price if available -->
+                                            <th:block th:if="${wishlistItem.discountPrice != null and wishlistItem.discountPrice > 0}">
+                                                <span th:text="'₹' + ${#numbers.formatDecimal(wishlistItem.discountPrice, 0, 'COMMA', 0, 'POINT')}">₹0</span>
+                                                <span style="color: #999; text-decoration: line-through; font-size: 0.9rem;"
+                                                      th:text="'₹' + ${#numbers.formatDecimal(wishlistItem.price, 0, 'COMMA', 0, 'POINT')}">₹0</span>
+                                            </th:block>
+                                            <th:block th:unless="${wishlistItem.discountPrice != null and wishlistItem.discountPrice > 0}">
+                                                <span th:text="'₹' + ${#numbers.formatDecimal(wishlistItem.price, 0, 'COMMA', 0, 'POINT')}">₹0</span>
+                                            </th:block>
+                                        </div>
+
+                                        <div class="wishlist-actions">
+                                            <button class="action-btn"
+                                                    th:onclick="'addToCartFromWishlist(' + ${wishlistItem.variantId} + ')'">
+                                                Add to Cart
+                                            </button>
+                                            <button class="action-btn"
+                                                    th:onclick="'viewProduct(' + ${wishlistItem.productId} + ', ' + ${wishlistItem.variantId} + ')'">
+                                                View
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Empty Wishlist State -->
+                                <div id="emptyWishlist" class="empty-state"
+                                     th:if="${wishlistItems == null or #lists.isEmpty(wishlistItems)}">
+                                    <div class="empty-icon"><i class="far fa-heart"></i></div>
+                                    <h3 class="empty-title">Your wishlist is empty</h3>
+                                    <p class="empty-text">
+                                        Save items you love for later. Click the heart icon on any product to add it here.
+                                    </p>
+                                    <a th:href="@{/shop}" class="btn-primary">
+                                        <i class="fas fa-shopping-bag me-2"></i> Start Shopping
+                                    </a>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- ---- ADDRESS BOOK ---- -->
+                        <div id="addresses" class="account-content">
+                            <div class="content-header">
+                                <h2 class="content-title">Address Book</h2>
+                                <button class="btn-primary" data-bs-toggle="modal" data-bs-target="#addAddressModal">
+                                    <i class="fas fa-plus me-2"></i> Add New Address
+                                </button>
+                            </div>
+
+                            <div class="address-grid">
+
+                                <!-- Address Cards Loop -->
+                                <div th:each="addr : ${user.addresses}"
+                                     th:class="${'address-card' + (addr.isDefault ? ' default' : '')}">
+
+                                    <div class="address-header">
+                                        <div class="address-name"
+                                             th:text="${addr.firstName + ' ' + addr.lastName}">Name</div>
+                                        <span class="address-type" th:if="${addr.isDefault}">Default</span>
+                                    </div>
+
+                                    <div class="address-details">
+                                        <span th:text="${addr.streetAddress}">Street</span><br>
+                                        <span th:text="${addr.city + ', ' + addr.state + ' ' + addr.pinCode}">City, State</span><br>
+                                        <span th:text="${addr.country}">Country</span><br>
+                                        Phone: <span th:text="${addr.phone}">Phone</span><br>
+                                        Type: <span th:text="${addr.addressType}">Type</span>
+                                    </div>
+
+                                    <div class="address-actions">
+                                        <button class="action-btn edit-btn btn btn-sm"
+                                                th:attr="
+                                                    data-id=${addr.addressId},
+                                                    data-firstname=${addr.firstName},
+                                                    data-lastname=${addr.lastName},
+                                                    data-phone=${addr.phone},
+                                                    data-street=${addr.streetAddress},
+                                                    data-city=${addr.city},
+                                                    data-state=${addr.state},
+                                                    data-pincode=${addr.pinCode},
+                                                    data-country=${addr.country},
+                                                    data-type=${addr.addressType},
+                                                    data-default=${addr.isDefault}">
+                                            Edit
+                                        </button>
+
+                                        <button class="action-btn set-default-btn btn btn-sm"
+                                                th:if="${!addr.isDefault}"
+                                                th:attr="data-id=${addr.addressId}">
+                                            Set as Default
+                                        </button>
+
+                                        <button class="action-btn remove-btn btn btn-sm"
+                                                th:attr="data-id=${addr.addressId}">
+                                            Remove
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Add New Address Card -->
+                                <a href="#" class="add-address-card"
+                                   data-bs-toggle="modal" data-bs-target="#addAddressModal">
+                                    <div class="add-icon"><i class="fas fa-plus"></i></div>
+                                    <div style="font-weight: 600; margin-bottom: 5px;">Add New Address</div>
+                                    <div style="font-size: 0.9rem;">Click to add a new delivery address</div>
+                                </a>
+
+                            </div>
+                        </div>
+
+                        <!-- ---- PROFILE DETAILS ---- -->
+                        <div id="profile" class="account-content">
+                            <div class="content-header">
+                                <h2 class="content-title">Profile Details</h2>
+                                <div class="profile-status">
+                                    <span class="badge bg-success">Verified</span>
+                                </div>
+                            </div>
+
+                            <form id="profileForm">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="profileFirstName" class="form-label">First Name</label>
+                                            <input type="text" class="form-control" id="profileFirstName"
+                                                   th:value="${user.firstName}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="profileLastName" class="form-label">Last Name</label>
+                                            <input type="text" class="form-control" id="profileLastName"
+                                                   th:value="${user.lastName}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="profileEmail" class="form-label">Email Address</label>
+                                            <input type="email" class="form-control" id="profileEmail"
+                                                   th:value="${user.email}" readonly>
+                                            <div class="form-text">Email cannot be changed</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="profilePhone" class="form-label">Phone Number</label>
+                                            <input type="tel" class="form-control" id="profilePhone"
+                                                   th:value="${user.phone != null ? user.phone : ''}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="profileGender" class="form-label">Gender</label>
+                                            <select class="form-control" id="profileGender">
+                                                <option value="female">Female</option>
+                                                <option value="male">Male</option>
+                                                <option value="other">Other</option>
+                                                <option value="prefer-not-to-say">Prefer not to say</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="profileBirthdate" class="form-label">Date of Birth</label>
+                                            <input type="date" class="form-control" id="profileBirthdate">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-primary">Save Changes</button>
+                                    <button type="button" class="btn-secondary" id="cancelProfileChanges">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+
+                    </div><!-- /col-lg-9 -->
+                </div><!-- /row -->
+            </div><!-- /container -->
+        </section>
+
+    </th:block>
+    <!-- ======================== END LOGGED-IN VIEW ======================== -->
+
+
+    <!-- ======================== GUEST VIEW ======================== -->
+    <th:block th:unless="${user != null}">
+
+        <section class="account-header">
+            <div class="container">
+                <div class="account-welcome">
+                    <div class="welcome-text">
+                        <h1>Access Required</h1>
+                        <p>Please login to access your account</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="account-container">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <div class="account-sidebar">
+                            <div class="user-profile">
+                                <div class="user-avatar"><span>?</span></div>
+                                <h3 class="user-name">Guest User</h3>
+                                <p class="user-email">Not logged in</p>
+                            </div>
+                            <ul class="account-menu">
+                                <li class="menu-item">
+                                    <a th:href="@{/login_register}" class="menu-link">
+                                        <span class="menu-icon"><i class="fas fa-sign-in-alt"></i></span>
+                                        <span class="menu-text">Login</span>
+                                    </a>
+                                </li>
+                                <li class="menu-item">
+                                    <a th:href="@{/login_register}" class="menu-link">
+                                        <span class="menu-icon"><i class="fas fa-user-plus"></i></span>
+                                        <span class="menu-text">Register</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-9">
+                        <div class="account-content active">
+                            <div class="empty-state" style="padding: 60px 0;">
+                                <div class="empty-icon">
+                                    <i class="fas fa-user-lock" style="font-size: 60px; color: #ccc;"></i>
+                                </div>
+                                <h3 class="empty-title">Login Required</h3>
+                                <p class="empty-text">
+                                    You need to be logged in to access your account dashboard.
+                                </p>
+                                <div class="mt-4">
+                                    <a th:href="@{/login_register}" class="btn-primary me-3">
+                                        <i class="fas fa-sign-in-alt me-2"></i> Login
+                                    </a>
+                                    <a th:href="@{/home}" class="btn-secondary">
+                                        <i class="fas fa-home me-2"></i> Go to Home
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </th:block>
+    <!-- ======================== END GUEST VIEW ======================== -->
+
+
+    <!-- Footer -->
+    <footer class="footer-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <a th:href="@{/home}" class="footer-logo">Mokshitha<span>.</span></a>
+                    <p class="footer-about">
+                        Bringing you the finest collection of traditional sarees and contemporary dresses
+                        since 2010. Our mission is to make every woman feel elegant and confident.
+                    </p>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-pinterest-p"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h4 class="footer-title">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a th:href="@{/home}">Home</a></li>
+                        <li><a th:href="@{/shop}">Shop</a></li>
+                        <li><a th:href="@{/shop(categorySlug='sarees')}">Sarees</a></li>
+                        <li><a th:href="@{/shop(categorySlug='dresses')}">Dresses</a></li>
+                        <li><a th:href="@{/about}">About Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h4 class="footer-title">Support</h4>
+                    <ul class="footer-links">
+                        <li><a th:href="@{/contact}">Contact Us</a></li>
+                        <li><a th:href="@{/contact}">FAQ</a></li>
+                        <li><a th:href="@{/contact}">Shipping Policy</a></li>
+                        <li><a th:href="@{/contact}">Returns &amp; Exchange</a></li>
+                        <li><a th:href="@{/contact}">Privacy Policy</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-4 col-md-4 mb-4">
+                    <h4 class="footer-title">Contact Info</h4>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt me-2"></i> 123 Fashion Street, Chennai, India</li>
+                        <li><i class="fas fa-phone-alt me-2"></i> +91 98765 43210</li>
+                        <li><i class="fas fa-envelope me-2"></i> info@mokshithacollections.com</li>
+                        <li><i class="fas fa-clock me-2"></i> Mon-Sat: 10AM - 8PM</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="copyright">
+                <p>
+                    <span th:text="'&copy; ' + ${#temporals.format(#temporals.createNow(), 'yyyy')} + ' Mokshitha Collections. All rights reserved. |'">&copy; 2026 Mokshitha Collections. All rights reserved. |</span>
+                    Designed with <i class="fas fa-heart" style="color: var(--light-sea-green);"></i>
+                    for elegant women
+                </p>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- ======================== ADD ADDRESS MODAL ======================== -->
+    <div class="modal fade" id="addAddressModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Address</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAddressForm">
+                        <!-- Hidden user ID -->
+                        <input type="hidden" name="userId" th:value="${user != null ? user.userId : ''}">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-control" name="firstName"
+                                       th:value="${user != null ? user.firstName : ''}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-control" name="lastName"
+                                       th:value="${user != null ? user.lastName : ''}" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" name="phone"
+                                   th:value="${user != null ? user.phone : ''}">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Street Address</label>
+                            <input type="text" class="form-control" name="streetAddress" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">PIN Code</label>
+                                <input type="text" class="form-control" name="pinCode" required
+                                       inputmode="numeric" maxlength="6" placeholder="6-digit PIN">
+                                <small class="form-text pincode-status"></small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">City</label>
+                                <input type="text" class="form-control" name="city" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">State</label>
+                                <select class="form-control" name="state" required>
+                                    <option value="">Select State</option>
+                                    <optgroup label="States">
+                                        <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                        <option value="Assam">Assam</option>
+                                        <option value="Bihar">Bihar</option>
+                                        <option value="Chhattisgarh">Chhattisgarh</option>
+                                        <option value="Goa">Goa</option>
+                                        <option value="Gujarat">Gujarat</option>
+                                        <option value="Haryana">Haryana</option>
+                                        <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                        <option value="Jharkhand">Jharkhand</option>
+                                        <option value="Karnataka">Karnataka</option>
+                                        <option value="Kerala">Kerala</option>
+                                        <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                        <option value="Maharashtra">Maharashtra</option>
+                                        <option value="Manipur">Manipur</option>
+                                        <option value="Meghalaya">Meghalaya</option>
+                                        <option value="Mizoram">Mizoram</option>
+                                        <option value="Nagaland">Nagaland</option>
+                                        <option value="Odisha">Odisha</option>
+                                        <option value="Punjab">Punjab</option>
+                                        <option value="Rajasthan">Rajasthan</option>
+                                        <option value="Sikkim">Sikkim</option>
+                                        <option value="Tamil Nadu">Tamil Nadu</option>
+                                        <option value="Telangana">Telangana</option>
+                                        <option value="Tripura">Tripura</option>
+                                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                        <option value="Uttarakhand">Uttarakhand</option>
+                                        <option value="West Bengal">West Bengal</option>
+                                    </optgroup>
+                                    <optgroup label="Union Territories">
+                                        <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                                        <option value="Chandigarh">Chandigarh</option>
+                                        <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                                        <option value="Delhi">Delhi</option>
+                                        <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                                        <option value="Ladakh">Ladakh</option>
+                                        <option value="Lakshadweep">Lakshadweep</option>
+                                        <option value="Puducherry">Puducherry</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Country</label>
+                                <select class="form-control" name="country">
+                                    <option value="India" selected>India</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Address Type</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio"
+                                           name="addressType" value="HOME" checked>
+                                    <label class="form-check-label">Home</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio"
+                                           name="addressType" value="WORK">
+                                    <label class="form-check-label">Work</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio"
+                                           name="addressType" value="OTHER">
+                                    <label class="form-check-label">Other</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox"
+                                   name="isDefault" id="setAsDefault">
+                            <label class="form-check-label" for="setAsDefault">
+                                Set as default address
+                            </label>
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn-primary flex-grow-1">Save Address</button>
+                            <button type="button" class="btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ======================== EDIT ADDRESS MODAL ======================== -->
+    <div class="modal fade" id="editAddressModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form id="editAddressForm">
+                    <!-- CSRF Token (Spring Security) -->
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+                    <!-- Hidden Address ID -->
+                    <input type="hidden" id="editAddressId" name="addressId">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Address</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-control"
+                                       id="editFirstName" name="firstName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-control"
+                                       id="editLastName" name="lastName" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="editPhone" name="phone">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Street Address</label>
+                            <input type="text" class="form-control"
+                                   id="editStreetAddress" name="streetAddress" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">PIN Code</label>
+                                <input type="text" class="form-control" id="editPinCode" name="pinCode" required
+                                       inputmode="numeric" maxlength="6" placeholder="6-digit PIN">
+                                <small class="form-text pincode-status"></small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">City</label>
+                                <input type="text" class="form-control" id="editCity" name="city" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">State</label>
+                                <select class="form-control" id="editState" name="state" required>
+                                    <option value="">Select State</option>
+                                    <optgroup label="States">
+                                        <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                        <option value="Assam">Assam</option>
+                                        <option value="Bihar">Bihar</option>
+                                        <option value="Chhattisgarh">Chhattisgarh</option>
+                                        <option value="Goa">Goa</option>
+                                        <option value="Gujarat">Gujarat</option>
+                                        <option value="Haryana">Haryana</option>
+                                        <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                        <option value="Jharkhand">Jharkhand</option>
+                                        <option value="Karnataka">Karnataka</option>
+                                        <option value="Kerala">Kerala</option>
+                                        <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                        <option value="Maharashtra">Maharashtra</option>
+                                        <option value="Manipur">Manipur</option>
+                                        <option value="Meghalaya">Meghalaya</option>
+                                        <option value="Mizoram">Mizoram</option>
+                                        <option value="Nagaland">Nagaland</option>
+                                        <option value="Odisha">Odisha</option>
+                                        <option value="Punjab">Punjab</option>
+                                        <option value="Rajasthan">Rajasthan</option>
+                                        <option value="Sikkim">Sikkim</option>
+                                        <option value="Tamil Nadu">Tamil Nadu</option>
+                                        <option value="Telangana">Telangana</option>
+                                        <option value="Tripura">Tripura</option>
+                                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                        <option value="Uttarakhand">Uttarakhand</option>
+                                        <option value="West Bengal">West Bengal</option>
+                                    </optgroup>
+                                    <optgroup label="Union Territories">
+                                        <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                                        <option value="Chandigarh">Chandigarh</option>
+                                        <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                                        <option value="Delhi">Delhi</option>
+                                        <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                                        <option value="Ladakh">Ladakh</option>
+                                        <option value="Lakshadweep">Lakshadweep</option>
+                                        <option value="Puducherry">Puducherry</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Country</label>
+                                <select class="form-control" id="editCountry" name="country">
+                                    <option value="India" selected>India</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label class="form-label">Address Type</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio"
+                                           id="editTypeHome" name="addressType" value="HOME">
+                                    <label class="form-check-label" for="editTypeHome">Home</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio"
+                                           id="editTypeWork" name="addressType" value="WORK">
+                                    <label class="form-check-label" for="editTypeWork">Work</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio"
+                                           id="editTypeOther" name="addressType" value="OTHER">
+                                    <label class="form-check-label" for="editTypeOther">Other</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-4 mt-2">
+                            <input class="form-check-input" type="checkbox"
+                                   id="editIsDefault" name="isDefault">
+                            <label class="form-check-label" for="editIsDefault">
+                                Set as default address
+                            </label>
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn-primary flex-grow-1">Update Address</button>
+                            <button type="button" class="btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" th:src="@{/js/account.js}"></script>
+</body>
+</html>

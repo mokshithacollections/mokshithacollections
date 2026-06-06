@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Track ' + ${order.orderNumber} + ' · Mokshitha Collections'">Track order</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --dark-sea-green: #2E8B57;
+            --light-sea-green: #66c2a5;
+            --ink: #111827;
+            --muted: #6b7280;
+            --soft: #e5e7eb;
+            --soft-bg: #f9fafb;
+            --done: #16a34a;
+            --done-tint: #ecfdf5;
+            --current: #f59e0b;
+            --current-tint: #fef3c7;
+            --pending: #d1d5db;
+            --danger: #dc2626;
+            --danger-tint: #fef2f2;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f3f4f6;
+            color: var(--ink);
+            min-height: 100vh;
+        }
+
+        /* ---------- Header ---------- */
+        .topbar {
+            background: #fff;
+            border-bottom: 1px solid var(--soft);
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .topbar .crumb { font-size: 0.9rem; color: var(--muted); }
+        .topbar .crumb a { color: var(--dark-sea-green); text-decoration: none; }
+        .topbar .crumb a:hover { text-decoration: underline; }
+        .topbar .crumb strong { color: var(--ink); }
+
+        /* ---------- Page ---------- */
+        .wrap {
+            max-width: 880px;
+            margin: 32px auto;
+            padding: 0 20px;
+        }
+
+        /* ---------- Hero card ---------- */
+        .hero {
+            background: #fff;
+            border-radius: 16px;
+            padding: 28px 32px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04);
+            margin-bottom: 20px;
+        }
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            align-items: center;
+        }
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            margin: 0 0 6px;
+            font-size: 1.85rem;
+        }
+        .hero .order-num {
+            color: var(--dark-sea-green);
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
+        .hero .placed {
+            color: var(--muted);
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+        .hero-eta {
+            background: var(--done-tint);
+            border: 1px solid #a7f3d0;
+            border-radius: 12px;
+            padding: 14px 18px;
+            text-align: center;
+        }
+        .hero-eta .label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #047857;
+            font-weight: 600;
+        }
+        .hero-eta .value {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #064e3b;
+            margin-top: 2px;
+        }
+        .hero-eta.muted { background: var(--soft-bg); border-color: var(--soft); }
+        .hero-eta.muted .label { color: var(--muted); }
+        .hero-eta.muted .value { color: var(--ink); font-weight: 500; font-size: 0.95rem; }
+
+        /* ---------- Cancelled banner ---------- */
+        .cancel-banner {
+            background: var(--danger-tint);
+            border: 2px solid #fecaca;
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cancel-banner .icon { font-size: 1.5rem; color: var(--danger); }
+        .cancel-banner .label { font-weight: 600; color: var(--danger); }
+        .cancel-banner .when { font-size: 0.85rem; color: var(--muted); }
+
+        /* ---------- Card section ---------- */
+        .card-section {
+            background: #fff;
+            border-radius: 16px;
+            padding: 28px 32px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            margin-bottom: 20px;
+        }
+        .card-section h2 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--muted);
+            margin: 0 0 22px;
+        }
+
+        /* ---------- Tracking number / link card ---------- */
+        .track-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .track-card .meta { flex-grow: 1; min-width: 0; }
+        .track-card .courier {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+        .track-card .tracking-num {
+            font-family: 'Courier New', monospace;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--ink);
+            word-break: break-all;
+        }
+        .track-card .btn-track {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            color: #fff;
+            text-decoration: none;
+            padding: 12px 22px;
+            border-radius: 10px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform .15s, box-shadow .15s;
+        }
+        .track-card .btn-track:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(46, 139, 87, 0.25);
+            color: #fff;
+        }
+
+        /* ---------- Stepper ---------- */
+        .stepper {
+            position: relative;
+            padding-left: 38px;
+        }
+        .step {
+            position: relative;
+            padding-bottom: 28px;
+        }
+        .step:last-child { padding-bottom: 0; }
+        .step::before {
+            /* Connector line down to the next step */
+            content: '';
+            position: absolute;
+            left: -23px;
+            top: 24px;
+            bottom: -4px;
+            width: 2px;
+            background: var(--pending);
+        }
+        .step:last-child::before { display: none; }
+        .step .dot {
+            position: absolute;
+            left: -38px;
+            top: 0;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #fff;
+            border: 2px solid var(--pending);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            color: var(--pending);
+            z-index: 1;
+        }
+        .step.done .dot {
+            background: var(--done);
+            border-color: var(--done);
+            color: #fff;
+        }
+        .step.done::before { background: var(--done); }
+        .step.current .dot {
+            background: var(--current);
+            border-color: var(--current);
+            color: #fff;
+            box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.18);
+            animation: pulse 1.6s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.18); }
+            50%      { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0.05); }
+        }
+        .step .title {
+            font-weight: 600;
+            color: var(--ink);
+            font-size: 1rem;
+        }
+        .step.pending .title { color: var(--muted); }
+        .step .descr {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+        .step .when {
+            font-size: 0.82rem;
+            color: var(--done);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+        .step.current .when { color: var(--current); }
+
+        /* ---------- Items list ---------- */
+        .items-list {
+            display: grid;
+            gap: 12px;
+        }
+        .item-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px;
+            background: var(--soft-bg);
+            border-radius: 10px;
+        }
+        .item-row img {
+            width: 56px;
+            height: 56px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: var(--soft);
+        }
+        .item-row .info { flex-grow: 1; min-width: 0; }
+        .item-row .name { font-weight: 500; }
+        .item-row .meta { font-size: 0.82rem; color: var(--muted); }
+        .item-row .amt { font-weight: 600; }
+
+        /* ---------- Address + totals ---------- */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .info-block .lbl {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+        .info-block .body { line-height: 1.55; font-size: 0.92rem; }
+        .info-block .body strong { font-weight: 600; }
+
+        .totals { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; font-size: 0.92rem; }
+        .totals .lbl { color: var(--muted); }
+        .totals .val { text-align: right; font-weight: 500; }
+        .totals .grand { border-top: 2px solid var(--soft); padding-top: 10px; margin-top: 4px; font-size: 1.05rem; font-weight: 700; }
+        .totals .grand .val { color: var(--dark-sea-green); }
+
+        /* ---------- Footer actions ---------- */
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 28px 0;
+        }
+        .btn-back {
+            background: #fff;
+            border: 2px solid var(--soft);
+            color: var(--ink);
+            padding: 11px 22px;
+            border-radius: 10px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            transition: all .15s;
+        }
+        .btn-back:hover { background: var(--soft-bg); border-color: var(--dark-sea-green); color: var(--ink); text-decoration: none; }
+        .btn-back.primary {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            border-color: transparent;
+            color: #fff;
+        }
+        .btn-back.primary:hover { color: #fff; }
+
+        @media (max-width: 640px) {
+            .hero-grid { grid-template-columns: 1fr; }
+            .two-col { grid-template-columns: 1fr; }
+            .card-section { padding: 20px; }
+            .hero { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+    <div class="crumb">
+        <a th:href="@{/user_redirect}">My Account</a> ›
+        <a th:href="@{/user_redirect}">My Orders</a> ›
+        <strong th:text="'Tracking ' + ${order.orderNumber}">Tracking #—</strong>
+    </div>
+    <a th:href="@{/home}" class="crumb" style="text-decoration:none;">
+        <i class="fas fa-home"></i> Home
+    </a>
+</div>
+
+<div class="wrap">
+
+    <!-- Hero with order number + ETA -->
+    <div class="hero">
+        <div class="hero-grid">
+            <div>
+                <div class="order-num" th:text="${order.orderNumber}">#MC-000000</div>
+                <h1>Your order is on its way</h1>
+                <div class="placed">
+                    Placed
+                    <span th:text="${#temporals.format(order.placedAt, 'd MMM yyyy, HH:mm')}">date</span>
+                    · <span th:text="${#lists.size(order.items)} + ' item(s)'">0 items</span>
+                    · <span th:text="'Total ₹' + ${order.totalAmount}">₹0</span>
+                </div>
+            </div>
+            <!-- ETA box: green when delivery date is known, neutral grey when not -->
+            <div th:if="${order.status.name() != 'CANCELLED' and order.status.name() != 'DELIVERED'}"
+                 th:class="${order.expectedDeliveryDate != null} ? 'hero-eta' : 'hero-eta muted'">
+                <div class="label">Expected delivery</div>
+                <div class="value"
+                     th:text="${order.expectedDeliveryDate != null}
+                              ? ${#temporals.format(order.expectedDeliveryDate, 'd MMM yyyy')}
+                              : 'Pending update'">—</div>
+            </div>
+            <div th:if="${order.status.name() == 'DELIVERED'}" class="hero-eta">
+                <div class="label">Delivered</div>
+                <div class="value"
+                     th:text="${order.deliveredAt != null}
+                              ? ${#temporals.format(order.deliveredAt, 'd MMM yyyy')}
+                              : 'Confirmed'">—</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancelled banner (only when CANCELLED) -->
+    <div class="cancel-banner" th:if="${order.status.name() == 'CANCELLED'}">
+        <div style="display:flex; gap:14px; align-items:center;">
+            <div class="icon"><i class="fas fa-times-circle"></i></div>
+            <div>
+                <div class="label">This order was cancelled</div>
+                <div class="when"
+                     th:if="${order.cancelledAt != null}"
+                     th:text="'on ' + ${#temporals.format(order.cancelledAt, 'd MMM yyyy, HH:mm')}">—</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tracking number + courier link (only when SHIPPED/DELIVERED and tracking is set) -->
+    <div class="card-section"
+         th:if="${(order.status.name() == 'SHIPPED' or order.status.name() == 'DELIVERED')
+                 and order.trackingNumber != null}">
+        <h2><i class="fas fa-truck"></i> Tracking Information</h2>
+        <div class="track-card">
+            <div class="meta">
+                <div class="courier"
+                     th:text="${order.courier != null ? order.courier : 'Courier'}">Courier</div>
+                <div class="tracking-num" th:text="${order.trackingNumber}">DLH123456789</div>
+            </div>
+            <a th:if="${order.trackingUrl != null}"
+               th:href="${order.trackingUrl}" target="_blank" rel="noopener"
+               class="btn-track">
+                <i class="fas fa-external-link-alt"></i> Track on courier site
+            </a>
+            <span th:unless="${order.trackingUrl != null}"
+                  style="font-size:0.85rem;color:var(--muted);">
+                Tracking link not provided yet.
+            </span>
+        </div>
+    </div>
+
+    <!-- Status stepper -->
+    <div class="card-section">
+        <h2><i class="far fa-clock"></i> Status Timeline</h2>
+
+        <!-- We pre-compute each step's classes based on the order's status. -->
+        <div class="stepper">
+
+            <!-- 1. PLACED -->
+            <div class="step done">
+                <div class="dot"><i class="fas fa-check"></i></div>
+                <div class="title">Order placed</div>
+                <div class="descr">We received your order and started processing it.</div>
+                <div class="when"
+                     th:text="${#temporals.format(order.placedAt, 'd MMM yyyy, HH:mm')}">date</div>
+            </div>
+
+            <!-- 2. CONFIRMED -->
+            <div th:class="${order.status.name() == 'CANCELLED' and order.confirmedAt == null}
+                            ? 'step pending'
+                            : (${order.confirmedAt != null}
+                                ? 'step done'
+                                : (${order.status.name() == 'CONFIRMED'} ? 'step current' : 'step pending'))">
+                <div class="dot">
+                    <i class="fas fa-check" th:if="${order.confirmedAt != null}"></i>
+                    <span th:unless="${order.confirmedAt != null}">2</span>
+                </div>
+                <div class="title">Confirmed</div>
+                <div class="descr">Your order has been confirmed by our team.</div>
+                <div class="when"
+                     th:if="${order.confirmedAt != null}"
+                     th:text="${#temporals.format(order.confirmedAt, 'd MMM yyyy, HH:mm')}">date</div>
+            </div>
+
+            <!-- 3. PROCESSING -->
+            <div th:class="${order.status.name() == 'CANCELLED' and order.processingAt == null}
+                            ? 'step pending'
+                            : (${order.processingAt != null}
+                                ? 'step done'
+                                : (${order.status.name() == 'PROCESSING'} ? 'step current' : 'step pending'))">
+                <div class="dot">
+                    <i class="fas fa-check" th:if="${order.processingAt != null}"></i>
+                    <span th:unless="${order.processingAt != null}">3</span>
+                </div>
+                <div class="title">Processing</div>
+                <div class="descr">Packing your items and getting them ready for dispatch.</div>
+                <div class="when"
+                     th:if="${order.processingAt != null}"
+                     th:text="${#temporals.format(order.processingAt, 'd MMM yyyy, HH:mm')}">date</div>
+            </div>
+
+            <!-- 4. SHIPPED -->
+            <div th:class="${order.status.name() == 'CANCELLED' and order.shippedAt == null}
+                            ? 'step pending'
+                            : (${order.shippedAt != null}
+                                ? 'step done'
+                                : (${order.status.name() == 'SHIPPED'} ? 'step current' : 'step pending'))">
+                <div class="dot">
+                    <i class="fas fa-check" th:if="${order.shippedAt != null}"></i>
+                    <span th:unless="${order.shippedAt != null}">4</span>
+                </div>
+                <div class="title">Shipped</div>
+                <div class="descr">
+                    Handed over to the courier.
+                    <span th:if="${order.courier != null}" th:text="' (' + ${order.courier} + ')'"></span>
+                </div>
+                <div class="when"
+                     th:if="${order.shippedAt != null}"
+                     th:text="${#temporals.format(order.shippedAt, 'd MMM yyyy, HH:mm')}">date</div>
+            </div>
+
+            <!-- 5. DELIVERED -->
+            <div th:class="${order.status.name() == 'CANCELLED' and order.deliveredAt == null}
+                            ? 'step pending'
+                            : (${order.deliveredAt != null}
+                                ? 'step done'
+                                : (${order.status.name() == 'DELIVERED'} ? 'step current' : 'step pending'))">
+                <div class="dot">
+                    <i class="fas fa-check" th:if="${order.deliveredAt != null}"></i>
+                    <span th:unless="${order.deliveredAt != null}">5</span>
+                </div>
+                <div class="title">Delivered</div>
+                <div class="descr">Your parcel has arrived. We hope you love it!</div>
+                <div class="when"
+                     th:if="${order.deliveredAt != null}"
+                     th:text="${#temporals.format(order.deliveredAt, 'd MMM yyyy, HH:mm')}">date</div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Items + Address + Totals -->
+    <div class="card-section">
+        <h2><i class="fas fa-box-open"></i> Order Details</h2>
+
+        <div class="items-list" style="margin-bottom: 24px;">
+            <div class="item-row" th:each="item : ${order.items}">
+                <!-- Ordered variant's image (falls back to the snapshot hero) -->
+                <img th:src="${variantImages != null and variantImages.containsKey(item.variantId)
+                              ? variantImages.get(item.variantId) : item.productImageUrl}"
+                     th:alt="${item.productName}"
+                     onerror="this.style.visibility='hidden'">
+                <div class="info">
+                    <div class="name" th:text="${item.productName}">Product</div>
+                    <div class="meta">
+                        <span th:if="${item.variantColor != null}" th:text="${item.variantColor}">Color</span>
+                        <span th:if="${item.variantSize != null}" th:text="' · Size ' + ${item.variantSize}"> · Size</span>
+                        <span th:text="' · Qty ' + ${item.quantity}"> · Qty 1</span>
+                    </div>
+                </div>
+                <div class="amt" th:text="'₹' + ${item.lineTotal}">₹0</div>
+            </div>
+        </div>
+
+        <div class="two-col">
+            <div class="info-block">
+                <div class="lbl"><i class="fas fa-map-marker-alt me-1"></i> Shipping to</div>
+                <div class="body" th:if="${order.shippingAddress != null}">
+                    <strong th:text="${order.shippingAddress.firstName + ' ' + order.shippingAddress.lastName}">Name</strong><br>
+                    <span th:text="${order.shippingAddress.streetAddress}">Street</span><br>
+                    <span th:text="${order.shippingAddress.city + ', ' + order.shippingAddress.state + ' ' + order.shippingAddress.pinCode}">City</span><br>
+                    <span th:text="${order.shippingAddress.country}">Country</span><br>
+                    <span style="color:var(--muted);font-size:0.85rem;"
+                          th:text="${order.shippingAddress.phone}">Phone</span>
+                </div>
+            </div>
+
+            <div class="info-block">
+                <div class="lbl"><i class="fas fa-receipt me-1"></i> Payment summary</div>
+                <div class="totals">
+                    <div class="lbl">Subtotal</div>
+                    <div class="val" th:text="'₹' + ${order.subtotal}">₹0</div>
+
+                    <div class="lbl">Shipping</div>
+                    <div class="val" th:text="'₹' + ${order.shippingFee}">₹0</div>
+
+                    <div class="lbl grand">Total</div>
+                    <div class="val grand" th:text="'₹' + ${order.totalAmount}">₹0</div>
+
+                    <div class="lbl" style="font-size:0.82rem;">Method</div>
+                    <div class="val" style="font-size:0.82rem; font-weight:400;"
+                         th:text="${order.paymentMethod.name() + ' · ' + order.paymentStatus.name()}">COD</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+        <a th:href="@{/user_redirect}" class="btn-back primary">
+            <i class="fas fa-list"></i> Back to my orders
+        </a>
+        <a th:href="@{/shop}" class="btn-back">
+            <i class="fas fa-shopping-bag"></i> Continue shopping
+        </a>
+    </div>
+</div>
+
+<script>
+    // Set the activeAccountTab flag so the "Back to my orders" button lands on
+    // the My Orders tab (not the Dashboard tab) when the user clicks it.
+    document.querySelectorAll('a[href$="/user_redirect"]').forEach(a => {
+        a.addEventListener('click', () => {
+            try { localStorage.setItem('activeAccountTab', 'orders'); } catch (_) {}
+        });
+    });
+</script>
+
+</body>
+</html>

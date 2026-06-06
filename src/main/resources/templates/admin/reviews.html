@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Reviews')}"></head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/_layout :: sidebar('reviews')}"></aside>
+
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <div>
+                <h1>Pending reviews</h1>
+                <div class="breadcrumb"
+                     th:text="${reviews.totalElements} + ' awaiting moderation'">0 awaiting moderation</div>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Reviewer</th>
+                        <th>Product</th>
+                        <th>Rating</th>
+                        <th>Comment</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="r : ${reviews.content}">
+                        <td>
+                            <strong th:text="${r.reviewerName}">Name</strong>
+                            <div style="font-size:0.8rem;color:#888;" th:text="${r.reviewerEmail}">email</div>
+                        </td>
+                        <td>
+                            <a th:href="@{/admin/products/{id}(id=${r.productId})}"
+                               th:text="${r.productName}">Product</a>
+                        </td>
+                        <td>
+                            <span style="color:#d97706;">
+                                <i th:each="i : ${#numbers.sequence(1, r.rating)}" class="fas fa-star"></i>
+                                <i th:each="i : ${#numbers.sequence(r.rating + 1, 5)}" class="far fa-star"
+                                   th:if="${r.rating < 5}"></i>
+                            </span>
+                            <span style="color:#888;font-size:0.85rem;" th:text="' (' + ${r.rating} + '/5)'">(0/5)</span>
+                        </td>
+                        <td style="max-width:300px;"
+                            th:text="${r.comment != null ? r.comment : '— no comment —'}">comment</td>
+                        <td th:text="${#temporals.format(r.createdAt, 'd MMM yyyy')}">date</td>
+                        <td>
+                            <button type="button" class="btn btn-success btn-sm"
+                                    th:attr="data-id=${r.reviewId}"
+                                    onclick="onApprove(this)">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                            <button type="button" class="btn btn-danger btn-sm"
+                                    th:attr="data-id=${r.reviewId}"
+                                    onclick="onReject(this)">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(reviews.content)}">
+                        <td class="empty-row" colspan="6">No reviews waiting for approval. 🎉</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <ul class="pagination" th:if="${reviews.totalPages > 1}">
+            <li th:classappend="${!reviews.hasPrevious()} ? 'disabled'">
+                <a th:if="${reviews.hasPrevious()}"
+                   th:href="@{/admin/reviews(page=${reviews.number - 1})}">Previous</a>
+                <span th:unless="${reviews.hasPrevious()}">Previous</span>
+            </li>
+            <li th:each="i : ${#numbers.sequence(0, reviews.totalPages - 1)}"
+                th:classappend="${i == reviews.number} ? 'active'">
+                <a th:href="@{/admin/reviews(page=${i})}" th:text="${i + 1}">1</a>
+            </li>
+            <li th:classappend="${!reviews.hasNext()} ? 'disabled'">
+                <a th:if="${reviews.hasNext()}"
+                   th:href="@{/admin/reviews(page=${reviews.number + 1})}">Next</a>
+                <span th:unless="${reviews.hasNext()}">Next</span>
+            </li>
+        </ul>
+    </main>
+</div>
+
+<div th:replace="~{admin/_layout :: scripts}"></div>
+<script>
+    async function onApprove(btn) {
+        try {
+            await adminApi('POST', '/api/admin/reviews/' + btn.dataset.id + '/approve');
+            toast('Review approved', 'success');
+            setTimeout(() => location.reload(), 500);
+        } catch (e) { toast(e.message, 'error'); }
+    }
+
+    function onReject(btn) {
+        confirmThen('Reject and delete this review?', async () => {
+            try {
+                await adminApi('DELETE', '/api/admin/reviews/' + btn.dataset.id);
+                toast('Review rejected', 'success');
+                setTimeout(() => location.reload(), 500);
+            } catch (e) { toast(e.message, 'error'); }
+        });
+    }
+</script>
+</body>
+</html>

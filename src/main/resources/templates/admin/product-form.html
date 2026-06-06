@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Product')}"></head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/_layout :: sidebar('products')}"></aside>
+
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <div>
+                <h1 th:text="${product != null} ? 'Edit product' : 'New product'">New product</h1>
+                <div class="breadcrumb">
+                    <a th:href="@{/admin/products}">Products</a> /
+                    <span th:text="${product != null ? product.name : 'New'}">New</span>
+                </div>
+            </div>
+            <a class="btn btn-outline" th:href="@{/admin/products}">Back to list</a>
+        </div>
+
+        <!-- Core product card -->
+        <div class="card">
+            <h2>Details</h2>
+            <form id="productForm">
+                <div class="form-grid-2">
+                    <div class="form-row">
+                        <label>Name *</label>
+                        <input type="text" name="name" required maxlength="255"
+                               th:value="${product != null ? product.name : ''}">
+                    </div>
+                    <div class="form-row">
+                        <label>SKU *</label>
+                        <input type="text" name="sku" required maxlength="64"
+                               th:value="${product != null ? product.sku : ''}">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label>Description</label>
+                    <textarea name="description"
+                              th:text="${product != null ? product.description : ''}"></textarea>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-row">
+                        <label>Price (₹) *</label>
+                        <input type="number" name="price" step="0.01" min="0.01" required
+                               th:value="${product != null ? product.price : ''}">
+                    </div>
+                    <div class="form-row">
+                        <label>Discount price (₹)</label>
+                        <input type="number" name="discountPrice" step="0.01" min="0.01"
+                               th:value="${product != null and product.discountPrice != null ? product.discountPrice : ''}">
+                    </div>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-row">
+                        <label>Category *</label>
+                        <select name="categoryId" required>
+                            <option value="">— Select —</option>
+                            <option th:each="c : ${categories}"
+                                    th:value="${c.categoryId}"
+                                    th:text="${c.name}"
+                                    th:selected="${product != null and product.category != null and product.category.categoryId == c.categoryId}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>Hero image</label>
+                        <div style="display:flex;gap:12px;align-items:center;">
+                            <img id="heroPreview"
+                                 th:src="${product != null and product.imageUrl != null ? product.imageUrl : ''}"
+                                 th:style="${product != null and product.imageUrl != null} ? 'display:block' : 'display:none'"
+                                 alt="hero"
+                                 style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--admin-border);">
+                            <input type="file" id="heroFile" accept="image/*">
+                        </div>
+                        <div class="helper">Choose an image from your computer. Uploaded when you save.
+                            You can also set the hero from a variant's gallery below (<i class="fas fa-star"></i>).</div>
+                    </div>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-row">
+                        <label>Fabric type</label>
+                        <input type="text" name="fabricType"
+                               th:value="${product != null ? product.fabricType : ''}">
+                    </div>
+                    <div class="form-row">
+                        <label>Occasion</label>
+                        <input type="text" name="occasion"
+                               th:value="${product != null ? product.occasion : ''}">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label style="margin-bottom:8px;">Promotion badges</label>
+                    <div style="display:flex;flex-wrap:wrap;gap:20px;">
+                        <span class="form-row checkbox" style="margin:0;">
+                            <input type="checkbox" id="isFeatured" name="isFeatured"
+                                   th:checked="${product != null and product.isFeatured != null and product.isFeatured}">
+                            <label for="isFeatured">Featured (homepage)</label>
+                        </span>
+                        <span class="form-row checkbox" style="margin:0;">
+                            <input type="checkbox" id="isBestseller" name="isBestseller"
+                                   th:checked="${product != null and product.isBestseller != null and product.isBestseller}">
+                            <label for="isBestseller">Bestseller</label>
+                        </span>
+                        <span class="form-row checkbox" style="margin:0;">
+                            <input type="checkbox" id="isTrending" name="isTrending"
+                                   th:checked="${product != null and product.isTrending != null and product.isTrending}">
+                            <label for="isTrending">Trending</label>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="form-row checkbox">
+                    <!-- New products default to active; existing ones reflect their stored flag. -->
+                    <input type="checkbox" id="isActive" name="isActive"
+                           th:checked="${product == null or (product.isActive != null and product.isActive)}">
+                    <label for="isActive">Active (visible to customers)</label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        <span th:text="${product != null} ? 'Save changes' : 'Create product'">Create</span>
+                    </button>
+                    <a class="btn btn-outline" th:href="@{/admin/products}">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Variants — only for existing products -->
+        <div class="card" th:if="${product != null}">
+            <h2>Variants</h2>
+            <p class="breadcrumb" style="margin-top:0;">
+                Each variant is one purchasable colour/size combination with its own stock.
+            </p>
+
+            <p th:if="${#lists.isEmpty(product.variants)}" class="empty-row" style="padding:12px 0;">
+                No variants yet. Add one below.
+            </p>
+
+            <!-- One editable block per variant: stock/colour/size/SKU inline edit
+                 + an image gallery whose thumbnails can be set as the product hero. -->
+            <div class="variant-editor" th:each="v : ${product.variants}"
+                 th:attr="data-vid=${v.variantId}"
+                 style="border:1px solid var(--admin-border);border-radius:10px;padding:16px;margin-bottom:14px;">
+                <div class="form-grid-2" style="align-items:end;">
+                    <div class="form-row">
+                        <label>Color *</label>
+                        <input type="text" class="v-color" maxlength="64" th:value="${v.color}">
+                    </div>
+                    <div class="form-row">
+                        <label>Size</label>
+                        <input type="text" class="v-size" maxlength="32" th:value="${v.size}">
+                    </div>
+                    <div class="form-row">
+                        <label>Stock *</label>
+                        <input type="number" class="v-stock" min="0" th:value="${v.stockQuantity}">
+                    </div>
+                    <div class="form-row">
+                        <label>SKU variant</label>
+                        <input type="text" class="v-sku" maxlength="64" th:value="${v.skuVariant}">
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="saveVariant(this)">
+                        <i class="fas fa-save"></i> Save changes
+                    </button>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="openImageUpload(this)">
+                        <i class="fas fa-upload"></i> Upload image
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm"
+                            th:attr="data-color=${v.color}" onclick="deleteVariant(this)">
+                        <i class="fas fa-trash"></i> Delete variant
+                    </button>
+                </div>
+
+                <!-- Image gallery for this variant -->
+                <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;">
+                    <div th:each="img : ${v.images}"
+                         style="width:96px;text-align:center;">
+                        <div style="position:relative;border:2px solid var(--admin-border);border-radius:8px;overflow:hidden;height:96px;"
+                             th:style="${img.isPrimary != null and img.isPrimary}
+                                       ? 'position:relative;border:2px solid var(--admin-accent,#2E8B57);border-radius:8px;overflow:hidden;height:96px;'
+                                       : 'position:relative;border:2px solid var(--admin-border);border-radius:8px;overflow:hidden;height:96px;'">
+                            <img th:src="${img.imageUrl}" alt="variant"
+                                 style="width:100%;height:100%;object-fit:cover;">
+                            <span th:if="${img.isPrimary != null and img.isPrimary}"
+                                  style="position:absolute;top:2px;left:2px;background:#2E8B57;color:#fff;font-size:0.6rem;padding:1px 5px;border-radius:4px;">PRIMARY</span>
+                        </div>
+                        <div style="display:flex;gap:4px;justify-content:center;margin-top:4px;">
+                            <button type="button" title="Set as product hero image"
+                                    class="btn btn-outline btn-sm" style="padding:2px 7px;"
+                                    th:attr="data-url=${img.imageUrl}" onclick="setAsHero(this)">
+                                <i class="fas fa-star"></i>
+                            </button>
+                            <button type="button" title="Make primary for this variant"
+                                    class="btn btn-outline btn-sm" style="padding:2px 7px;"
+                                    th:attr="data-img=${img.imageId}" onclick="setPrimaryImage(this)">
+                                <i class="fas fa-thumbtack"></i>
+                            </button>
+                            <button type="button" title="Delete image"
+                                    class="btn btn-danger btn-sm" style="padding:2px 7px;"
+                                    th:attr="data-img=${img.imageId}" onclick="deleteImage(this)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <p th:if="${#lists.isEmpty(v.images)}" class="breadcrumb" style="margin:0;align-self:center;">
+                        No images yet — upload one, then click <i class="fas fa-star"></i> to use it as the hero.
+                    </p>
+                </div>
+            </div>
+
+            <h3 style="font-size: 1rem;">Add a variant</h3>
+            <form id="variantForm" class="form-grid-2">
+                <div class="form-row">
+                    <label>Color *</label>
+                    <input type="text" name="color" required maxlength="64">
+                </div>
+                <div class="form-row">
+                    <label>Size</label>
+                    <input type="text" name="size" maxlength="32" placeholder="e.g. M, Free Size">
+                </div>
+                <div class="form-row">
+                    <label>Stock *</label>
+                    <input type="number" name="stockQuantity" min="0" required value="0">
+                </div>
+                <div class="form-row">
+                    <label>SKU variant</label>
+                    <input type="text" name="skuVariant" maxlength="64">
+                </div>
+                <div class="form-actions" style="grid-column: 1 / -1;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add variant
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Hidden image upload (one input shared by all variants via openImageUpload) -->
+        <input type="file" id="imageFile" accept="image/*" style="display:none;">
+    </main>
+</div>
+
+<div th:replace="~{admin/_layout :: scripts}"></div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const PRODUCT_ID = /*[[${product != null ? product.productId : null}]]*/ null;
+    /*]]>*/
+
+    // ----- Product create / update -----
+    document.getElementById('productForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const body = {
+            name: fd.get('name'),
+            sku: fd.get('sku'),
+            description: fd.get('description') || null,
+            price: parseFloat(fd.get('price')),
+            discountPrice: fd.get('discountPrice') ? parseFloat(fd.get('discountPrice')) : null,
+            categoryId: parseInt(fd.get('categoryId'), 10),
+            fabricType: fd.get('fabricType') || null,
+            occasion: fd.get('occasion') || null,
+            isFeatured: fd.get('isFeatured') === 'on',
+            isBestseller: fd.get('isBestseller') === 'on',
+            isTrending: fd.get('isTrending') === 'on',
+            isActive: fd.get('isActive') === 'on'
+        };
+        try {
+            const isUpdate = PRODUCT_ID !== null && PRODUCT_ID !== undefined && PRODUCT_ID !== '';
+            const url = isUpdate ? '/api/admin/products/' + PRODUCT_ID : '/api/admin/products';
+            const saved = await adminApi('POST', url, body);
+            // After create, jump to the edit page so variants/images become available.
+            const targetId = isUpdate ? PRODUCT_ID : (saved && saved.productId);
+
+            // If the admin picked a hero image file, upload it now (works for both
+            // new and existing products since we have a productId at this point).
+            const heroFile = document.getElementById('heroFile');
+            if (heroFile && heroFile.files[0] && targetId) {
+                try {
+                    await adminUpload('/api/admin/products/' + targetId + '/image', { file: heroFile.files[0] });
+                } catch (err) {
+                    toast('Saved, but hero image upload failed: ' + err.message, 'error');
+                }
+            }
+
+            toast(isUpdate ? 'Saved' : 'Created', 'success');
+            setTimeout(() => { window.location.href = '/admin/products/' + targetId; }, 500);
+        } catch (e) {
+            toast(e.message, 'error');
+        }
+    });
+
+    // Live preview of the chosen hero image before upload.
+    const heroFileInput = document.getElementById('heroFile');
+    if (heroFileInput) {
+        heroFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            const preview = document.getElementById('heroPreview');
+            if (file && preview) {
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = 'block';
+            }
+        });
+    }
+
+    // ----- Variant CRUD -----
+    const variantForm = document.getElementById('variantForm');
+    if (variantForm) {
+        variantForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fd = new FormData(variantForm);
+            const body = {
+                color: fd.get('color'),
+                size: fd.get('size') || null,
+                stockQuantity: parseInt(fd.get('stockQuantity'), 10),
+                skuVariant: fd.get('skuVariant') || null
+            };
+            try {
+                await adminApi('POST', '/api/admin/products/' + PRODUCT_ID + '/variants', body);
+                toast('Variant added', 'success');
+                setTimeout(() => location.reload(), 500);
+            } catch (e) { toast(e.message, 'error'); }
+        });
+    }
+
+    // Each variant action button lives inside a .variant-editor that carries the id.
+    function variantIdOf(btn) {
+        const block = btn.closest('.variant-editor');
+        return block ? block.dataset.vid : null;
+    }
+
+    // ----- Edit an existing variant (stock / colour / size / SKU) -----
+    async function saveVariant(btn) {
+        const block = btn.closest('.variant-editor');
+        const vid = block.dataset.vid;
+        const body = {
+            color: block.querySelector('.v-color').value.trim(),
+            size: block.querySelector('.v-size').value.trim() || null,
+            stockQuantity: parseInt(block.querySelector('.v-stock').value, 10),
+            skuVariant: block.querySelector('.v-sku').value.trim() || null
+        };
+        if (!body.color) { toast('Color is required', 'error'); return; }
+        if (isNaN(body.stockQuantity) || body.stockQuantity < 0) { toast('Stock must be 0 or more', 'error'); return; }
+        try {
+            await adminApi('POST', '/api/admin/products/' + PRODUCT_ID + '/variants/' + vid, body);
+            toast('Variant updated', 'success');
+            setTimeout(() => location.reload(), 500);
+        } catch (e) { toast(e.message, 'error'); }
+    }
+
+    function deleteVariant(btn) {
+        const vid = variantIdOf(btn);
+        const color = btn.dataset.color;
+        confirmThen('Delete variant "' + color + '"? Its images will also be removed.', async () => {
+            try {
+                await adminApi('DELETE', '/api/admin/products/' + PRODUCT_ID + '/variants/' + vid);
+                toast('Variant deleted', 'success');
+                setTimeout(() => location.reload(), 500);
+            } catch (e) { toast(e.message, 'error'); }
+        });
+    }
+
+    // ----- Image actions -----
+    // Set the clicked variant image as the product's hero (primary catalog) image.
+    async function setAsHero(btn) {
+        const url = btn.dataset.url;
+        try {
+            await adminApi('POST', '/api/admin/products/' + PRODUCT_ID, { imageUrl: url });
+            toast('Hero image updated', 'success');
+            setTimeout(() => location.reload(), 500);
+        } catch (e) { toast(e.message, 'error'); }
+    }
+
+    // Mark an image as the lead image for its own variant gallery.
+    async function setPrimaryImage(btn) {
+        try {
+            await adminApi('POST', '/api/admin/products/images/' + btn.dataset.img + '/primary');
+            toast('Primary image set', 'success');
+            setTimeout(() => location.reload(), 500);
+        } catch (e) { toast(e.message, 'error'); }
+    }
+
+    function deleteImage(btn) {
+        confirmThen('Delete this image?', async () => {
+            try {
+                await adminApi('DELETE', '/api/admin/products/images/' + btn.dataset.img);
+                toast('Image deleted', 'success');
+                setTimeout(() => location.reload(), 500);
+            } catch (e) { toast(e.message, 'error'); }
+        });
+    }
+
+    // ----- Image upload (multipart) -----
+    let pendingVariantId = null;
+    function openImageUpload(btn) {
+        pendingVariantId = variantIdOf(btn);
+        document.getElementById('imageFile').click();
+    }
+    document.getElementById('imageFile').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file || !pendingVariantId) return;
+        try {
+            await adminUpload(
+                '/api/admin/products/' + PRODUCT_ID + '/variants/' + pendingVariantId + '/images',
+                { file, viewType: 'FRONT', isPrimary: 'false' }
+            );
+            toast('Image uploaded', 'success');
+            setTimeout(() => location.reload(), 500);
+        } catch (e) { toast(e.message, 'error'); }
+        finally { e.target.value = ''; pendingVariantId = null; }
+    });
+</script>
+</body>
+</html>

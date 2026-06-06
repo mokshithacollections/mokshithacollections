@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | Mokshitha Collections</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dark-sea-green: #2E8B57;
+            --light-sea-green: #20B2AA;
+            --light-cream: #FFF8F0;
+            --gold-accent: #D4AF37;
+            --dark-text: #2C3E50;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--dark-text);
+            background-color: #fefefe;
+        }
+        
+        h1, h2, h3, h4, h5 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+        }
+        
+        /* Header Styles */
+        .header-top {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            color: white;
+            padding: 8px 0;
+            font-size: 0.9rem;
+        }
+        
+        .main-header {
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        
+        .logo span {
+            color: var(--gold-accent);
+        }
+        
+        .nav-link {
+            color: var(--dark-text) !important;
+            font-weight: 500;
+            margin: 0 10px;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover {
+            color: var(--dark-sea-green) !important;
+        }
+        
+        .nav-link.active {
+            color: var(--dark-sea-green) !important;
+            font-weight: 600;
+        }
+        
+        .header-icons .icon {
+            position: relative;
+            margin-left: 20px;
+            font-size: 1.2rem;
+            color: var(--dark-text);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .header-icons .icon:hover {
+            color: var(--dark-sea-green);
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--light-sea-green);
+            color: white;
+            font-size: 0.7rem;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Hero Section */
+        .about-hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                        url('https://images.unsplash.com/photo-1569396116182-6a42e5dd3c6d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 120px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .about-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(46, 139, 87, 0.3), rgba(32, 178, 170, 0.3));
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-title {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: white;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.3rem;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        /* About Container */
+        .about-container {
+            padding: 80px 0;
+        }
+        
+        /* Section Common Styles */
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .section-title h2 {
+            font-size: 3rem;
+            color: var(--dark-text);
+            display: inline-block;
+            padding-bottom: 15px;
+            position: relative;
+        }
+        
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--dark-sea-green), var(--light-sea-green));
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 20px auto 0;
+            line-height: 1.6;
+        }
+        
+        /* Our Story */
+        .our-story {
+            padding: 80px 0;
+            background: linear-gradient(135deg, rgba(46, 139, 87, 0.03), rgba(32, 178, 170, 0.03));
+        }
+        
+        .story-content {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+        }
+        
+        .story-text {
+            flex: 1;
+        }
+        
+        .story-image {
+            flex: 1;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .story-image img {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        .story-image:hover img {
+            transform: scale(1.05);
+        }
+        
+        .story-text h3 {
+            font-size: 2.5rem;
+            margin-bottom: 25px;
+            color: var(--dark-text);
+        }
+        
+        .story-text p {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+        }
+        
+        /* Founder Section */
+        .founder-section {
+            padding: 80px 0;
+        }
+        
+        .founder-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .founder-content {
+            display: flex;
+            align-items: center;
+            padding: 50px;
+            gap: 40px;
+        }
+        
+        .founder-image {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 5px solid white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .founder-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .founder-info {
+            flex: 1;
+        }
+        
+        .founder-name {
+            font-size: 2.2rem;
+            color: var(--dark-text);
+            margin-bottom: 10px;
+        }
+        
+        .founder-title {
+            color: var(--dark-sea-green);
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        
+        .founder-quote {
+            font-size: 1.2rem;
+            color: #666;
+            line-height: 1.8;
+            font-style: italic;
+            position: relative;
+            padding-left: 30px;
+            border-left: 3px solid var(--gold-accent);
+            margin-bottom: 25px;
+        }
+        
+        .founder-bio {
+            color: #666;
+            line-height: 1.7;
+        }
+        
+        /* Values Section */
+        .values-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, rgba(46, 139, 87, 0.03), rgba(32, 178, 170, 0.03));
+        }
+        
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+        
+        .value-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .value-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border-color: rgba(46, 139, 87, 0.1);
+        }
+        
+        .value-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            font-size: 2rem;
+            color: white;
+        }
+        
+        .value-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--dark-text);
+        }
+        
+        .value-description {
+            color: #666;
+            line-height: 1.7;
+        }
+        
+        /* Team Section */
+        .team-section {
+            padding: 80px 0;
+        }
+        
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+        
+        .team-member {
+            text-align: center;
+        }
+        
+        .member-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 0 auto 20px;
+            border: 5px solid white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .member-image:hover {
+            transform: scale(1.05);
+            border-color: var(--dark-sea-green);
+        }
+        
+        .member-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .member-name {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+            color: var(--dark-text);
+        }
+        
+        .member-role {
+            color: var(--dark-sea-green);
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .member-description {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        /* Journey Timeline */
+        .journey-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, rgba(46, 139, 87, 0.03), rgba(32, 178, 170, 0.03));
+        }
+        
+        .timeline {
+            position: relative;
+            max-width: 1000px;
+            margin: 60px auto 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--dark-sea-green), var(--light-sea-green));
+            transform: translateX(-50%);
+        }
+        
+        .timeline-item {
+            display: flex;
+            margin-bottom: 60px;
+            position: relative;
+        }
+        
+        .timeline-item:nth-child(odd) {
+            flex-direction: row-reverse;
+        }
+        
+        .timeline-content {
+            flex: 1;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+        
+        .timeline-item:nth-child(odd) .timeline-content {
+            margin-right: 40px;
+        }
+        
+        .timeline-item:nth-child(even) .timeline-content {
+            margin-left: 40px;
+        }
+        
+        .timeline-year {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            color: white;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            z-index: 2;
+            box-shadow: 0 5px 15px rgba(46, 139, 87, 0.3);
+        }
+        
+        .timeline-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--dark-text);
+        }
+        
+        .timeline-description {
+            color: #666;
+            line-height: 1.7;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            padding: 100px 0;
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            color: white;
+            text-align: center;
+        }
+        
+        .cta-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: white;
+        }
+        
+        .cta-subtitle {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto 40px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn-primary {
+            background: white;
+            color: var(--dark-sea-green);
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            color: var(--dark-sea-green);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-outline:hover {
+            background: white;
+            color: var(--dark-sea-green);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Footer */
+        .footer-section {
+            background: #1a1a1a;
+            color: #ddd;
+            padding: 60px 0 30px;
+        }
+        
+        .footer-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        
+        .footer-logo span {
+            color: var(--light-sea-green);
+        }
+        
+        .footer-title {
+            color: white;
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .footer-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background: var(--light-sea-green);
+        }
+        
+        .footer-links {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+        
+        .footer-links a {
+            color: #aaa;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--light-sea-green);
+            padding-left: 5px;
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            background: #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .social-icon:hover {
+            background: var(--light-sea-green);
+            transform: translateY(-5px);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            margin-top: 50px;
+            border-top: 1px solid #333;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 992px) {
+            .hero-title {
+                font-size: 3rem;
+            }
+            
+            .story-content {
+                flex-direction: column;
+            }
+            
+            .founder-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .founder-image {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .timeline::before {
+                left: 30px;
+            }
+            
+            .timeline-item {
+                flex-direction: row !important;
+            }
+            
+            .timeline-year {
+                left: 30px;
+            }
+            
+            .timeline-content {
+                margin-left: 80px !important;
+                margin-right: 0 !important;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .section-title h2 {
+                font-size: 2.5rem;
+            }
+            
+            .story-text h3 {
+                font-size: 2rem;
+            }
+            
+            .founder-content {
+                padding: 30px;
+            }
+            
+            .founder-name {
+                font-size: 1.8rem;
+            }
+            
+            .cta-title {
+                font-size: 2.5rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn-primary, .btn-outline {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .section-title h2 {
+                font-size: 2rem;
+            }
+            
+            .story-image img {
+                height: 350px;
+            }
+            
+            .values-grid, .team-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Top Bar -->
+    <div class="header-top">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <span th:if="${user != null}" th:text="'Welcome back, ' + ${user.firstName} + '!'">Welcome back!</span>
+                    <span th:unless="${user != null}">
+                        <i class="fas fa-phone-alt"></i> +91 98765 43210 &nbsp;&nbsp;|&nbsp;&nbsp;
+                        <i class="fas fa-envelope"></i> info@mokshithacollections.com
+                    </span>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <span>Celebrating Years of Elegance</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="main-header py-3">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-3 col-md-4 col-6">
+                    <a th:href="@{/home}" class="logo">Mokshitha<span>.</span></a>
+                </div>
+                <div class="col-lg-6 col-md-4 d-none d-md-block">
+                    <nav class="navbar navbar-expand-lg justify-content-center">
+                        <ul class="navbar-nav">
+                            <li class="nav-item"><a class="nav-link" th:href="@{/home}">Home</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Shop</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Collections</a></li>
+                            <li class="nav-item"><a class="nav-link active" th:href="@{/about}">About</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/contact}">Contact</a></li>
+                            <li class="nav-item" th:if="${user != null and user.isAdmin}">
+                                <a class="nav-link" th:href="@{/admin}" style="color: var(--dark-sea-green); font-weight: 600;">
+                                    <i class="fas fa-cog"></i> Admin
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="col-lg-3 col-md-4 col-6 text-end">
+                    <div class="header-icons d-inline-flex align-items-center">
+                        <div class="icon search-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="icon user-icon" onclick="window.location.href='/user_redirect'">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="icon wishlist-icon" onclick="window.location.href='/user_redirect'">
+                            <i class="far fa-heart"></i>
+                            <span class="cart-count" th:text="${wishlistCount != null ? wishlistCount : 0}">0</span>
+                        </div>
+                        <div class="icon cart-icon" onclick="window.location.href='/cart'">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span class="cart-count" th:text="${cartCount != null ? cartCount : 0}">0</span>
+                        </div>
+                        <button class="navbar-toggler d-md-none ms-3" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div class="collapse d-md-none" id="mobileMenu">
+                <ul class="navbar-nav mt-3">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/home}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Shop</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/shop}">Collections</a></li>
+                    <li class="nav-item"><a class="nav-link active" th:href="@{/about}">About</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/contact}">Contact</a></li>
+                    <li class="nav-item" th:if="${user != null and user.isAdmin}">
+                        <a class="nav-link" th:href="@{/admin}" style="color: var(--dark-sea-green); font-weight: 600;">
+                            <i class="fas fa-cog"></i> Admin
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Hero Section -->
+    <section class="about-hero">
+        <div class="container">
+            <div class="hero-content animate-fade-in-up">
+                <h1 class="hero-title">Our Story of Elegance</h1>
+                <p class="hero-subtitle">
+                    For over a decade, Mokshitha Collections has been redefining traditional Indian fashion, 
+                    blending timeless craftsmanship with contemporary elegance to make every woman feel special.
+                </p>
+                <div class="cta-buttons">
+                    <a href="#story" class="btn-primary">Discover Our Journey</a>
+                    <a th:href="@{/shop}" class="btn-outline">Shop Collections</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Our Story -->
+    <section id="story" class="our-story">
+        <div class="container">
+            <div class="section-title animate-fade-in-up">
+                <h2>Our Humble Beginnings</h2>
+                <p class="section-subtitle">
+                    From a small boutique in Chennai to becoming a beloved name in Indian fashion
+                </p>
+            </div>
+            
+            <div class="story-content animate-fade-in-up">
+                <div class="story-text">
+                    <h3>Where Tradition Meets Modernity</h3>
+                    <p>
+                        Founded in 2010 by Mokshitha Reddy, our journey began with a simple vision: 
+                        to preserve the rich heritage of Indian textile artistry while making it accessible 
+                        to the modern woman. What started as a small boutique in Chennai has grown into 
+                        a trusted name across India, known for exceptional quality and timeless designs.
+                    </p>
+                    <p>
+                        Each piece in our collection tells a story - of skilled artisans who have preserved 
+                        traditional techniques for generations, of luxurious fabrics that drape like a dream, 
+                        and of designs that celebrate the beauty of Indian femininity.
+                    </p>
+                    <p>
+                        Today, we serve thousands of elegant women who trust us for their most special moments - 
+                        weddings, festivals, celebrations, and everyday elegance. Our commitment remains unchanged: 
+                        to bring you clothing that makes you feel confident, beautiful, and truly special.
+                    </p>
+                </div>
+                <div class="story-image">
+                    <img src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Our Story">
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Founder Section -->
+    <section class="founder-section">
+        <div class="container">
+            <div class="section-title animate-fade-in-up">
+                <h2>Meet Our Founder</h2>
+                <p class="section-subtitle">
+                    The visionary behind Mokshitha Collections
+                </p>
+            </div>
+            
+            <div class="founder-card animate-fade-in-up">
+                <div class="founder-content">
+                    <div class="founder-image">
+                        <img src="https://images.unsplash.com/photo-1494790108755-2616b786d4d9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Mokshitha Reddy">
+                    </div>
+                    <div class="founder-info">
+                        <h3 class="founder-name">Mokshitha Reddy</h3>
+                        <p class="founder-title">Founder & Creative Director</p>
+                        <blockquote class="founder-quote">
+                            "Every woman deserves to feel elegant and confident in her clothing. 
+                            That belief has been the foundation of everything we create."
+                        </blockquote>
+                        <p class="founder-bio">
+                            With a degree in Textile Design from NIFT and a passion for traditional Indian crafts, 
+                            Mokshitha started her journey with just five weavers from Kanchipuram. 
+                            Her dedication to quality, attention to detail, and deep respect for craftsmanship 
+                            has shaped the brand's identity. Today, she personally oversees every collection, 
+                            ensuring that each piece meets her exacting standards of excellence.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Values Section -->
+    <section class="values-section">
+        <div class="container">
+            <div class="section-title animate-fade-in-up">
+                <h2>Our Core Values</h2>
+                <p class="section-subtitle">
+                    The principles that guide everything we do
+                </p>
+            </div>
+            
+            <div class="values-grid">
+                <div class="value-card animate-fade-in-up">
+                    <div class="value-icon">
+                        <i class="fas fa-hands"></i>
+                    </div>
+                    <h4 class="value-title">Artisan Craftsmanship</h4>
+                    <p class="value-description">
+                        We partner with skilled artisans across India, preserving traditional 
+                        techniques while providing fair wages and sustainable livelihoods.
+                    </p>
+                </div>
+                
+                <div class="value-card animate-fade-in-up">
+                    <div class="value-icon">
+                        <i class="fas fa-gem"></i>
+                    </div>
+                    <h4 class="value-title">Uncompromising Quality</h4>
+                    <p class="value-description">
+                        From fabric selection to final stitch, every detail is meticulously 
+                        checked to ensure our pieces stand the test of time.
+                    </p>
+                </div>
+                
+                <div class="value-card animate-fade-in-up">
+                    <div class="value-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h4 class="value-title">Sustainable Practices</h4>
+                    <p class="value-description">
+                        We're committed to ethical sourcing, minimizing waste, and using 
+                        eco-friendly materials wherever possible.
+                    </p>
+                </div>
+                
+                <div class="value-card animate-fade-in-up">
+                    <div class="value-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h4 class="value-title">Customer Delight</h4>
+                    <p class="value-description">
+                        Your satisfaction is our priority. We go above and beyond to ensure 
+                        every shopping experience is exceptional.
+                    </p>
+                </div>
+                
+                <div class="value-card animate-fade-in-up">
+                    <div class="value-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h4 class="value-title">Innovative Design</h4>
+                    <p class="value-description">
+                        While respecting tradition, we continuously innovate to bring you 
+                        fresh, contemporary designs for the modern woman.
+                    </p>
+                </div>
+                
+                <div class="value-card animate-fade-in-up">
+                    <div class="value-icon">
+                        <i class="fas fa-hands-helping"></i>
+                    </div>
+                    <h4 class="value-title">Community Impact</h4>
+                    <p class="value-description">
+                        We support women's empowerment initiatives and contribute to 
+                        the preservation of Indian textile heritage.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Journey Timeline -->
+    <section class="journey-section">
+        <div class="container">
+            <div class="section-title animate-fade-in-up">
+                <h2>Our Journey</h2>
+                <p class="section-subtitle">
+                    Milestones in our journey of elegance
+                </p>
+            </div>
+            
+            <div class="timeline">
+                <div class="timeline-item animate-fade-in-up">
+                    <div class="timeline-year">2010</div>
+                    <div class="timeline-content">
+                        <h4 class="timeline-title">The Beginning</h4>
+                        <p class="timeline-description">
+                            Mokshitha Collections opens its first boutique in Chennai with 
+                            a collection of 50 handpicked sarees. The focus is on authentic 
+                            Kanchipuram silks and traditional weaves.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item animate-fade-in-up">
+                    <div class="timeline-year">2013</div>
+                    <div class="timeline-content">
+                        <h4 class="timeline-title">First Expansion</h4>
+                        <p class="timeline-description">
+                            We open our second store in Bangalore and launch our first 
+                            designer collection. Our team grows to include master weavers 
+                            from Varanasi and artisans from Gujarat.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item animate-fade-in-up">
+                    <div class="timeline-year">2016</div>
+                    <div class="timeline-content">
+                        <h4 class="timeline-title">Digital Transformation</h4>
+                        <p class="timeline-description">
+                            Launch of our e-commerce platform, making Mokshitha Collections 
+                            accessible nationwide. We introduce "Mokshitha Studio" for 
+                            contemporary western wear.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item animate-fade-in-up">
+                    <div class="timeline-year">2019</div>
+                    <div class="timeline-content">
+                        <h4 class="timeline-title">Sustainable Initiatives</h4>
+                        <p class="timeline-description">
+                            Introduction of our eco-friendly collection using organic 
+                            cottons and natural dyes. We partner with artisan cooperatives 
+                            across 5 states.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item animate-fade-in-up">
+                    <div class="timeline-year">2022</div>
+                    <div class="timeline-content">
+                        <h4 class="timeline-title">International Recognition</h4>
+                        <p class="timeline-description">
+                            Featured in "Vogue India" and "Elle Decor". We begin shipping 
+                            internationally to the US, UK, and UAE, sharing Indian elegance 
+                            with the world.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item animate-fade-in-up">
+                    <div class="timeline-year">2023</div>
+                    <div class="timeline-content">
+                        <h4 class="timeline-title">Present Day</h4>
+                        <p class="timeline-description">
+                            Serving over 50,000 customers with 7 physical stores and a 
+                            thriving online presence. Launch of our bespoke tailoring 
+                            service and virtual try-on feature.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Team Section -->
+    <section class="team-section">
+        <div class="container">
+            <div class="section-title animate-fade-in-up">
+                <h2>Meet Our Team</h2>
+                <p class="section-subtitle">
+                    The passionate individuals behind our success
+                </p>
+            </div>
+            
+            <div class="team-grid">
+                <div class="team-member animate-fade-in-up">
+                    <div class="member-image">
+                        <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Ananya Sharma">
+                    </div>
+                    <h4 class="member-name">Ananya Sharma</h4>
+                    <p class="member-role">Head of Design</p>
+                    <p class="member-description">
+                        With 8 years of experience in fashion design, Ananya leads our creative team, 
+                        blending traditional motifs with contemporary aesthetics.
+                    </p>
+                </div>
+                
+                <div class="team-member animate-fade-in-up">
+                    <div class="member-image">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Rajesh Kumar">
+                    </div>
+                    <h4 class="member-name">Rajesh Kumar</h4>
+                    <p class="member-role">Production Manager</p>
+                    <p class="member-description">
+                        Rajesh ensures every piece meets our quality standards, working closely with 
+                        our artisan partners across India for over 10 years.
+                    </p>
+                </div>
+                
+                <div class="team-member animate-fade-in-up">
+                    <div class="member-image">
+                        <img src="https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Priya Patel">
+                    </div>
+                    <h4 class="member-name">Priya Patel</h4>
+                    <p class="member-role">Customer Experience</p>
+                    <p class="member-description">
+                        Priya and her team ensure every customer feels valued, handling inquiries, 
+                        custom requests, and after-sales service with care.
+                    </p>
+                </div>
+                
+                <div class="team-member animate-fade-in-up">
+                    <div class="member-image">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Arun Mehta">
+                    </div>
+                    <h4 class="member-name">Arun Mehta</h4>
+                    <p class="member-role">Digital Marketing</p>
+                    <p class="member-description">
+                        Arun manages our online presence, creating engaging content that shares 
+                        the stories behind our collections with the world.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="section-title animate-fade-in-up">
+                <h2 class="cta-title">Join Our Journey</h2>
+                <p class="cta-subtitle">
+                    Experience the elegance, craftsmanship, and passion that defines Mokshitha Collections. 
+                    Become part of our story today.
+                </p>
+            </div>
+            
+            <div class="cta-buttons animate-fade-in-up">
+                <a th:href="@{/shop}" class="btn-primary">
+                    <i class="fas fa-shopping-bag me-2"></i> Shop Our Collections
+                </a>
+                <a th:href="@{/contact}" class="btn-outline">
+                    <i class="fas fa-envelope me-2"></i> Get In Touch
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="footer-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <a th:href="@{/home}" class="footer-logo">Mokshitha<span>.</span></a>
+                    <p class="footer-about">
+                        Bringing you the finest collection of traditional sarees and contemporary dresses since 2010.
+                        Our mission is to make every woman feel elegant and confident.
+                    </p>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-pinterest-p"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h4 class="footer-title">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a th:href="@{/home}">Home</a></li>
+                        <li><a th:href="@{/shop}">Shop</a></li>
+                        <li><a th:href="@{/shop(categorySlug='sarees')}">Sarees</a></li>
+                        <li><a th:href="@{/shop(categorySlug='dresses')}">Dresses</a></li>
+                        <li><a th:href="@{/about}">About Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-2 col-md-4 mb-4">
+                    <h4 class="footer-title">Support</h4>
+                    <ul class="footer-links">
+                        <li><a th:href="@{/contact}">Contact Us</a></li>
+                        <li><a th:href="@{/contact}">FAQ</a></li>
+                        <li><a th:href="@{/contact}">Shipping Policy</a></li>
+                        <li><a th:href="@{/contact}">Returns &amp; Exchange</a></li>
+                        <li><a th:href="@{/contact}">Privacy Policy</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-4 col-md-4 mb-4">
+                    <h4 class="footer-title">Contact Info</h4>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt me-2"></i> 123 Fashion Street, Chennai, India</li>
+                        <li><i class="fas fa-phone-alt me-2"></i> +91 98765 43210</li>
+                        <li><i class="fas fa-envelope me-2"></i> info@mokshithacollections.com</li>
+                        <li><i class="fas fa-clock me-2"></i> Mon-Sat: 10AM - 8PM</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="copyright">
+                <p>
+                    <span th:text="'&copy; ' + ${#temporals.format(#temporals.createNow(), 'yyyy')} + ' Mokshitha Collections. All rights reserved. |'">&copy; 2026 Mokshitha Collections. All rights reserved. |</span>
+                    Designed with <i class="fas fa-heart" style="color: var(--light-sea-green);"></i> for elegant women
+                </p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            animateOnScroll();
+        });
+        
+        function setupEventListeners() {
+            // Search functionality
+            document.querySelector('.search-icon').addEventListener('click', showSearchModal);
+            
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 100,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        }
+        
+        function animateOnScroll() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-fade-in-up');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+            
+            // Observe all elements with the animation class
+            document.querySelectorAll('.animate-fade-in-up').forEach(element => {
+                observer.observe(element);
+            });
+        }
+        
+        // Common functions
+        function showSearchModal() {
+            const searchBox = document.createElement('div');
+            searchBox.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                z-index: 10001;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            searchBox.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 600px; position: relative;">
+                    <button class="close-search" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
+                    <h3 style="margin-bottom: 20px; color: var(--dark-text);">Search Products</h3>
+                    <div style="display: flex;">
+                        <input type="text" placeholder="Search for sarees, dresses, collections..." 
+                               style="flex: 1; padding: 15px; border: 2px solid #eee; border-radius: 5px 0 0 5px; font-size: 1rem;">
+                        <button style="background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green)); color: white; border: none; padding: 0 30px; border-radius: 0 5px 5px 0; cursor: pointer;">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div style="margin-top: 20px; color: #666; font-size: 0.9rem;">
+                        <p>Popular searches: <a href="#" style="color: var(--dark-sea-green); margin-right: 10px;">Silk Sarees</a> 
+                        <a href="#" style="color: var(--dark-sea-green); margin-right: 10px;">Evening Dresses</a> 
+                        <a href="#" style="color: var(--dark-sea-green);">Party Wear</a></p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(searchBox);
+            
+            searchBox.querySelector('.close-search').addEventListener('click', function() {
+                document.body.removeChild(searchBox);
+            });
+            
+            searchBox.addEventListener('click', function(e) {
+                if (e.target === searchBox) {
+                    document.body.removeChild(searchBox);
+                }
+            });
+        }
+        
+        // Add smooth scrolling for timeline on mobile
+        if (window.innerWidth <= 992) {
+            const timeline = document.querySelector('.timeline');
+            if (timeline) {
+                timeline.style.overflowX = 'auto';
+                timeline.style.whiteSpace = 'nowrap';
+                timeline.style.paddingBottom = '20px';
+                
+                const timelineItems = document.querySelectorAll('.timeline-item');
+                timelineItems.forEach(item => {
+                    item.style.display = 'inline-block';
+                    item.style.width = '300px';
+                    item.style.verticalAlign = 'top';
+                    item.style.whiteSpace = 'normal';
+                    item.style.marginRight = '30px';
+                });
+            }
+        }
+    </script>
+</body>
+</html>

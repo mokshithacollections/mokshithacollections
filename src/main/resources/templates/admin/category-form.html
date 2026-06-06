@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Category')}"></head>
+<body>
+<div class="admin-shell">
+    <aside th:replace="~{admin/_layout :: sidebar('categories')}"></aside>
+
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <div>
+                <h1 th:text="${category != null} ? 'Edit category' : 'New category'">New category</h1>
+                <div class="breadcrumb">
+                    <a th:href="@{/admin/categories}">Categories</a> /
+                    <span th:text="${category != null ? category.name : 'New'}">New</span>
+                </div>
+            </div>
+            <a class="btn btn-outline" th:href="@{/admin/categories}">Back to list</a>
+        </div>
+
+        <div class="card">
+            <form id="categoryForm">
+                <div class="form-grid-2">
+                    <div class="form-row">
+                        <label>Name *</label>
+                        <input type="text" name="name" required maxlength="100"
+                               th:value="${category != null ? category.name : ''}">
+                    </div>
+                    <div class="form-row">
+                        <label>Slug *</label>
+                        <input type="text" name="slug" required maxlength="100"
+                               pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                               th:value="${category != null ? category.slug : ''}">
+                        <div class="helper">Lowercase letters/numbers, hyphens. e.g. <code>silk-sarees</code></div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label>Description</label>
+                    <textarea name="description"
+                              th:text="${category != null ? category.description : ''}"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <label>Parent category</label>
+                    <select name="parentId">
+                        <option value="">— None (top-level) —</option>
+                        <option th:each="c : ${allCategories}"
+                                th:value="${c.categoryId}"
+                                th:text="${c.name}"
+                                th:if="${category == null or c.categoryId != category.categoryId}"
+                                th:selected="${category != null and category.parentId != null and category.parentId == c.categoryId}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-row checkbox">
+                    <input type="checkbox" id="isActive" name="isActive" checked
+                           th:if="${category == null}">
+                    <input type="checkbox" id="isActive" name="isActive" checked
+                           th:if="${category != null}">
+                    <label for="isActive">Active</label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        <span th:text="${category != null} ? 'Save changes' : 'Create category'">Create</span>
+                    </button>
+                    <a class="btn btn-outline" th:href="@{/admin/categories}">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<div th:replace="~{admin/_layout :: scripts}"></div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const CATEGORY_ID = /*[[${category != null ? category.categoryId : null}]]*/ null;
+    /*]]>*/
+
+    document.getElementById('categoryForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const body = {
+            name: fd.get('name'),
+            slug: fd.get('slug'),
+            description: fd.get('description') || null,
+            parentId: fd.get('parentId') ? parseInt(fd.get('parentId'), 10) : null,
+            isActive: fd.get('isActive') === 'on'
+        };
+        try {
+            const isUpdate = CATEGORY_ID !== null && CATEGORY_ID !== undefined && CATEGORY_ID !== '';
+            const url = isUpdate ? '/api/admin/categories/' + CATEGORY_ID : '/api/admin/categories';
+            await adminApi('POST', url, body);
+            toast(isUpdate ? 'Saved' : 'Created', 'success');
+            setTimeout(() => { window.location.href = '/admin/categories'; }, 500);
+        } catch (e) { toast(e.message, 'error'); }
+    });
+</script>
+</body>
+</html>
