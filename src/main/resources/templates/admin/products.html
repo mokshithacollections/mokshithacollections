@@ -57,16 +57,20 @@
                                th:text="'₹' + ${p.price}">₹0</s>
                         </td>
                         <td>
-                            <!-- listAll() returns ProductSummaryResponse which doesn't carry isActive,
-                                 so render placeholder; the form page shows the real state. -->
-                            <span class="pill pill-active">Listed</span>
+                            <span th:if="${p.isActive != null and p.isActive}" class="pill pill-active">Active</span>
+                            <span th:unless="${p.isActive != null and p.isActive}" class="pill"
+                                  style="background:#eee;color:#888;">Inactive</span>
                         </td>
-                        <td>
+                        <td style="white-space:nowrap;">
                             <a class="btn btn-outline btn-sm"
                                th:href="@{/admin/products/{id}(id=${p.productId})}">Edit</a>
+                            <button type="button" class="btn btn-outline btn-sm"
+                                    th:attr="data-id=${p.productId}, data-active=${p.isActive}"
+                                    th:text="${p.isActive != null and p.isActive} ? 'Deactivate' : 'Activate'"
+                                    onclick="onToggleActive(this)">Deactivate</button>
                             <button type="button" class="btn btn-danger btn-sm"
                                     th:attr="data-id=${p.productId}, data-name=${p.name}"
-                                    onclick="onDelete(this)">Deactivate</button>
+                                    onclick="onRemove(this)">Remove</button>
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(products.content)}">
@@ -101,13 +105,27 @@
 
 <div th:replace="~{admin/_layout :: scripts}"></div>
 <script>
-    function onDelete(btn) {
+    // Flip Active/Inactive via explicit activate/deactivate endpoints.
+    function onToggleActive(btn) {
+        const id = btn.dataset.id;
+        const isActive = btn.dataset.active === 'true';
+        const path = isActive ? 'deactivate' : 'activate';
+        adminApi('POST', '/api/admin/products/' + id + '/' + path)
+            .then(() => {
+                toast(isActive ? 'Product deactivated' : 'Product activated', 'success');
+                setTimeout(() => location.reload(), 500);
+            })
+            .catch(e => toast(e.message, 'error'));
+    }
+
+    // Permanent hard delete (product + variants + images + reviews; orders unaffected).
+    function onRemove(btn) {
         const id = btn.dataset.id;
         const name = btn.dataset.name;
-        confirmThen('Deactivate "' + name + '"? Existing orders will keep referencing it.', async () => {
+        confirmThen('Permanently DELETE "' + name + '"?\n\nThis removes the product, its variants, images and reviews, and clears it from any carts/wishlists. Past orders are unaffected. This cannot be undone.', async () => {
             try {
                 await adminApi('DELETE', '/api/admin/products/' + id);
-                toast('Product deactivated', 'success');
+                toast('Product deleted', 'success');
                 setTimeout(() => location.reload(), 600);
             } catch (e) {
                 toast(e.message, 'error');

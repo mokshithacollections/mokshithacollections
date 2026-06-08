@@ -8,6 +8,7 @@ import com.ec.mokshitha_collections.entity.Order;
 import com.ec.mokshitha_collections.entity.OrderItem;
 import com.ec.mokshitha_collections.entity.OrderStatus;
 import com.ec.mokshitha_collections.entity.PaymentStatus;
+import com.ec.mokshitha_collections.exception.BadRequestException;
 import com.ec.mokshitha_collections.exception.ResourceNotFoundException;
 import com.ec.mokshitha_collections.repository.OrderRepository;
 import com.ec.mokshitha_collections.repository.ProductVariantImageRepository;
@@ -90,6 +91,15 @@ public class AdminOrderService {
 
         OrderStatus previous = order.getStatus();
         OrderStatus next = req.getStatus();
+
+        // Enforce the step-by-step flow — no skipping ahead (e.g. PLACED → DELIVERED).
+        if (!previous.canTransitionTo(next)) {
+            String allowed = previous.nextStep() != null ? previous.nextStep().name() : "none";
+            throw new BadRequestException(
+                    "Cannot change status from " + previous + " to " + next
+                    + ". Orders move one step at a time (next allowed: " + allowed + ")"
+                    + (previous.isCancellable() ? ", or you can cancel the order." : "."));
+        }
 
         // Re-stock + refund on cancel
         if (next == OrderStatus.CANCELLED && previous != OrderStatus.CANCELLED) {

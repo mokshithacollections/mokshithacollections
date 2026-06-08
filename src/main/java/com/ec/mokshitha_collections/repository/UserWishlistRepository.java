@@ -5,11 +5,17 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import com.ec.mokshitha_collections.entity.UserWishlist;
 
 public interface UserWishlistRepository extends JpaRepository<UserWishlist, Long>{
+
+	/** Remove every wishlist row for a product (hard delete). */
+	@Modifying
+	@Query("DELETE FROM UserWishlist w WHERE w.product.productId = :productId")
+	void deleteByProductId(Long productId);
 
 	/** Wishlist is now keyed on the variant, so the same product can appear
 	 *  in several colours. */

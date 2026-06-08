@@ -10,6 +10,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -47,6 +48,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         return ResponseEntity.badRequest()
                 .body(ApiResponse.error("Invalid value for parameter: " + ex.getName()));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiResponse> handleMissingParam(MissingServletRequestParameterException ex) {
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error("Missing required parameter: " + ex.getParameterName()));
     }
 
     @ExceptionHandler(BadRequestException.class)

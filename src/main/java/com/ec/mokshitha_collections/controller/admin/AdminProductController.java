@@ -47,10 +47,25 @@ public class AdminProductController {
         return ResponseEntity.ok(service.update(id, req));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse> softDelete(@PathVariable Long id) {
-        service.softDelete(id);
+    /** Make the product visible/purchasable. */
+    @PostMapping("/{id}/activate")
+    public ResponseEntity<ApiResponse> activate(@PathVariable Long id) {
+        service.setActive(id, true);
+        return ResponseEntity.ok(ApiResponse.success("Product activated"));
+    }
+
+    /** Hide the product from the storefront (without deleting it). */
+    @PostMapping("/{id}/deactivate")
+    public ResponseEntity<ApiResponse> deactivate(@PathVariable Long id) {
+        service.setActive(id, false);
         return ResponseEntity.ok(ApiResponse.success("Product deactivated"));
+    }
+
+    /** Permanently delete the product + variants, images, reviews, cart/wishlist refs. */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse> delete(@PathVariable Long id) {
+        service.hardDelete(id);
+        return ResponseEntity.ok(ApiResponse.success("Product deleted"));
     }
 
     /** Hero image upload from the admin's computer (multipart). */

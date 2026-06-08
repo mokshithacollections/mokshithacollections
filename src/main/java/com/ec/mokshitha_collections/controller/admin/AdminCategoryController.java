@@ -35,9 +35,24 @@ public class AdminCategoryController {
         return ResponseEntity.ok(service.update(id, req));
     }
 
-    @DeleteMapping("/{id}")
+    /** Make the category visible to customers. */
+    @PostMapping("/{id}/activate")
+    public ResponseEntity<ApiResponse> activate(@PathVariable Long id) {
+        service.setActive(id, true);
+        return ResponseEntity.ok(ApiResponse.success("Category activated"));
+    }
+
+    /** Hide the category from customers (without deleting it). */
+    @PostMapping("/{id}/deactivate")
     public ResponseEntity<ApiResponse> deactivate(@PathVariable Long id) {
-        service.deactivate(id);
+        service.setActive(id, false);
         return ResponseEntity.ok(ApiResponse.success("Category deactivated"));
+    }
+
+    /** Permanently delete the category AND all products under it. */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse> delete(@PathVariable Long id) {
+        service.hardDelete(id);
+        return ResponseEntity.ok(ApiResponse.success("Category and its products deleted"));
     }
 }

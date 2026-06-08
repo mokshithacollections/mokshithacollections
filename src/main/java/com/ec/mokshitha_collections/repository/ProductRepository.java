@@ -32,4 +32,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>,
             WHERE p.productId = :productId
             """)
     Optional<Product> findByIdWithCategory(Long productId);
+
+    /** All products in a category — used when hard-deleting a category. */
+    List<Product> findByCategoryCategoryId(Long categoryId);
 }

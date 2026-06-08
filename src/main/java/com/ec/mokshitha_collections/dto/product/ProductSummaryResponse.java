@@ -21,6 +21,7 @@ public class ProductSummaryResponse {
     private final Boolean isFeatured;
     private final Boolean isBestseller;
     private final Boolean isTrending;
+    private final Boolean isActive;
     /** Number of distinct colours this product is available in (0 if no variants). */
     private final Integer colorCount;
 }

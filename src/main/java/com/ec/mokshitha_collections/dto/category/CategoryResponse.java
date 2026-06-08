@@ -13,4 +13,5 @@ public class CategoryResponse {
     private final String slug;
     private final String description;
     private final Long parentId;
+    private final Boolean isActive;
 }

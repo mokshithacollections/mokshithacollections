@@ -4,11 +4,18 @@ import com.ec.mokshitha_collections.entity.ProductReview;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 
 public interface ProductReviewRepository extends JpaRepository<ProductReview, Long> {
+
+    /** Remove all reviews for a product (hard delete). */
+    @Modifying
+    @Query("DELETE FROM ProductReview r WHERE r.product.productId = :productId")
+    void deleteByProductId(Long productId);
+
 
     @Query("""
             SELECT r FROM ProductReview r

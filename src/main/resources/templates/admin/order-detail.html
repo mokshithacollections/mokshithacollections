@@ -97,8 +97,11 @@
                     <form id="statusForm">
                         <div class="form-row">
                             <label>Update order status</label>
+                            <!-- Only the current status, the next step, and (if still
+                                 cancellable) Cancelled are offered — no skipping ahead. -->
                             <select name="status">
                                 <option th:each="s : ${statuses}"
+                                        th:if="${order.status.canTransitionTo(s)}"
                                         th:value="${s.name()}"
                                         th:text="${s.name()}"
                                         th:selected="${s.name() == order.status.name()}"></option>

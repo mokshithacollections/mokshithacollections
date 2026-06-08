@@ -43,6 +43,7 @@ public class CategoryService {
                 .slug(c.getSlug())
                 .description(c.getDescription())
                 .parentId(c.getParent() != null ? c.getParent().getCategoryId() : null)
+                .isActive(c.getIsActive())
                 .build();
     }
 }

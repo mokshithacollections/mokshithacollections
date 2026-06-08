@@ -2,12 +2,18 @@ package com.ec.mokshitha_collections.repository;
 
 import com.ec.mokshitha_collections.entity.ProductVariant;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ProductVariantRepository extends JpaRepository<ProductVariant, Long> {
+
+    /** Remove all variants of a product (hard delete; delete images/cart first). */
+    @Modifying
+    @Query("DELETE FROM ProductVariant v WHERE v.product.productId = :productId")
+    void deleteByProductId(Long productId);
 
     /** All variants of a product, ordered by stock so the toggle endpoint
      *  picks the most-available default. */

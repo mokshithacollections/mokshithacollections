@@ -25,6 +25,7 @@
                         <th>Slug</th>
                         <th>Parent</th>
                         <th>Description</th>
+                        <th>Status</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -41,15 +42,24 @@
                         </td>
                         <td th:text="${c.description != null ? #strings.abbreviate(c.description, 60) : '—'}">—</td>
                         <td>
+                            <span th:if="${c.isActive != null and c.isActive}" class="pill pill-active">Active</span>
+                            <span th:unless="${c.isActive != null and c.isActive}" class="pill"
+                                  style="background:#eee;color:#888;">Inactive</span>
+                        </td>
+                        <td style="white-space:nowrap;">
                             <a class="btn btn-outline btn-sm"
                                th:href="@{/admin/categories/{id}(id=${c.categoryId})}">Edit</a>
+                            <button type="button" class="btn btn-outline btn-sm"
+                                    th:attr="data-id=${c.categoryId}, data-active=${c.isActive}"
+                                    th:text="${c.isActive != null and c.isActive} ? 'Deactivate' : 'Activate'"
+                                    onclick="onToggleActive(this)">Deactivate</button>
                             <button type="button" class="btn btn-danger btn-sm"
                                     th:attr="data-id=${c.categoryId}, data-name=${c.name}"
-                                    onclick="onDeactivate(this)">Deactivate</button>
+                                    onclick="onRemove(this)">Remove</button>
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(categories)}">
-                        <td class="empty-row" colspan="5">
+                        <td class="empty-row" colspan="6">
                             No categories yet. <a th:href="@{/admin/categories/new}">Create one</a>.
                         </td>
                     </tr>
@@ -61,14 +71,28 @@
 
 <div th:replace="~{admin/_layout :: scripts}"></div>
 <script>
-    function onDeactivate(btn) {
+    // Flip Active/Inactive via explicit activate/deactivate endpoints.
+    function onToggleActive(btn) {
+        const id = btn.dataset.id;
+        const isActive = btn.dataset.active === 'true';
+        const path = isActive ? 'deactivate' : 'activate';
+        adminApi('POST', '/api/admin/categories/' + id + '/' + path)
+            .then(() => {
+                toast(isActive ? 'Category deactivated' : 'Category activated', 'success');
+                setTimeout(() => location.reload(), 500);
+            })
+            .catch(e => toast(e.message, 'error'));
+    }
+
+    // Permanent hard delete — removes the category AND every product under it.
+    function onRemove(btn) {
         const id = btn.dataset.id;
         const name = btn.dataset.name;
-        confirmThen('Deactivate "' + name + '"? Products in this category stay but the category is hidden.', async () => {
+        confirmThen('Permanently DELETE category "' + name + '" AND all products under it?\n\nEach product\'s variants, images and reviews are removed too. Past orders are unaffected. This cannot be undone.', async () => {
             try {
                 await adminApi('DELETE', '/api/admin/categories/' + id);
-                toast('Category deactivated', 'success');
-                setTimeout(() => location.reload(), 600);
+                toast('Category and its products deleted', 'success');
+                setTimeout(() => location.reload(), 700);
             } catch (e) { toast(e.message, 'error'); }
         });
     }

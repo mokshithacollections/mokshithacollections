@@ -3,11 +3,13 @@ package com.ec.mokshitha_collections.service.admin;
 import com.ec.mokshitha_collections.dto.admin.CategoryCreateRequest;
 import com.ec.mokshitha_collections.dto.admin.CategoryUpdateRequest;
 import com.ec.mokshitha_collections.dto.category.CategoryResponse;
+import com.ec.mokshitha_collections.entity.Product;
 import com.ec.mokshitha_collections.entity.ProductCategory;
 import com.ec.mokshitha_collections.exception.BadRequestException;
 import com.ec.mokshitha_collections.exception.ConflictException;
 import com.ec.mokshitha_collections.exception.ResourceNotFoundException;
 import com.ec.mokshitha_collections.repository.ProductCategoryRepository;
+import com.ec.mokshitha_collections.repository.ProductRepository;
 import com.ec.mokshitha_collections.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,8 @@ import java.util.List;
 public class AdminCategoryService {
 
     private final ProductCategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
+    private final AdminProductService adminProductService;
 
     /** Lists ALL categories (active + inactive) for admin grid. */
     @Transactional(readOnly = true)
@@ -78,12 +82,30 @@ public class AdminCategoryService {
         return CategoryService.toResponse(categoryRepository.save(c));
     }
 
-    /** Deactivate rather than delete — products may still reference the category. */
+    /** Toggle a category's visibility (Active/Inactive) without deleting it. */
     @Transactional
-    public void deactivate(Long categoryId) {
+    public void setActive(Long categoryId, boolean active) {
         ProductCategory c = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-        c.setIsActive(false);
+        c.setIsActive(active);
         categoryRepository.save(c);
+    }
+
+    /**
+     * Hard delete: permanently removes the category AND every product under it
+     * (each product's variants, images, reviews and cart/wishlist refs are
+     * cleaned up by AdminProductService.hardDelete). Sub-categories are detached
+     * (their parent link is cleared) so the row can be removed.
+     */
+    @Transactional
+    public void hardDelete(Long categoryId) {
+        ProductCategory c = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
+        for (Product p : productRepository.findByCategoryCategoryId(categoryId)) {
+            adminProductService.hardDelete(p.getProductId());
+        }
+        categoryRepository.detachChildren(categoryId);
+        categoryRepository.delete(c);
     }
 }

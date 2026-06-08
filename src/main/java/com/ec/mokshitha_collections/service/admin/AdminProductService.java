@@ -14,10 +14,13 @@ import com.ec.mokshitha_collections.entity.ProductVariantImage;
 import com.ec.mokshitha_collections.exception.BadRequestException;
 import com.ec.mokshitha_collections.exception.ConflictException;
 import com.ec.mokshitha_collections.exception.ResourceNotFoundException;
+import com.ec.mokshitha_collections.repository.CartItemRepository;
 import com.ec.mokshitha_collections.repository.ProductCategoryRepository;
 import com.ec.mokshitha_collections.repository.ProductRepository;
+import com.ec.mokshitha_collections.repository.ProductReviewRepository;
 import com.ec.mokshitha_collections.repository.ProductVariantImageRepository;
 import com.ec.mokshitha_collections.repository.ProductVariantRepository;
+import com.ec.mokshitha_collections.repository.UserWishlistRepository;
 import com.ec.mokshitha_collections.service.ProductService;
 import com.ec.mokshitha_collections.service.impl.ProductServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +38,9 @@ public class AdminProductService {
     private final ProductCategoryRepository categoryRepository;
     private final ProductVariantRepository variantRepository;
     private final ProductVariantImageRepository imageRepository;
+    private final CartItemRepository cartItemRepository;
+    private final UserWishlistRepository wishlistRepository;
+    private final ProductReviewRepository reviewRepository;
     private final ImageStorageService imageStorageService;
     private final ProductService productService;
 
@@ -100,13 +106,37 @@ public class AdminProductService {
         return productService.getProductDetail(p.getProductId());
     }
 
-    /** Soft delete: flips isActive=false so order history references stay intact. */
+    /** Toggle a product's visibility (Active/Inactive) without deleting anything. */
     @Transactional
-    public void softDelete(Long productId) {
+    public void setActive(Long productId, boolean active) {
         Product p = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
-        p.setIsActive(false);
+        p.setIsActive(active);
         productRepository.save(p);
+    }
+
+    /**
+     * Hard delete: permanently removes the product and everything that references
+     * it — variant images (files + rows), variants, reviews, and any cart/wishlist
+     * entries. Order history is unaffected: order lines store snapshots (productId/
+     * variantId are plain columns, not foreign keys).
+     */
+    @Transactional
+    public void hardDelete(Long productId) {
+        Product p = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+        // 1) delete the physical image files from disk (best-effort)
+        imageRepository.findByProductId(productId)
+                .forEach(img -> imageStorageService.delete(img.getImageUrl()));
+
+        // 2) delete DB rows in FK-safe order (children before parents)
+        imageRepository.deleteByProductId(productId);   // FK -> variant
+        cartItemRepository.deleteByProductId(productId); // FK -> variant
+        wishlistRepository.deleteByProductId(productId); // FK -> product/variant
+        reviewRepository.deleteByProductId(productId);   // FK -> product
+        variantRepository.deleteByProductId(productId);  // FK -> product
+        productRepository.delete(p);
     }
 
     /** Uploads a file from the admin's computer and sets it as the product's hero image. */

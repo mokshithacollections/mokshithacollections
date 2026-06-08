@@ -359,7 +359,14 @@
         <div class="hero-grid">
             <div>
                 <div class="order-num" th:text="${order.orderNumber}">#MC-000000</div>
-                <h1>Your order is on its way</h1>
+                <h1 th:switch="${order.status.name()}">
+                    <span th:case="'DELIVERED'">Delivered successfully 🎉</span>
+                    <span th:case="'CANCELLED'">Your order was cancelled</span>
+                    <span th:case="'SHIPPED'">Your order is on its way</span>
+                    <span th:case="'PROCESSING'">We're preparing your order</span>
+                    <span th:case="'CONFIRMED'">Your order is confirmed</span>
+                    <span th:case="*">We've received your order</span>
+                </h1>
                 <div class="placed">
                     Placed
                     <span th:text="${#temporals.format(order.placedAt, 'd MMM yyyy, HH:mm')}">date</span>

@@ -2,6 +2,7 @@ package com.ec.mokshitha_collections.repository;
 
 import com.ec.mokshitha_collections.entity.CartItem;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -10,6 +11,14 @@ import java.util.Optional;
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 
     Optional<CartItem> findByCartCartIdAndVariantVariantId(Long cartId, Long variantId);
+
+    /** Remove every cart line referencing any variant of a product (hard delete). */
+    @Modifying
+    @Query("""
+            DELETE FROM CartItem ci
+            WHERE ci.variant.variantId IN (SELECT v.variantId FROM ProductVariant v WHERE v.product.productId = :productId)
+            """)
+    void deleteByProductId(Long productId);
 
     long countByCartCartId(Long cartId);
 

@@ -154,6 +154,7 @@ public class ProductServiceImpl implements ProductService {
                 .isFeatured(p.getIsFeatured())
                 .isBestseller(p.getIsBestseller())
                 .isTrending(p.getIsTrending())
+                .isActive(p.getIsActive())
                 .colorCount(colorCount)
                 .build();
     }
