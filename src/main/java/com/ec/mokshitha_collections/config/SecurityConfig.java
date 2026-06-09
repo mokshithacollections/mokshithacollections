@@ -15,7 +15,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
@@ -129,9 +128,33 @@ public class SecurityConfig {
             .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable())
             .logout(logout -> logout.disable())
-            // Return 401 JSON for unauthenticated AJAX rather than a redirect to /login
+            // For unauthenticated requests: API/AJAX calls get a clean 401 (so the
+            // frontend can react), while normal page navigations (e.g. a guest
+            // clicking the cart) are redirected to the login page instead of a
+            // bare 401/blank screen.
             .exceptionHandling(ex -> ex
-                    .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                    .authenticationEntryPoint((request, response, authException) -> {
+                        // Distinguish a top-level page navigation (e.g. a guest clicking
+                        // the cart icon) from an AJAX/fetch call. Browsers send
+                        // Sec-Fetch-Mode: navigate only for real navigations.
+                        String secFetchMode = request.getHeader("Sec-Fetch-Mode");
+                        boolean isAjax;
+                        if (secFetchMode != null) {
+                            isAjax = !"navigate".equals(secFetchMode);
+                        } else {
+                            // Fallback for older clients without Sec-Fetch-* headers.
+                            String uri = request.getRequestURI();
+                            String accept = request.getHeader("Accept");
+                            isAjax = uri.startsWith("/api/")
+                                    || "XMLHttpRequest".equals(request.getHeader("X-Requested-With"))
+                                    || (accept != null && accept.contains("application/json"));
+                        }
+                        if (isAjax) {
+                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                        } else {
+                            response.sendRedirect(request.getContextPath() + "/login_register");
+                        }
+                    }))
             .sessionManagement(s -> s
                     .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                     .sessionFixation(sf -> sf.migrateSession())

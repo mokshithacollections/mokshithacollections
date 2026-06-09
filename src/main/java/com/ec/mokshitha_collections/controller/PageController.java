@@ -6,6 +6,7 @@ import com.ec.mokshitha_collections.service.CategoryService;
 import com.ec.mokshitha_collections.service.OrderService;
 import com.ec.mokshitha_collections.service.ProductService;
 import com.ec.mokshitha_collections.service.ReviewService;
+import com.ec.mokshitha_collections.service.WishlistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +34,7 @@ public class PageController {
     private final CategoryService categoryService;
     private final ReviewService reviewService;
     private final OrderService orderService;
+    private final WishlistService wishlistService;
 
     private static final int DEFAULT_PAGE_SIZE = 12;
 
@@ -77,6 +79,13 @@ public class PageController {
     public String cart(@AuthenticationPrincipal CustomUserDetails principal, Model model) {
         model.addAttribute("cart", cartService.getCart(principal.getUserId()));
         return "cart";
+    }
+
+    /** Dedicated wishlist page (opened from the header heart icon). */
+    @GetMapping("/wishlist")
+    public String wishlist(@AuthenticationPrincipal CustomUserDetails principal, Model model) {
+        model.addAttribute("wishlistItems", wishlistService.getUserWishlist(principal.getUserId()));
+        return "wishlist";
     }
 
     @GetMapping("/checkout")

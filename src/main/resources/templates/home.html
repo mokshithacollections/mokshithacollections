@@ -71,7 +71,7 @@
                         <div class="icon user-icon" id="userIcon">
                             <i class="fas fa-user"></i>
                         </div>
-                        <div class="icon wishlist-icon" id="wishlistIcon">
+                        <div class="icon wishlist-icon" id="wishlistIcon" onclick="window.location.href='/wishlist'">
                             <i class="far fa-heart"></i>
                             <span class="cart-count" th:text="${wishlistCount != null ? wishlistCount : 0}">0</span>
                         </div>

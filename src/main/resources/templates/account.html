@@ -70,7 +70,7 @@
                         <div class="icon user-icon">
                             <i class="fas fa-user"></i>
                         </div>
-                        <div class="icon wishlist-icon" id="wishlistIcon">
+                        <div class="icon wishlist-icon" id="wishlistIcon" onclick="window.location.href='/wishlist'">
                             <i class="far fa-heart"></i>
                             <span class="cart-count" th:text="${wishlistCount != null ? wishlistCount : 0}">0</span>
                         </div>
@@ -186,7 +186,7 @@
                                     </a>
                                 </li>
                                 <li class="menu-item">
-                                    <a href="#wishlist" class="menu-link" data-content="wishlist">
+                                    <a th:href="@{/wishlist}" class="menu-link">
                                         <span class="menu-icon"><i class="fas fa-heart"></i></span>
                                         <span class="menu-text">Wishlist</span>
                                         <span class="menu-badge" th:text="${wishlistCount != null ? wishlistCount : 0}">0</span>
@@ -249,7 +249,7 @@
                                     <div class="card-icon"><i class="fas fa-heart"></i></div>
                                     <div class="card-value" th:text="${wishlistCount != null ? wishlistCount : 0}">0</div>
                                     <div class="card-label">Wishlist Items</div>
-                                    <a href="#wishlist" class="card-link" data-content="wishlist">
+                                    <a th:href="@{/wishlist}" class="card-link">
                                         View Wishlist <i class="fas fa-arrow-right"></i>
                                     </a>
                                 </div>
@@ -415,90 +415,8 @@
                         </div>
                         <!-- end th:remove="all" wrapper around the orphan dead content above -->
 
-                        <!-- ---- WISHLIST ---- -->
-                        <div id="wishlist" class="account-content">
-                            <div class="content-header">
-                                <h2 class="content-title">My Wishlist</h2>
-                                <button class="btn-primary" id="addAllToCart"
-                                        th:if="${wishlistItems != null and not #lists.isEmpty(wishlistItems)}">
-                                    <i class="fas fa-shopping-bag me-2"></i> Add All to Cart
-                                </button>
-                            </div>
-
-                            <div class="wishlist-grid">
-
-                                <!-- Wishlist Items Loop -->
-                                <div class="wishlist-card"
-                                     th:each="wishlistItem : ${wishlistItems}"
-                                     th:attr="data-wishlist-id=${wishlistItem.wishlistId},
-                                              data-product-id=${wishlistItem.productId},
-                                              data-variant-id=${wishlistItem.variantId}">
-
-                                    <div class="wishlist-image">
-                                        <!-- Saved variant's image (falls back to hero), or placeholder -->
-                                        <img th:if="${wishlistItem.imageUrl != null and wishlistItem.imageUrl != ''}"
-                                             th:src="${wishlistItem.imageUrl}"
-                                             th:alt="${wishlistItem.productName}">
-                                        <img th:unless="${wishlistItem.imageUrl != null and wishlistItem.imageUrl != ''}"
-                                             src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                                             th:alt="${wishlistItem.productName}">
-                                    </div>
-
-                                    <div class="wishlist-remove" title="Remove from wishlist"
-                                         th:onclick="'removeFromWishlist(' + ${wishlistItem.variantId} + ')'">
-                                        <i class="fas fa-times"></i>
-                                    </div>
-
-                                    <div class="wishlist-content">
-                                        <div class="wishlist-title" th:text="${wishlistItem.productName}">Product Name</div>
-
-                                        <!-- Variant the customer saved -->
-                                        <div class="wishlist-variant" style="font-size:0.85rem;color:#6b7280;margin:2px 0 6px;">
-                                            <span th:text="${wishlistItem.color}">Colour</span>
-                                            <span th:if="${wishlistItem.size != null}"
-                                                  th:text="' · Size ' + ${wishlistItem.size}"> · Size</span>
-                                        </div>
-
-                                        <div class="wishlist-price">
-                                            <!-- Show discount price if available -->
-                                            <th:block th:if="${wishlistItem.discountPrice != null and wishlistItem.discountPrice > 0}">
-                                                <span th:text="'₹' + ${#numbers.formatDecimal(wishlistItem.discountPrice, 0, 'COMMA', 0, 'POINT')}">₹0</span>
-                                                <span style="color: #999; text-decoration: line-through; font-size: 0.9rem;"
-                                                      th:text="'₹' + ${#numbers.formatDecimal(wishlistItem.price, 0, 'COMMA', 0, 'POINT')}">₹0</span>
-                                            </th:block>
-                                            <th:block th:unless="${wishlistItem.discountPrice != null and wishlistItem.discountPrice > 0}">
-                                                <span th:text="'₹' + ${#numbers.formatDecimal(wishlistItem.price, 0, 'COMMA', 0, 'POINT')}">₹0</span>
-                                            </th:block>
-                                        </div>
-
-                                        <div class="wishlist-actions">
-                                            <button class="action-btn"
-                                                    th:onclick="'addToCartFromWishlist(' + ${wishlistItem.variantId} + ')'">
-                                                Add to Cart
-                                            </button>
-                                            <button class="action-btn"
-                                                    th:onclick="'viewProduct(' + ${wishlistItem.productId} + ', ' + ${wishlistItem.variantId} + ')'">
-                                                View
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Empty Wishlist State -->
-                                <div id="emptyWishlist" class="empty-state"
-                                     th:if="${wishlistItems == null or #lists.isEmpty(wishlistItems)}">
-                                    <div class="empty-icon"><i class="far fa-heart"></i></div>
-                                    <h3 class="empty-title">Your wishlist is empty</h3>
-                                    <p class="empty-text">
-                                        Save items you love for later. Click the heart icon on any product to add it here.
-                                    </p>
-                                    <a th:href="@{/shop}" class="btn-primary">
-                                        <i class="fas fa-shopping-bag me-2"></i> Start Shopping
-                                    </a>
-                                </div>
-
-                            </div>
-                        </div>
+                        <!-- Wishlist now lives on its own page (/wishlist), opened from the
+                             header heart icon and the sidebar/dashboard links above. -->
 
                         <!-- ---- ADDRESS BOOK ---- -->
                         <div id="addresses" class="account-content">

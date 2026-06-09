@@ -440,10 +440,12 @@ function getCsrfToken() {
         }
         
         function checkEmptyWishlist() {
-            const wishlistItems = document.querySelectorAll('.wishlist-card').length;
             const emptyState = document.getElementById('emptyWishlist');
             const wishlistContent = document.getElementById('wishlist');
-            
+            // Wishlist moved to its own /wishlist page — nothing to do on the account page.
+            if (!emptyState || !wishlistContent) return;
+            const wishlistItems = document.querySelectorAll('.wishlist-card').length;
+
             if (wishlistItems === 0) {
                 emptyState.style.display = 'block';
                 wishlistContent.querySelector('.wishlist-grid').style.display = 'none';
