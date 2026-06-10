@@ -179,6 +179,16 @@
                     <div>Placed: <span th:text="${#temporals.format(order.placedAt, 'd MMM yyyy, HH:mm')}">—</span></div>
                     <div>Updated: <span th:text="${#temporals.format(order.updatedAt, 'd MMM yyyy, HH:mm')}">—</span></div>
                     <div>Method: <span th:text="${order.paymentMethod.name()}">COD</span></div>
+                    <div th:if="${order.razorpayPaymentId != null}">
+                        Payment ID:
+                        <span style="font-family: monospace; user-select: all;"
+                              th:text="${order.razorpayPaymentId}">pay_XXXXXXXXXXXX</span>
+                    </div>
+                    <div th:if="${order.razorpayOrderId != null}">
+                        Razorpay order:
+                        <span style="font-family: monospace; user-select: all;"
+                              th:text="${order.razorpayOrderId}">order_XXXXXXXXXXXX</span>
+                    </div>
                 </div>
             </div>
         </div>

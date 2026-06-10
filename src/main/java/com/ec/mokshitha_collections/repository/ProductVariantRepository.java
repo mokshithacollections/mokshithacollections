@@ -15,6 +15,26 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     @Query("DELETE FROM ProductVariant v WHERE v.product.productId = :productId")
     void deleteByProductId(Long productId);
 
+    /**
+     * Atomically reserve stock for a variant. The {@code stockQuantity >= :qty}
+     * guard means the DB row-lock lets only ONE concurrent caller win the last
+     * unit — returns 1 when reserved, 0 when there isn't enough (no oversell).
+     */
+    @Modifying
+    @Query("""
+            UPDATE ProductVariant v SET v.stockQuantity = v.stockQuantity - :qty
+            WHERE v.variantId = :variantId AND v.stockQuantity >= :qty
+            """)
+    int reserveStock(Long variantId, int qty);
+
+    /** Return previously-reserved stock (on payment failure / expiry / cancel). */
+    @Modifying
+    @Query("""
+            UPDATE ProductVariant v SET v.stockQuantity = v.stockQuantity + :qty
+            WHERE v.variantId = :variantId
+            """)
+    int releaseStock(Long variantId, int qty);
+
     /** All variants of a product, ordered by stock so the toggle endpoint
      *  picks the most-available default. */
     @Query("""

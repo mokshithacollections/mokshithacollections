@@ -54,6 +54,13 @@ public class Order {
     @Column(nullable = false, length = 16)
     private OrderStatus status;
 
+    /* ---------- Razorpay references (null for COD orders) ---------- */
+    @Column(name = "razorpay_order_id", length = 64)
+    private String razorpayOrderId;
+
+    @Column(name = "razorpay_payment_id", length = 64)
+    private String razorpayPaymentId;
+
     @Column(name = "placed_at", nullable = false)
     private LocalDateTime placedAt;
 

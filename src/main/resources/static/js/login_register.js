@@ -277,7 +277,7 @@ function getCsrfToken() {
 		            const target    = isAdmin ? '/admin' : '/';
 		            const where     = isAdmin ? 'admin dashboard' : 'home page';
 
-		            let countdown = 2;
+		            let countdown = 1;
 		            const notification = showNotification(
 		                `${payload.message} Welcome, ${firstName}! Redirecting to ${where} in ${countdown} seconds...`,
 		                'success'

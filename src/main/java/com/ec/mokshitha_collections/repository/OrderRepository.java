@@ -38,6 +38,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             """)
     Optional<Order> findByIdWithItems(Long orderId);
 
+    /** Look up the order created for a given Razorpay order (idempotent confirm). */
+    Optional<Order> findByRazorpayOrderId(String razorpayOrderId);
+
     /* ---------- Per-user stats for the admin user-detail page ---------- */
 
     long countByUserUserId(Long userId);

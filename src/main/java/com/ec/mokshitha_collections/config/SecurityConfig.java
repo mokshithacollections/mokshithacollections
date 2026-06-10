@@ -98,7 +98,10 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf
                     .csrfTokenRepository(csrfRepo)
-                    .csrfTokenRequestHandler(csrfHandler))
+                    .csrfTokenRequestHandler(csrfHandler)
+                    // Razorpay posts the webhook server-to-server (no CSRF token);
+                    // it's authenticated by its HMAC signature instead.
+                    .ignoringRequestMatchers("/api/payments/webhook"))
             .authorizeHttpRequests(auth -> auth
                     // Public pages — /user_redirect is a router that itself
                     // decides whether to render the account or login page.
@@ -114,6 +117,8 @@ public class SecurityConfig {
                     // Public catalog browsing
                     .requestMatchers(org.springframework.http.HttpMethod.GET,
                             "/api/products/**", "/api/categories/**", "/api/pincode/**").permitAll()
+                    // Razorpay webhook (server-to-server, signature-verified)
+                    .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/payments/webhook").permitAll()
                     // Admin area (REST + any future page routes)
                     .requestMatchers("/api/admin/**", "/admin/**").hasRole("ADMIN")
                     // Authenticated user areas (page and REST routes both gated)

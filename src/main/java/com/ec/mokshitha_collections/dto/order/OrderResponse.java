@@ -21,6 +21,10 @@ public class OrderResponse {
     private final OrderStatus status;
     private final PaymentMethod paymentMethod;
     private final PaymentStatus paymentStatus;
+
+    /* ---------- Razorpay references (online payments only) ---------- */
+    private final String razorpayOrderId;
+    private final String razorpayPaymentId;
     private final BigDecimal subtotal;
     private final BigDecimal shippingFee;
     private final BigDecimal totalAmount;

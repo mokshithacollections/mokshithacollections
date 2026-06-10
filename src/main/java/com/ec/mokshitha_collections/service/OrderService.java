@@ -45,7 +45,7 @@ public class OrderService {
     private BigDecimal flatShippingFee;
 
     /** Orders with a subtotal at or above this amount ship free. */
-    @Value("${app.shipping.free-above:5000.00}")
+    @Value("${app.shipping.free-above:5000.00}") //app.shipping.free-above:5000.00
     private BigDecimal freeShippingThreshold;
 
     /**
@@ -236,6 +236,8 @@ public class OrderService {
                 .status(o.getStatus())
                 .paymentMethod(o.getPaymentMethod())
                 .paymentStatus(o.getPaymentStatus())
+                .razorpayOrderId(o.getRazorpayOrderId())
+                .razorpayPaymentId(o.getRazorpayPaymentId())
                 .subtotal(o.getSubtotal())
                 .shippingFee(o.getShippingFee())
                 .totalAmount(o.getTotalAmount())

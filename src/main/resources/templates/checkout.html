@@ -1072,22 +1072,17 @@
                             <h3 class="form-section-title">Payment Method</h3>
 
                             <div class="payment-methods">
-                                <div class="payment-option selected" data-payment="cod">
-                                    <input type="radio" name="paymentMethod" value="COD" id="codRadio" checked
+                                <div class="payment-option selected" data-payment="ONLINE" onclick="selectPayment(this)">
+                                    <input type="radio" name="paymentMethod" value="ONLINE" id="onlineRadio" checked
                                            style="display:none;">
                                     <div class="payment-icon">
-                                        <i class="fas fa-money-bill-wave"></i>
+                                        <i class="fas fa-credit-card"></i>
                                     </div>
                                     <div class="payment-content">
-                                        <div class="payment-title">Cash on Delivery</div>
-                                        <div class="payment-description">Pay in cash when your order arrives.</div>
+                                        <div class="payment-title">Pay Online — UPI / Card / Net Banking / Wallet</div>
+                                        <div class="payment-description">Secure payment via Razorpay.</div>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="alert alert-info mt-3">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Online payments (Card / UPI / Net Banking) are coming soon.
                             </div>
                         </div>
 
@@ -1291,13 +1286,23 @@
     
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
-        // ----- Place Order (COD) -----
-        // Reads CSRF token from cookie, posts to /api/orders, redirects on success.
         function getCsrfToken() {
             const m = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
             return m ? decodeURIComponent(m[1]) : '';
         }
+
+        // Highlight the chosen payment method + check its hidden radio.
+        function selectPayment(el) {
+            document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+            const radio = el.querySelector('input[type="radio"]');
+            if (radio) radio.checked = true;
+        }
+
+        const placeBtn = document.getElementById('placeOrderBtn');
+        function resetBtn(label) { if (placeBtn) { placeBtn.disabled = false; placeBtn.innerHTML = label; } }
 
         const checkoutForm = document.getElementById('checkoutForm');
         if (checkoutForm) {
@@ -1305,60 +1310,133 @@
                 e.preventDefault();
 
                 const addressRadio = document.querySelector('input[name="addressId"]:checked');
-                if (!addressRadio) {
-                    alert('Please select a shipping address.');
-                    return;
-                }
+                if (!addressRadio) { alert('Please select a shipping address.'); return; }
                 if (!document.getElementById('termsAgree').checked) {
-                    alert('Please agree to the terms and conditions.');
-                    return;
+                    alert('Please agree to the terms and conditions.'); return;
                 }
 
-                const btn = document.getElementById('placeOrderBtn');
-                const originalLabel = btn.innerHTML;
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Placing order...';
-
-                fetch('/api/orders', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-XSRF-TOKEN': getCsrfToken()
-                    },
-                    body: new URLSearchParams({
-                        addressId: addressRadio.value,
-                        paymentMethod: 'COD'
-                    })
-                })
-                .then(res => res.json().then(data => ({ ok: res.ok, status: res.status, data })))
-                .then(({ ok, status, data }) => {
-                    if (ok) {
-                        // Redirect to the dedicated celebration page, which:
-                        //   - shows an animated checkmark + confetti
-                        //   - displays the order details and shipping address
-                        //   - has a "View My Orders" button that lands on the My Orders tab
-                        //   - auto-redirects to My Orders after 10 seconds (cancellable)
-                        const orderId = data.orderId;
-                        if (orderId) {
-                            window.location.href = '/orders/' + orderId + '/success';
-                        } else {
-                            // Fallback if the server didn't return an id for some reason
-                            localStorage.setItem('activeAccountTab', 'orders');
-                            window.location.href = '/user_redirect';
-                        }
-                    } else {
-                        alert(data.message || ('Failed to place order (HTTP ' + status + ')'));
-                        btn.disabled = false;
-                        btn.innerHTML = originalLabel;
-                    }
-                })
-                .catch(err => {
-                    alert('Network error placing order. Please try again.');
-                    console.error(err);
-                    btn.disabled = false;
-                    btn.innerHTML = originalLabel;
-                });
+                const method = (document.querySelector('input[name="paymentMethod"]:checked') || {}).value || 'ONLINE';
+                if (method === 'COD') {
+                    placeCodOrder(addressRadio.value);
+                } else {
+                    startOnlinePayment(addressRadio.value);
+                }
             });
+        }
+
+        // ----- Cash on Delivery: create the order directly -----
+        function placeCodOrder(addressId) {
+            const original = placeBtn.innerHTML;
+            placeBtn.disabled = true;
+            placeBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Placing order...';
+            fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-XSRF-TOKEN': getCsrfToken() },
+                body: new URLSearchParams({ addressId: addressId, paymentMethod: 'COD' })
+            })
+            .then(res => res.json().then(data => ({ ok: res.ok, status: res.status, data })))
+            .then(({ ok, status, data }) => {
+                if (ok && data.orderId) {
+                    window.location.href = '/orders/' + data.orderId + '/success';
+                } else {
+                    alert(data.message || ('Failed to place order (HTTP ' + status + ')'));
+                    resetBtn(original);
+                }
+            })
+            .catch(() => { alert('Network error placing order. Please try again.'); resetBtn(original); });
+        }
+
+        // ----- Online payment via Razorpay -----
+        async function startOnlinePayment(addressId) {
+            const original = placeBtn.innerHTML;
+            placeBtn.disabled = true;
+            placeBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Starting secure payment...';
+            try {
+                const res = await fetch('/api/payments/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-XSRF-TOKEN': getCsrfToken() },
+                    body: new URLSearchParams({ addressId: addressId })
+                });
+                const data = await res.json();
+                if (!res.ok) { alert(data.message || 'Could not start payment.'); resetBtn(original); return; }
+                if (typeof Razorpay === 'undefined') {
+                    alert('Payment library failed to load. Check your connection and try again.');
+                    resetBtn(original); return;
+                }
+
+                // Free the reserved stock the moment the widget closes/times out.
+                function releaseReservation() {
+                    fetch('/api/payments/cancel', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-XSRF-TOKEN': getCsrfToken() },
+                        body: new URLSearchParams({ razorpay_order_id: data.razorpayOrderId })
+                    }).catch(() => {});
+                }
+
+                const rzp = new Razorpay({
+                    key: data.razorpayKeyId,
+                    amount: data.amount,
+                    currency: data.currency,
+                    name: 'Mokshitha Collections',
+                    description: 'Order payment',
+                    order_id: data.razorpayOrderId,
+                    // 6 minutes to complete the payment, then the widget closes
+                    // and modal.ondismiss releases the reserved stock.
+                    timeout: 360,
+                    // Surface UPI as the first block (card / net-banking / wallet
+                    // still show via show_default_blocks). UPI must also be enabled
+                    // on the Razorpay account for it to appear.
+                    config: {
+                        display: {
+                            blocks: {
+                                upi: {
+                                    name: 'Pay using UPI',
+                                    instruments: [{ method: 'upi' }]
+                                }
+                            },
+                            sequence: ['block.upi'],
+                            preferences: { show_default_blocks: true }
+                        }
+                    },
+                    prefill: {
+                        name: data.customerName,
+                        email: data.customerEmail,
+                        contact: data.customerContact
+                    },
+                    theme: { color: '#55000c' },
+                    handler: function (response) {
+                        placeBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Verifying payment...';
+                        fetch('/api/payments/verify', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-XSRF-TOKEN': getCsrfToken() },
+                            body: new URLSearchParams({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature
+                            })
+                        })
+                        .then(r => r.json().then(d => ({ ok: r.ok, d })))
+                        .then(({ ok, d }) => {
+                            if (ok && d.orderId) {
+                                window.location.href = '/orders/' + d.orderId + '/success';
+                            } else {
+                                alert((d && d.message) || 'Payment verification failed. If money was deducted it will be refunded.');
+                                resetBtn(original);
+                            }
+                        })
+                        .catch(() => { alert('Could not verify payment. Please contact support if money was deducted.'); resetBtn(original); });
+                    },
+                    modal: { ondismiss: function () { releaseReservation(); resetBtn(original); } }
+                });
+                rzp.on('payment.failed', function (resp) {
+                    alert('Payment failed: ' + (resp.error && resp.error.description ? resp.error.description : 'please try again'));
+                    resetBtn(original);
+                });
+                rzp.open();
+            } catch (e) {
+                alert('Could not start payment. Please try again.');
+                resetBtn(original);
+            }
         }
     </script>
 
