@@ -2,6 +2,65 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/_layout :: head('Product')}"></head>
 <body>
+<!-- Presentation-only styles for the product form. No JS hooks live here;
+     all ids/names/classes the script relies on are unchanged. -->
+<style>
+    .pf-section { padding: 18px 0; border-top: 1px solid var(--admin-border); }
+    .pf-section:first-of-type { border-top: 0; padding-top: 4px; }
+    .pf-section-head { margin: 0 0 4px; font-size: 0.95rem; font-weight: 600; color: var(--admin-text); }
+    .pf-section-head i { color: var(--admin-primary); margin-right: 7px; }
+    .pf-section-sub { margin: 0 0 16px; font-size: 0.82rem; color: var(--admin-muted); }
+
+    /* Hero image dropzone */
+    .pf-hero { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+    .pf-hero-preview {
+        width: 96px; height: 96px; object-fit: cover; border-radius: 10px;
+        border: 1px solid var(--admin-border); background: var(--admin-bg);
+    }
+    .pf-dropzone {
+        flex: 1; min-width: 220px; display: flex; align-items: center; gap: 12px;
+        padding: 16px; border: 2px dashed var(--admin-border); border-radius: 10px;
+        cursor: pointer; transition: border-color .15s, background .15s; color: var(--admin-muted);
+    }
+    .pf-dropzone:hover { border-color: var(--admin-primary); background: rgba(46,139,87,0.04); color: var(--admin-text); }
+    .pf-dropzone i { font-size: 1.3rem; color: var(--admin-primary); }
+    .pf-dropzone .pf-dz-main { font-weight: 600; color: var(--admin-text); font-size: 0.9rem; }
+    .pf-dropzone .pf-dz-sub { font-size: 0.78rem; }
+
+    /* Promotion badge chips (styled labels around the existing checkboxes) */
+    .pf-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+    .pf-chip {
+        display: inline-flex; align-items: center; gap: 8px; margin: 0;
+        padding: 9px 14px; border: 1px solid var(--admin-border); border-radius: 999px;
+        cursor: pointer; user-select: none; font-size: 0.85rem; transition: all .15s;
+    }
+    .pf-chip:hover { border-color: var(--admin-primary); }
+    .pf-chip input { width: auto; margin: 0; accent-color: var(--admin-primary); }
+    .pf-chip:has(input:checked) {
+        border-color: var(--admin-primary); background: rgba(46,139,87,0.08);
+        color: var(--admin-primary-dark); font-weight: 600;
+    }
+
+    /* Active toggle banner */
+    .pf-active {
+        display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+        background: var(--admin-bg); border: 1px solid var(--admin-border); border-radius: 8px;
+    }
+    .pf-active input { width: auto; margin: 0; accent-color: var(--admin-primary); }
+    .pf-active label { margin: 0; font-weight: 500; }
+
+    /* Variant cards */
+    .variant-editor { background: var(--admin-surface); }
+    .pf-variant-head {
+        display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+        font-weight: 600; color: var(--admin-text);
+    }
+    .pf-variant-head .pf-swatch {
+        width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--admin-border);
+        display: inline-flex; align-items: center; justify-content: center; color: var(--admin-muted);
+    }
+    .pf-gallery-label { font-size: 0.8rem; font-weight: 600; color: var(--admin-muted); margin: 16px 0 8px; text-transform: uppercase; letter-spacing: 0.4px; }
+</style>
 <div class="admin-shell">
     <aside th:replace="~{admin/_layout :: sidebar('products')}"></aside>
 
@@ -19,106 +78,142 @@
 
         <!-- Core product card -->
         <div class="card">
-            <h2>Details</h2>
             <form id="productForm">
-                <div class="form-grid-2">
-                    <div class="form-row">
-                        <label>Name *</label>
-                        <input type="text" name="name" required maxlength="255"
-                               th:value="${product != null ? product.name : ''}">
-                    </div>
-                    <div class="form-row">
-                        <label>SKU *</label>
-                        <input type="text" name="sku" required maxlength="64"
-                               th:value="${product != null ? product.sku : ''}">
-                    </div>
-                </div>
 
-                <div class="form-row">
-                    <label>Description</label>
-                    <textarea name="description"
-                              th:text="${product != null ? product.description : ''}"></textarea>
-                </div>
-
-                <div class="form-grid-2">
-                    <div class="form-row">
-                        <label>Price (₹) *</label>
-                        <input type="number" name="price" step="0.01" min="0.01" required
-                               th:value="${product != null ? product.price : ''}">
-                    </div>
-                    <div class="form-row">
-                        <label>Discount price (₹)</label>
-                        <input type="number" name="discountPrice" step="0.01" min="0.01"
-                               th:value="${product != null and product.discountPrice != null ? product.discountPrice : ''}">
-                    </div>
-                </div>
-
-                <div class="form-grid-2">
-                    <div class="form-row">
-                        <label>Category *</label>
-                        <select name="categoryId" required>
-                            <option value="">— Select —</option>
-                            <option th:each="c : ${categories}"
-                                    th:value="${c.categoryId}"
-                                    th:text="${c.name}"
-                                    th:selected="${product != null and product.category != null and product.category.categoryId == c.categoryId}">
-                            </option>
-                        </select>
-                    </div>
-                    <div class="form-row">
-                        <label>Hero image</label>
-                        <div style="display:flex;gap:12px;align-items:center;">
-                            <img id="heroPreview"
-                                 th:src="${product != null and product.imageUrl != null ? product.imageUrl : ''}"
-                                 th:style="${product != null and product.imageUrl != null} ? 'display:block' : 'display:none'"
-                                 alt="hero"
-                                 style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--admin-border);">
-                            <input type="file" id="heroFile" accept="image/*">
+                <!-- ===== Basic information ===== -->
+                <div class="pf-section">
+                    <h3 class="pf-section-head"><i class="fas fa-circle-info"></i>Basic information</h3>
+                    <p class="pf-section-sub">Name and SKU identify this product. The description shows on the product page.</p>
+                    <div class="form-grid-2">
+                        <div class="form-row">
+                            <label>Name *</label>
+                            <input type="text" name="name" required maxlength="255"
+                                   placeholder="e.g. Banarasi Silk Saree"
+                                   th:value="${product != null ? product.name : ''}">
                         </div>
-                        <div class="helper">Choose an image from your computer. Uploaded when you save.
-                            You can also set the hero from a variant's gallery below (<i class="fas fa-star"></i>).</div>
+                        <div class="form-row">
+                            <label>SKU *</label>
+                            <input type="text" name="sku" required maxlength="64"
+                                   placeholder="Unique code, e.g. SAR-BNS-001"
+                                   th:value="${product != null ? product.sku : ''}">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label>Description</label>
+                        <textarea name="description"
+                                  placeholder="Describe the product — fabric feel, styling, care instructions…"
+                                  th:text="${product != null ? product.description : ''}"></textarea>
                     </div>
                 </div>
 
-                <div class="form-grid-2">
-                    <div class="form-row">
-                        <label>Fabric type</label>
-                        <input type="text" name="fabricType"
-                               th:value="${product != null ? product.fabricType : ''}">
+                <!-- ===== Pricing ===== -->
+                <div class="pf-section">
+                    <h3 class="pf-section-head"><i class="fas fa-tag"></i>Pricing</h3>
+                    <p class="pf-section-sub">Set the regular price. Add a discount price to show a strike-through offer.</p>
+                    <div class="form-grid-2">
+                        <div class="form-row">
+                            <label>Price (₹) *</label>
+                            <input type="number" name="price" step="0.01" min="0.01" required
+                                   placeholder="0.00"
+                                   th:value="${product != null ? product.price : ''}">
+                        </div>
+                        <div class="form-row">
+                            <label>Discount price (₹)</label>
+                            <input type="number" name="discountPrice" step="0.01" min="0.01"
+                                   placeholder="Leave blank for no discount"
+                                   th:value="${product != null and product.discountPrice != null ? product.discountPrice : ''}">
+                            <div class="helper">Must be lower than the regular price.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Organization ===== -->
+                <div class="pf-section">
+                    <h3 class="pf-section-head"><i class="fas fa-folder-tree"></i>Organization</h3>
+                    <p class="pf-section-sub">Help customers find this product through the right category and filters.</p>
+                    <div class="form-grid-2">
+                        <div class="form-row">
+                            <label>Category *</label>
+                            <select name="categoryId" required>
+                                <option value="">— Select —</option>
+                                <option th:each="c : ${categories}"
+                                        th:value="${c.categoryId}"
+                                        th:text="${c.name}"
+                                        th:selected="${product != null and product.category != null and product.category.categoryId == c.categoryId}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label>Fabric type</label>
+                            <input type="text" name="fabricType"
+                                   placeholder="e.g. Silk, Cotton"
+                                   th:value="${product != null ? product.fabricType : ''}">
+                        </div>
                     </div>
                     <div class="form-row">
                         <label>Occasion</label>
                         <input type="text" name="occasion"
+                               placeholder="e.g. Wedding, Festive, Casual"
                                th:value="${product != null ? product.occasion : ''}">
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <label style="margin-bottom:8px;">Promotion badges</label>
-                    <div style="display:flex;flex-wrap:wrap;gap:20px;">
-                        <span class="form-row checkbox" style="margin:0;">
-                            <input type="checkbox" id="isFeatured" name="isFeatured"
-                                   th:checked="${product != null and product.isFeatured != null and product.isFeatured}">
-                            <label for="isFeatured">Featured (homepage)</label>
-                        </span>
-                        <span class="form-row checkbox" style="margin:0;">
-                            <input type="checkbox" id="isBestseller" name="isBestseller"
-                                   th:checked="${product != null and product.isBestseller != null and product.isBestseller}">
-                            <label for="isBestseller">Bestseller</label>
-                        </span>
-                        <span class="form-row checkbox" style="margin:0;">
-                            <input type="checkbox" id="isTrending" name="isTrending"
-                                   th:checked="${product != null and product.isTrending != null and product.isTrending}">
-                            <label for="isTrending">Trending</label>
-                        </span>
+                <!-- ===== Hero image ===== -->
+                <div class="pf-section">
+                    <h3 class="pf-section-head"><i class="fas fa-image"></i>Hero image</h3>
+                    <p class="pf-section-sub">The main image shown in catalog cards. Uploaded when you save.
+                        You can also promote a variant photo to hero from the gallery below
+                        (<i class="fas fa-star" style="color:var(--admin-primary)"></i>).</p>
+                    <div class="pf-hero">
+                        <img id="heroPreview"
+                             th:src="${product != null and product.imageUrl != null ? product.imageUrl : ''}"
+                             th:style="${product != null and product.imageUrl != null} ? 'display:block' : 'display:none'"
+                             alt="hero" class="pf-hero-preview">
+                        <label for="heroFile" class="pf-dropzone">
+                            <i class="fas fa-cloud-arrow-up"></i>
+                            <span>
+                                <span class="pf-dz-main">Click to choose an image</span><br>
+                                <span class="pf-dz-sub">PNG or JPG from your computer</span>
+                            </span>
+                        </label>
+                        <input type="file" id="heroFile" accept="image/*" style="display:none;">
                     </div>
                 </div>
 
-                <div class="form-row checkbox">
-                    <!-- New products default to active; existing ones reflect their stored flag. -->
-                    <input type="checkbox" id="isActive" name="isActive"
-                           th:checked="${product == null or (product.isActive != null and product.isActive)}">
-                    <label for="isActive">Active (visible to customers)</label>
+                <!-- ===== Visibility & promotion ===== -->
+                <div class="pf-section">
+                    <h3 class="pf-section-head"><i class="fas fa-bullhorn"></i>Visibility &amp; promotion</h3>
+                    <p class="pf-section-sub">Control where this product appears and which badges it earns.</p>
+
+                    <div class="form-row">
+                        <div class="pf-active">
+                            <!-- New products default to active; existing ones reflect their stored flag. -->
+                            <input type="checkbox" id="isActive" name="isActive"
+                                   th:checked="${product == null or (product.isActive != null and product.isActive)}">
+                            <label for="isActive">Active — visible to customers</label>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label style="margin-bottom:8px;">Promotion badges</label>
+                        <div class="pf-chips">
+                            <label class="pf-chip" for="isFeatured">
+                                <input type="checkbox" id="isFeatured" name="isFeatured"
+                                       th:checked="${product != null and product.isFeatured != null and product.isFeatured}">
+                                <i class="fas fa-house"></i> Featured (homepage)
+                            </label>
+                            <label class="pf-chip" for="isBestseller">
+                                <input type="checkbox" id="isBestseller" name="isBestseller"
+                                       th:checked="${product != null and product.isBestseller != null and product.isBestseller}">
+                                <i class="fas fa-fire"></i> Bestseller
+                            </label>
+                            <label class="pf-chip" for="isTrending">
+                                <input type="checkbox" id="isTrending" name="isTrending"
+                                       th:checked="${product != null and product.isTrending != null and product.isTrending}">
+                                <i class="fas fa-arrow-trend-up"></i> Trending
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-actions">
@@ -147,6 +242,10 @@
             <div class="variant-editor" th:each="v : ${product.variants}"
                  th:attr="data-vid=${v.variantId}"
                  style="border:1px solid var(--admin-border);border-radius:10px;padding:16px;margin-bottom:14px;">
+                <div class="pf-variant-head">
+                    <span class="pf-swatch"><i class="fas fa-palette"></i></span>
+                    <span th:text="${v.color + (v.size != null and !v.size.isEmpty() ? ' · ' + v.size : '')}">Colour · Size</span>
+                </div>
                 <div class="form-grid-2" style="align-items:end;">
                     <div class="form-row">
                         <label>Color *</label>
@@ -179,7 +278,8 @@
                 </div>
 
                 <!-- Image gallery for this variant -->
-                <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;">
+                <div class="pf-gallery-label">Gallery</div>
+                <div style="display:flex;gap:12px;flex-wrap:wrap;">
                     <div th:each="img : ${v.images}"
                          style="width:96px;text-align:center;">
                         <div style="position:relative;border:2px solid var(--admin-border);border-radius:8px;overflow:hidden;height:96px;"
