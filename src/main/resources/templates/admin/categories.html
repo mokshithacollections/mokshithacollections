@@ -43,8 +43,7 @@
                         <td th:text="${c.description != null ? #strings.abbreviate(c.description, 60) : '—'}">—</td>
                         <td>
                             <span th:if="${c.isActive != null and c.isActive}" class="pill pill-active">Active</span>
-                            <span th:unless="${c.isActive != null and c.isActive}" class="pill"
-                                  style="background:#eee;color:#888;">Inactive</span>
+                            <span th:unless="${c.isActive != null and c.isActive}" class="pill pill-muted">Inactive</span>
                         </td>
                         <td style="white-space:nowrap;">
                             <a class="btn btn-outline btn-sm"
@@ -60,6 +59,7 @@
                     </tr>
                     <tr th:if="${#lists.isEmpty(categories)}">
                         <td class="empty-row" colspan="6">
+                            <i class="fas fa-tags"></i>
                             No categories yet. <a th:href="@{/admin/categories/new}">Create one</a>.
                         </td>
                     </tr>

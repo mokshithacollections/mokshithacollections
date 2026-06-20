@@ -46,7 +46,7 @@
                         <td th:text="${u.createdAt != null ? #temporals.format(u.createdAt, 'd MMM yyyy') : '—'}">—</td>
                         <td>
                             <span class="pill" th:if="${u.admin}" th:classappend="'pill-admin'">ADMIN</span>
-                            <span class="pill" th:unless="${u.admin}">CUSTOMER</span>
+                            <span class="pill pill-muted" th:unless="${u.admin}">CUSTOMER</span>
                         </td>
                         <td>
                             <span class="pill" th:classappend="${u.active} ? 'pill-active' : 'pill-inactive'"
@@ -72,7 +72,9 @@
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(users.content)}">
-                        <td class="empty-row" colspan="7">No users match.</td>
+                        <td class="empty-row" colspan="7">
+                            <i class="fas fa-users"></i>No users match.
+                        </td>
                     </tr>
                 </tbody>
             </table>

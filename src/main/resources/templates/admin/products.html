@@ -58,8 +58,7 @@
                         </td>
                         <td>
                             <span th:if="${p.isActive != null and p.isActive}" class="pill pill-active">Active</span>
-                            <span th:unless="${p.isActive != null and p.isActive}" class="pill"
-                                  style="background:#eee;color:#888;">Inactive</span>
+                            <span th:unless="${p.isActive != null and p.isActive}" class="pill pill-muted">Inactive</span>
                         </td>
                         <td style="white-space:nowrap;">
                             <a class="btn btn-outline btn-sm"
@@ -75,6 +74,7 @@
                     </tr>
                     <tr th:if="${#lists.isEmpty(products.content)}">
                         <td class="empty-row" colspan="7">
+                            <i class="fas fa-box-open"></i>
                             No products yet.
                             <a th:href="@{/admin/products/new}">Create the first one</a>.
                         </td>

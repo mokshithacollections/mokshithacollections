@@ -29,7 +29,14 @@ import java.util.UUID;
 public class ImageStorageService {
 
     private static final Set<String> ALLOWED_TYPES =
-            Set.of("image/jpeg", "image/png", "image/webp", "image/gif");
+		    Set.of(
+		    	    "image/jpeg",
+		    	    "image/png",
+		    	    "image/webp",
+		    	    "image/gif",
+		    	    "image/heic",
+		    	    "image/heif"
+		    	);
 
     private static final long MAX_BYTES = 5L * 1024 * 1024; // 5MB
 

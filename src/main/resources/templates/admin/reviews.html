@@ -61,7 +61,10 @@
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(reviews.content)}">
-                        <td class="empty-row" colspan="6">No reviews waiting for approval. 🎉</td>
+                        <td class="empty-row" colspan="6">
+                            <i class="fas fa-circle-check" style="color:#86efac;"></i>
+                            No reviews waiting for approval. 🎉
+                        </td>
                     </tr>
                 </tbody>
             </table>

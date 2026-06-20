@@ -19,46 +19,61 @@
 
         <div class="card">
             <form id="categoryForm">
-                <div class="form-grid-2">
-                    <div class="form-row">
-                        <label>Name *</label>
-                        <input type="text" name="name" required maxlength="100"
-                               th:value="${category != null ? category.name : ''}">
+
+                <!-- ===== Basic information ===== -->
+                <div class="form-section">
+                    <h3 class="form-section-head"><i class="fas fa-circle-info"></i>Basic information</h3>
+                    <p class="form-section-sub">The name shown to customers and a URL-friendly slug for the storefront link.</p>
+                    <div class="form-grid-2">
+                        <div class="form-row">
+                            <label>Name *</label>
+                            <input type="text" name="name" required maxlength="100"
+                                   placeholder="e.g. Silk Sarees"
+                                   th:value="${category != null ? category.name : ''}">
+                        </div>
+                        <div class="form-row">
+                            <label>Slug *</label>
+                            <input type="text" name="slug" required maxlength="100"
+                                   pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                                   placeholder="e.g. silk-sarees"
+                                   th:value="${category != null ? category.slug : ''}">
+                            <div class="helper">Lowercase letters/numbers, hyphens. e.g. <code>silk-sarees</code></div>
+                        </div>
                     </div>
                     <div class="form-row">
-                        <label>Slug *</label>
-                        <input type="text" name="slug" required maxlength="100"
-                               pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$"
-                               th:value="${category != null ? category.slug : ''}">
-                        <div class="helper">Lowercase letters/numbers, hyphens. e.g. <code>silk-sarees</code></div>
+                        <label>Description</label>
+                        <textarea name="description"
+                                  placeholder="Optional — a short note about this category"
+                                  th:text="${category != null ? category.description : ''}"></textarea>
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <label>Description</label>
-                    <textarea name="description"
-                              th:text="${category != null ? category.description : ''}"></textarea>
-                </div>
+                <!-- ===== Placement & visibility ===== -->
+                <div class="form-section">
+                    <h3 class="form-section-head"><i class="fas fa-folder-tree"></i>Placement &amp; visibility</h3>
+                    <p class="form-section-sub">Nest this under a parent category, and choose whether customers can see it.</p>
+                    <div class="form-row">
+                        <label>Parent category</label>
+                        <select name="parentId">
+                            <option value="">— None (top-level) —</option>
+                            <option th:each="c : ${allCategories}"
+                                    th:value="${c.categoryId}"
+                                    th:text="${c.name}"
+                                    th:if="${category == null or c.categoryId != category.categoryId}"
+                                    th:selected="${category != null and category.parentId != null and category.parentId == c.categoryId}">
+                            </option>
+                        </select>
+                    </div>
 
-                <div class="form-row">
-                    <label>Parent category</label>
-                    <select name="parentId">
-                        <option value="">— None (top-level) —</option>
-                        <option th:each="c : ${allCategories}"
-                                th:value="${c.categoryId}"
-                                th:text="${c.name}"
-                                th:if="${category == null or c.categoryId != category.categoryId}"
-                                th:selected="${category != null and category.parentId != null and category.parentId == c.categoryId}">
-                        </option>
-                    </select>
-                </div>
-
-                <div class="form-row checkbox">
-                    <input type="checkbox" id="isActive" name="isActive" checked
-                           th:if="${category == null}">
-                    <input type="checkbox" id="isActive" name="isActive" checked
-                           th:if="${category != null}">
-                    <label for="isActive">Active</label>
+                    <div class="form-row">
+                        <div class="form-toggle">
+                            <!-- Single checkbox reflecting the stored state: new = active,
+                                 existing = its actual isActive flag. -->
+                            <input type="checkbox" id="isActive" name="isActive"
+                                   th:checked="${category == null or (category.isActive != null and category.isActive)}">
+                            <label for="isActive">Active — visible to customers</label>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-actions">

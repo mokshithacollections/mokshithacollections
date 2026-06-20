@@ -16,31 +16,43 @@
         <!-- Stats -->
         <div class="stat-grid">
             <div class="stat-card">
-                <div class="label">Products</div>
+                <div class="stat-head">
+                    <div class="label">Products</div>
+                    <span class="stat-icon"><i class="fas fa-box"></i></span>
+                </div>
                 <div class="value" th:text="${productCount}">0</div>
-                <a th:href="@{/admin/products}" class="accent">Manage products &rarr;</a>
+                <a th:href="@{/admin/products}" class="accent">Manage products <i class="fas fa-arrow-right"></i></a>
             </div>
             <div class="stat-card">
-                <div class="label">Orders</div>
+                <div class="stat-head">
+                    <div class="label">Orders</div>
+                    <span class="stat-icon"><i class="fas fa-shopping-bag"></i></span>
+                </div>
                 <div class="value" th:text="${orderCount}">0</div>
                 <a th:href="@{/admin/orders}" class="accent"
                    th:text="${placedOrderCount} + ' awaiting fulfilment'">0 awaiting fulfilment</a>
             </div>
             <div class="stat-card">
-                <div class="label">Users</div>
+                <div class="stat-head">
+                    <div class="label">Users</div>
+                    <span class="stat-icon"><i class="fas fa-users"></i></span>
+                </div>
                 <div class="value" th:text="${userCount}">0</div>
-                <a th:href="@{/admin/users}" class="accent">Manage users &rarr;</a>
+                <a th:href="@{/admin/users}" class="accent">Manage users <i class="fas fa-arrow-right"></i></a>
             </div>
             <div class="stat-card">
-                <div class="label">Pending Reviews</div>
+                <div class="stat-head">
+                    <div class="label">Pending Reviews</div>
+                    <span class="stat-icon"><i class="fas fa-star"></i></span>
+                </div>
                 <div class="value" th:text="${pendingReviewCount}">0</div>
-                <a th:href="@{/admin/reviews}" class="accent">Moderate &rarr;</a>
+                <a th:href="@{/admin/reviews}" class="accent">Moderate <i class="fas fa-arrow-right"></i></a>
             </div>
         </div>
 
         <!-- Recent orders -->
         <div class="card">
-            <h2>Recent orders</h2>
+            <h2><i class="fas fa-clock-rotate-left"></i> Recent orders</h2>
             <div class="table-wrap" style="border:0; padding:0;">
                 <table class="admin-table">
                     <thead>
@@ -70,7 +82,9 @@
                             </td>
                         </tr>
                         <tr th:if="${recentOrders == null or #lists.isEmpty(recentOrders)}">
-                            <td class="empty-row" colspan="6">No orders placed yet.</td>
+                            <td class="empty-row" colspan="6">
+                                <i class="fas fa-shopping-bag"></i>No orders placed yet.
+                            </td>
                         </tr>
                     </tbody>
                 </table>

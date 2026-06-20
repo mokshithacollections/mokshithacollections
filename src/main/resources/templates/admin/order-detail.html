@@ -29,7 +29,7 @@
         <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;">
             <!-- Items -->
             <div class="card">
-                <h2>Items (<span th:text="${#lists.size(order.items)}">0</span>)</h2>
+                <h2><i class="fas fa-box"></i> Items (<span th:text="${#lists.size(order.items)}">0</span>)</h2>
                 <table class="admin-table">
                     <thead>
                         <tr>
@@ -79,7 +79,7 @@
             <div>
                 <!-- Status panel -->
                 <div class="card">
-                    <h2>Status</h2>
+                    <h2><i class="fas fa-truck-fast"></i> Status</h2>
                     <div style="margin-bottom:8px;">
                         Order:
                         <span class="pill"
@@ -164,7 +164,7 @@
 
                 <!-- Customer + shipping -->
                 <div class="card">
-                    <h2>Shipping address</h2>
+                    <h2><i class="fas fa-location-dot"></i> Shipping address</h2>
                     <div th:if="${order.shippingAddress != null}">
                         <strong th:text="${order.shippingAddress.firstName + ' ' + order.shippingAddress.lastName}">Name</strong><br>
                         <span th:text="${order.shippingAddress.streetAddress}">Street</span><br>
@@ -175,7 +175,7 @@
                 </div>
 
                 <div class="card">
-                    <h2>Order info</h2>
+                    <h2><i class="fas fa-circle-info"></i> Order info</h2>
                     <div>Placed: <span th:text="${#temporals.format(order.placedAt, 'd MMM yyyy, HH:mm')}">—</span></div>
                     <div>Updated: <span th:text="${#temporals.format(order.updatedAt, 'd MMM yyyy, HH:mm')}">—</span></div>
                     <div>Method: <span th:text="${order.paymentMethod.name()}">COD</span></div>
