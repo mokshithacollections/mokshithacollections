@@ -19,16 +19,32 @@ public final class ProductSpecifications {
         return (root, q, cb) -> cb.isTrue(root.get("isActive"));
     }
 
+    /**
+     * Matches the category itself OR any of its direct child categories, so that
+     * selecting a parent (e.g. "Sarees") rolls up products filed under its
+     * children ("Odisha Sarees", "Banarasi Sarees"). The parent join is LEFT so
+     * products in a top-level category (no parent) are still matched.
+     */
     public static Specification<Product> hasCategory(Long categoryId) {
-        return (root, q, cb) -> categoryId == null
-                ? null
-                : cb.equal(root.get("category").get("categoryId"), categoryId);
+        return (root, q, cb) -> {
+            if (categoryId == null) return null;
+            var category = root.join("category", JoinType.INNER);
+            var parent = category.join("parent", JoinType.LEFT);
+            return cb.or(
+                    cb.equal(category.get("categoryId"), categoryId),
+                    cb.equal(parent.get("categoryId"), categoryId));
+        };
     }
 
+    /** Slug equivalent of {@link #hasCategory}: matches the category or its children. */
     public static Specification<Product> hasCategorySlug(String slug) {
         return (root, q, cb) -> {
             if (slug == null || slug.isBlank()) return null;
-            return cb.equal(root.join("category", JoinType.INNER).get("slug"), slug);
+            var category = root.join("category", JoinType.INNER);
+            var parent = category.join("parent", JoinType.LEFT);
+            return cb.or(
+                    cb.equal(category.get("slug"), slug),
+                    cb.equal(parent.get("slug"), slug));
         };
     }
 
