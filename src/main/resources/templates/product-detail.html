@@ -159,6 +159,7 @@
             object-fit: contain;
             transition: transform 0.3s;
         }
+
         
         .thumbnail-container {
             display: flex;
@@ -187,6 +188,9 @@
             height: 100%;
             object-fit: contain;
         }
+
+        /* Paging dots for the mobile swipe gallery — hidden on desktop. */
+        .swipe-dots { display: none; }
         
         /* Product Info */
         .product-info {
@@ -803,21 +807,82 @@
         }
         
         @media (max-width: 768px) {
+            /* Remove the section padding on mobile. */
+            .product-detail-container {
+                padding: 0;
+            }
+
+            /* Hide the breadcrumb header + category line on mobile to save space. */
+            .product-detail-header {
+                display: none;
+            }
+            .product-info .product-category {
+                display: none;
+            }
+
             .action-buttons {
                 flex-direction: column;
             }
-            
+
             .btn-primary, .btn-secondary {
                 width: 100%;
             }
-            
+
             .product-meta {
                 flex-direction: column;
                 gap: 15px;
             }
-            
+
             .main-image {
                 height: 350px;
+            }
+
+            /* Mobile: hide the single big image; the thumbnail strip itself becomes
+               a large, swipeable image gallery. These exact images already render
+               on desktop, so they're guaranteed to show here too. */
+            .main-image-container { display: none; }
+
+            /* Mobile order: gallery, then the variant picker, then the product
+               name and the rest of the details. */
+            .product-info {
+                display: flex;
+                flex-direction: column;
+                margin-top: 18px;
+            }
+            .product-info .variant-options {
+                order: -1;          /* pull variants above the name on mobile */
+                margin-top: 0;
+                margin-bottom: 8px;
+            }
+            /* The thumbnail strip IS the swipeable image gallery on mobile. */
+            .thumbnail-container {
+                gap: 10px;
+                padding: 4px 0 8px;
+                scroll-snap-type: x mandatory;
+            }
+            .thumbnail {
+                width: 100%;           /* one full image per slide (no peek/series) */
+                height: 360px;
+                border-width: 0;       /* no selection border in gallery mode */
+                border-radius: 12px;
+                scroll-snap-align: center;
+                scroll-snap-stop: always;   /* one swipe = one image */
+                flex-shrink: 0;
+            }
+            .thumbnail img { background: #f7f7f7; }
+
+            .swipe-dots {
+                display: flex;
+                justify-content: center;
+                gap: 7px;
+                margin: 6px 0 2px;
+            }
+            .swipe-dots .dot {
+                width: 8px; height: 8px; border-radius: 50%;
+                background: #d1d5db; transition: all .2s;
+            }
+            .swipe-dots .dot.active {
+                background: var(--dark-sea-green); width: 22px; border-radius: 4px;
             }
         }
         
@@ -825,10 +890,11 @@
             .product-title {
                 font-size: 1.8rem;
             }
-            
+
             .main-image {
                 height: 300px;
             }
+            .thumbnail { height: 300px; }
             
             .nav-tabs .nav-link {
                 padding: 10px 15px;
@@ -891,9 +957,8 @@
             box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--dark-sea-green),
                         0 6px 18px rgba(46, 139, 87, 0.3);
         }
-        .variant-chip.active .variant-size {
+        .variant-chip.active .variant-name {
             color: var(--dark-sea-green);
-            font-weight: 700;
         }
         .variant-chip.out-of-stock {
             opacity: 0.5;
@@ -922,11 +987,19 @@
             background: rgba(255, 255, 255, 0.45);
             border-radius: 14px;
         }
-        /* Just the size under the thumbnail (no colour name, no stock text). */
-        .variant-size {
-            font-size: 0.9rem;
+        /* Colour name (primary) + size (secondary) under the thumbnail. */
+        .variant-name {
+            font-size: 0.88rem;
             font-weight: 600;
             color: var(--dark-text, #1f2937);
+            text-align: center;
+            max-width: 100px;
+        }
+        .variant-size {
+            font-size: 0.76rem;
+            font-weight: 500;
+            color: #6b7280;
+            margin-top: -2px;
         }
         /* Mobile: keep variants on one horizontally-scrollable row. */
         @media (max-width: 768px) {
@@ -1075,9 +1148,11 @@
                                 </div>
                             </th:block>
                         </div>
+                        <!-- Mobile-only paging dots for the swipe gallery (built by JS). -->
+                        <div class="swipe-dots" id="swipeDots"></div>
                     </div>
                 </div>
-                
+
                 <!-- Product Information -->
                 <div class="col-lg-6">
                     <div class="product-info">
@@ -1153,7 +1228,7 @@
                         </div>-->
                         
                         <!-- Variants — colour + size are properties of one variant row -->
-                        <div class="option-group" th:if="${not #lists.isEmpty(product.variants)}">
+                        <div class="option-group variant-options" th:if="${not #lists.isEmpty(product.variants)}">
                             <h4 class="option-title">
                                 Choose variant:
                                 <span id="selectedColor" th:text="${product.variants[0].color}">—</span>
@@ -1177,7 +1252,8 @@
                                           th:style="${firstImg != null}
                                                     ? ('background-image: url(' + ${firstImg} + ');')
                                                     : ('background-color: ' + ${#strings.replace(#strings.toLowerCase(variant.color), ' ', '')} + ';')"></span>
-                                    <!-- Only the size below; the colour is shown by 'Choose variant: X' above. -->
+                                    <!-- Colour name below the image, with the size as a smaller line. -->
+                                    <span class="variant-name" th:text="${variant.color}">Colour</span>
                                     <span class="variant-size"
                                           th:if="${variant.size != null and !#strings.isEmpty(variant.size)}"
                                           th:text="${variant.size}">M</span>
@@ -1783,6 +1859,7 @@
                     hero.classList.add('active');
                     setMainImage(hero.getAttribute('data-image'), hero.getAttribute('data-zoom'));
                 }
+                if (window.rebuildSwipeDots) window.rebuildSwipeDots();
                 return;
             }
 
@@ -1795,8 +1872,46 @@
             const lead = mine.find(t => t.getAttribute('data-primary') === 'true') || mine[0];
             lead.classList.add('active');
             setMainImage(lead.getAttribute('data-image'), lead.getAttribute('data-zoom'));
+            if (window.rebuildSwipeDots) window.rebuildSwipeDots();
         }
-        
+
+        // Mobile paging dots that track the thumbnail-strip gallery. Dots are
+        // rebuilt to match the currently-visible (selected variant's) images, and
+        // the active dot follows whichever image is centered in the strip.
+        (function initSwipeDots() {
+            const strip = document.getElementById('thumbnailContainer');
+            const dots = document.getElementById('swipeDots');
+            if (!strip || !dots) return;
+
+            window.rebuildSwipeDots = function () {
+                // New variant → jump back to its first image.
+                strip.scrollLeft = 0;
+                const visible = Array.from(strip.querySelectorAll('.thumbnail'))
+                    .filter(t => t.style.display !== 'none');
+                dots.innerHTML = '';
+                if (visible.length < 2) return;   // a single image needs no dots
+                visible.forEach((_, i) => {
+                    const d = document.createElement('span');
+                    d.className = 'dot' + (i === 0 ? ' active' : '');
+                    dots.appendChild(d);
+                });
+            };
+
+            strip.addEventListener('scroll', function () {
+                const visible = Array.from(strip.querySelectorAll('.thumbnail'))
+                    .filter(t => t.style.display !== 'none');
+                if (visible.length < 2 || !dots.children.length) return;
+                const mid = strip.getBoundingClientRect().left + strip.clientWidth / 2;
+                let best = 0, bestDist = Infinity;
+                visible.forEach((t, i) => {
+                    const r = t.getBoundingClientRect();
+                    const dist = Math.abs((r.left + r.width / 2) - mid);
+                    if (dist < bestDist) { bestDist = dist; best = i; }
+                });
+                Array.from(dots.children).forEach((d, i) => d.classList.toggle('active', i === best));
+            }, { passive: true });
+        })();
+
         // Image Zoom Functionality
         function initImageZoom() {
             const zoomContainer = document.createElement('div');
