@@ -529,17 +529,19 @@
         .vmodal-body .lbl { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: #888; margin-bottom: 10px; }
         .vchip-list { display: flex; flex-wrap: wrap; gap: 10px; }
         .vchip {
-            display: inline-flex; align-items: center; gap: 9px; padding: 7px 13px 7px 7px;
-            border: 2px solid #e5e7eb; border-radius: 999px; background: #fff; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 11px; padding: 8px 16px 8px 8px;
+            border: 2px solid #e5e7eb; border-radius: 14px; background: #fff; cursor: pointer;
             font-family: inherit; transition: all .15s;
         }
         .vchip:hover:not(.disabled) { border-color: var(--dark-sea-green); background: #f0fdf4; }
         .vchip.active { border-color: var(--dark-sea-green); background: linear-gradient(135deg,#f0fdf4,#ecfdf5); box-shadow: 0 4px 12px rgba(46,139,87,0.18); }
-        .vchip.disabled { opacity: .5; cursor: not-allowed; text-decoration: line-through; }
-        .vchip .sw { width: 28px; height: 28px; border-radius: 50%; background: #cbd5e1; border: 1px solid rgba(0,0,0,0.12); box-shadow: inset 0 2px 4px rgba(0,0,0,0.12); flex-shrink: 0; }
-        .vchip .ci { display: flex; flex-direction: column; line-height: 1.2; text-align: left; }
-        .vchip .ci .c { font-weight: 600; font-size: 0.9rem; color: var(--dark-text); }
-        .vchip .ci .m { font-size: 0.72rem; color: #6b7280; }
+        .vchip.disabled { opacity: .5; cursor: not-allowed; }
+        /* Square thumbnail of the variant's first image (colour fill as fallback). */
+        .vchip .sw { width: 52px; height: 52px; border-radius: 10px; background: #cbd5e1 center/cover no-repeat;
+            border: 1px solid rgba(0,0,0,0.12); flex-shrink: 0; }
+        .vchip .ci { display: flex; flex-direction: column; line-height: 1.25; text-align: left; }
+        .vchip .ci .c { font-weight: 600; font-size: 0.95rem; color: var(--dark-text); }
+        .vchip .ci .m { font-size: 0.8rem; color: #6b7280; margin-top: 2px; }
         .vmodal-foot { padding: 0 20px 20px; }
         .vmodal-foot .add {
             width: 100%; padding: 13px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
@@ -1548,6 +1550,22 @@
             return product || {};
         }
 
+        // First image of a variant (used as the chip thumbnail); '' when it has none.
+        function variantFirstImage(v) {
+            return (v && v.images && v.images.length && v.images[0].imageUrl) ? v.images[0].imageUrl : '';
+        }
+
+        // Paint a chip swatch: the variant's first image, or its colour as a solid fill.
+        function paintVariantSwatch(sw, v) {
+            const img = variantFirstImage(v);
+            if (img) {
+                sw.style.backgroundImage = 'url("' + img + '")';
+            } else {
+                const swatchColor = (v.color || '').toLowerCase().replace(/\s+/g, '');
+                if (swatchColor) sw.style.backgroundColor = swatchColor;
+            }
+        }
+
         // Add a specific variant to the cart (form-encoded, matches AddCartItemRequest).
         async function addVariantToCart(variantId, qty) {
             const res = await fetch('/api/cart/items', {
@@ -1617,13 +1635,13 @@
                 chip.className = 'vchip' + (out ? ' disabled' : '');
                 if (out) chip.disabled = true;
 
-                const swatchColor = (v.color || '').toLowerCase().replace(/\s+/g, '');
-                const meta = (v.size ? ('Size ' + v.size + ' · ') : '') +
-                             (out ? 'Out of stock' : (stock + ' in stock'));
+                // Show the size only; colour name is its own line, stock is conveyed by
+                // the dimmed/disabled chip rather than a "N in stock" label.
+                const meta = out ? 'Out of stock' : (v.size || '');
 
                 const sw = document.createElement('span');
                 sw.className = 'sw';
-                if (swatchColor) sw.style.backgroundColor = swatchColor;
+                paintVariantSwatch(sw, v);
 
                 const ci = document.createElement('span');
                 ci.className = 'ci';
@@ -1748,17 +1766,15 @@
                 chip.type = 'button';
                 chip.className = 'vchip' + (window.WISHLIST_VARIANT_IDS.has(v.variantId) ? ' active' : '');
 
-                const swatchColor = (v.color || '').toLowerCase().replace(/\s+/g, '');
                 const sw = document.createElement('span');
                 sw.className = 'sw';
-                if (swatchColor) sw.style.backgroundColor = swatchColor;
+                paintVariantSwatch(sw, v);
 
                 const ci = document.createElement('span');
                 ci.className = 'ci';
                 const c = document.createElement('span'); c.className = 'c'; c.textContent = v.color || 'Variant';
-                const m = document.createElement('span'); m.className = 'm';
-                m.textContent = (v.size ? ('Size ' + v.size + ' · ') : '') +
-                                (window.WISHLIST_VARIANT_IDS.has(v.variantId) ? 'In wishlist ♥' : 'Tap to add');
+                // Just the size; whether it's saved is shown by the highlighted (active) chip.
+                const m = document.createElement('span'); m.className = 'm'; m.textContent = v.size || '';
                 ci.appendChild(c); ci.appendChild(m);
                 chip.appendChild(sw); chip.appendChild(ci);
 
@@ -1767,8 +1783,6 @@
                     try {
                         const added = await toggleWishlistVariant(v.variantId);
                         chip.classList.toggle('active', added);
-                        m.textContent = (v.size ? ('Size ' + v.size + ' · ') : '') +
-                                        (added ? 'In wishlist ♥' : 'Tap to add');
                         // Heart on the card is filled if the product has any saved variant.
                         const anySaved = variants.some(x => window.WISHLIST_VARIANT_IDS.has(x.variantId));
                         const icon = heartEl ? heartEl.querySelector('i') : null;

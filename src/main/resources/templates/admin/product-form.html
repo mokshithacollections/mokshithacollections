@@ -60,6 +60,51 @@
         display: inline-flex; align-items: center; justify-content: center; color: var(--admin-muted);
     }
     .pf-gallery-label { font-size: 0.8rem; font-weight: 600; color: var(--admin-muted); margin: 16px 0 8px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+    /* The native file input, prettied up into a button. */
+    #variantImages { font-size: 0.85rem; color: var(--admin-muted); margin-top: 4px; }
+    #variantImages::file-selector-button {
+        margin-right: 12px; padding: 9px 16px; border-radius: 8px;
+        border: 1px solid var(--admin-border); background: #fff; color: var(--admin-text);
+        font-family: inherit; font-weight: 600; font-size: 0.85rem; cursor: pointer;
+        transition: background .15s, border-color .15s, color .15s;
+    }
+    #variantImages::file-selector-button:hover {
+        background: rgba(46,139,87,0.06); border-color: var(--admin-primary); color: var(--admin-primary);
+    }
+
+    /* Ordered preview of images chosen for a new variant (before upload). */
+    .pf-img-preview { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+    .pf-img-preview:empty { display: none; }
+    .pf-img-item {
+        position: relative; width: 108px; border: 1px solid var(--admin-border);
+        border-radius: 10px; overflow: hidden; background: #fff;
+        box-shadow: 0 1px 4px rgba(16, 24, 40, 0.1);
+    }
+    .pf-img-item img { display: block; width: 100%; height: 104px; object-fit: cover; }
+    .pf-img-item .pf-img-num {
+        position: absolute; top: 6px; left: 6px; min-width: 22px; height: 22px; padding: 0 6px;
+        border-radius: 11px; background: var(--admin-primary); color: #fff;
+        font-size: 0.72rem; font-weight: 700; display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    /* Remove — a round badge over the top-right corner of the image. */
+    .pf-img-item .rm {
+        position: absolute; top: 6px; right: 6px; width: 23px; height: 23px; border: 0; border-radius: 50%;
+        background: rgba(17, 24, 39, 0.6); color: #fff; cursor: pointer; font-size: 0.72rem; line-height: 1;
+        display: flex; align-items: center; justify-content: center; transition: background .15s, transform .15s;
+    }
+    .pf-img-item .rm:hover { background: var(--admin-danger); transform: scale(1.1); }
+    /* Reorder bar under the thumbnail (◄ earlier / ► later). */
+    .pf-img-item .pf-img-ctrls { display: flex; border-top: 1px solid var(--admin-border); }
+    .pf-img-item .pf-img-ctrls button {
+        flex: 1; border: 0; background: #fff; cursor: pointer; padding: 7px 0;
+        font-size: 0.8rem; color: var(--admin-muted); border-right: 1px solid var(--admin-border);
+        transition: background .15s, color .15s;
+    }
+    .pf-img-item .pf-img-ctrls button:last-child { border-right: 0; }
+    .pf-img-item .pf-img-ctrls button:hover:not(:disabled) { background: #f0fdf4; color: var(--admin-primary); }
+    .pf-img-item .pf-img-ctrls button:disabled { opacity: .3; cursor: default; }
 </style>
 <div class="admin-shell">
     <aside th:replace="~{admin/_layout :: sidebar('products')}"></aside>
@@ -269,7 +314,7 @@
                         <i class="fas fa-save"></i> Save changes
                     </button>
                     <button type="button" class="btn btn-outline btn-sm" onclick="openImageUpload(this)">
-                        <i class="fas fa-upload"></i> Upload image
+                        <i class="fas fa-upload"></i> Upload images
                     </button>
                     <button type="button" class="btn btn-danger btn-sm"
                             th:attr="data-color=${v.color}" onclick="deleteVariant(this)">
@@ -333,6 +378,15 @@
                     <label>SKU variant</label>
                     <input type="text" name="skuVariant" maxlength="64">
                 </div>
+                <div class="form-row" style="grid-column: 1 / -1;">
+                    <label>Images
+                        <span style="font-weight:400;color:var(--admin-muted);">
+                            — optional. Select several at once; drag the order with ▲ ▼. They upload in the order shown.
+                        </span>
+                    </label>
+                    <input type="file" id="variantImages" accept="image/*" multiple>
+                    <div id="variantImagesPreview" class="pf-img-preview"></div>
+                </div>
                 <div class="form-actions" style="grid-column: 1 / -1;">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Add variant
@@ -341,8 +395,9 @@
             </form>
         </div>
 
-        <!-- Hidden image upload (one input shared by all variants via openImageUpload) -->
-        <input type="file" id="imageFile" accept="image/*" style="display:none;">
+        <!-- Hidden image upload (one input shared by all variants via openImageUpload).
+             multiple = the admin can pick a whole group of images in one go. -->
+        <input type="file" id="imageFile" accept="image/*" multiple style="display:none;">
     </main>
 </div>
 
@@ -408,6 +463,50 @@
         });
     }
 
+    // ----- New variant: ordered image picker -----
+    // We keep our own ordered list of chosen files (a FileList can't be reordered),
+    // render a numbered preview, and upload in this exact order on submit.
+    let newVariantImages = [];
+    const variantImagesInput = document.getElementById('variantImages');
+    const variantImagesPreview = document.getElementById('variantImagesPreview');
+
+    function renderVariantImagesPreview() {
+        if (!variantImagesPreview) return;
+        variantImagesPreview.innerHTML = '';
+        newVariantImages.forEach((file, i) => {
+            const item = document.createElement('div');
+            item.className = 'pf-img-item';
+            const url = URL.createObjectURL(file);
+            item.innerHTML =
+                '<span class="pf-img-num">' + (i + 1) + '</span>' +
+                '<button type="button" class="rm" title="Remove"><i class="fas fa-times"></i></button>' +
+                '<img src="' + url + '" alt="">' +
+                '<div class="pf-img-ctrls">' +
+                  '<button type="button" class="up" title="Move earlier"' + (i === 0 ? ' disabled' : '') + '><i class="fas fa-chevron-left"></i></button>' +
+                  '<button type="button" class="dn" title="Move later"' + (i === newVariantImages.length - 1 ? ' disabled' : '') + '><i class="fas fa-chevron-right"></i></button>' +
+                '</div>';
+            item.querySelector('.up').addEventListener('click', () => { move(i, i - 1); });
+            item.querySelector('.dn').addEventListener('click', () => { move(i, i + 1); });
+            item.querySelector('.rm').addEventListener('click', () => { newVariantImages.splice(i, 1); renderVariantImagesPreview(); });
+            variantImagesPreview.appendChild(item);
+        });
+        function move(from, to) {
+            if (to < 0 || to >= newVariantImages.length) return;
+            const [f] = newVariantImages.splice(from, 1);
+            newVariantImages.splice(to, 0, f);
+            renderVariantImagesPreview();
+        }
+    }
+
+    if (variantImagesInput) {
+        variantImagesInput.addEventListener('change', (e) => {
+            // Append the newly picked files (in their picker order) to our list.
+            newVariantImages = newVariantImages.concat(Array.from(e.target.files || []));
+            e.target.value = '';            // allow re-picking the same file / adding more batches
+            renderVariantImagesPreview();
+        });
+    }
+
     // ----- Variant CRUD -----
     const variantForm = document.getElementById('variantForm');
     if (variantForm) {
@@ -420,11 +519,37 @@
                 stockQuantity: parseInt(fd.get('stockQuantity'), 10),
                 skuVariant: fd.get('skuVariant') || null
             };
+            const submitBtn = variantForm.querySelector('button[type=submit]');
             try {
-                await adminApi('POST', '/api/admin/products/' + PRODUCT_ID + '/variants', body);
-                toast('Variant added', 'success');
-                setTimeout(() => location.reload(), 500);
-            } catch (e) { toast(e.message, 'error'); }
+                if (submitBtn) submitBtn.disabled = true;
+                // addVariant returns the whole product; the new variant is the one
+                // whose id wasn't already on the page.
+                const before = new Set(Array.from(document.querySelectorAll('.variant-editor'))
+                                            .map(el => String(el.dataset.vid)));
+                const resp = await adminApi('POST', '/api/admin/products/' + PRODUCT_ID + '/variants', body);
+
+                let newVid = null;
+                if (resp && Array.isArray(resp.variants)) {
+                    const fresh = resp.variants.filter(v => !before.has(String(v.variantId)));
+                    newVid = (fresh.length ? fresh[fresh.length - 1]
+                                           : resp.variants[resp.variants.length - 1]).variantId;
+                }
+
+                const images = newVariantImages.slice();
+                if (newVid && images.length) {
+                    for (const file of images) {     // sequential → preserves the chosen order
+                        await adminUpload(
+                            '/api/admin/products/' + PRODUCT_ID + '/variants/' + newVid + '/images',
+                            { file, viewType: 'FRONT', isPrimary: 'false' }
+                        );
+                    }
+                }
+                toast('Variant added' + (images.length ? ' with ' + images.length + ' image(s)' : ''), 'success');
+                setTimeout(() => location.reload(), 600);
+            } catch (e) {
+                if (submitBtn) submitBtn.disabled = false;
+                toast(e.message, 'error');
+            }
         });
     }
 
@@ -502,15 +627,21 @@
         document.getElementById('imageFile').click();
     }
     document.getElementById('imageFile').addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file || !pendingVariantId) return;
+        const files = Array.from(e.target.files || []);
+        const vid = pendingVariantId;
+        if (!files.length || !vid) { e.target.value = ''; pendingVariantId = null; return; }
         try {
-            await adminUpload(
-                '/api/admin/products/' + PRODUCT_ID + '/variants/' + pendingVariantId + '/images',
-                { file, viewType: 'FRONT', isPrimary: 'false' }
-            );
-            toast('Image uploaded', 'success');
-            setTimeout(() => location.reload(), 500);
+            let n = 0;
+            // Sequential upload preserves the order the files came in.
+            for (const file of files) {
+                await adminUpload(
+                    '/api/admin/products/' + PRODUCT_ID + '/variants/' + vid + '/images',
+                    { file, viewType: 'FRONT', isPrimary: 'false' }
+                );
+                n++;
+            }
+            toast(n + (n === 1 ? ' image uploaded' : ' images uploaded'), 'success');
+            setTimeout(() => location.reload(), 600);
         } catch (e) { toast(e.message, 'error'); }
         finally { e.target.value = ''; pendingVariantId = null; }
     });

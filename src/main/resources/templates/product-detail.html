@@ -868,70 +868,76 @@
         }
         .variant-chip {
             display: inline-flex;
+            flex-direction: column;
             align-items: center;
-            gap: 10px;
-            padding: 8px 14px 8px 8px;
+            gap: 8px;
+            padding: 8px;
             background: #fff;
-            border: 2px solid #e5e7eb;
-            border-radius: 999px;
+            border: 2px solid transparent;
+            border-radius: 16px;
             cursor: pointer;
             font-family: inherit;
-            transition: border-color .15s, background .15s, box-shadow .15s, transform .15s;
+            transition: border-color .15s, box-shadow .15s, transform .15s;
         }
         .variant-chip:hover:not(:disabled):not(.out-of-stock) {
-            border-color: var(--dark-sea-green);
-            background: #f0fdf4;
+            transform: translateY(-3px);
         }
-        .variant-chip.active {
-            border-color: var(--dark-sea-green);
-            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
-            box-shadow: 0 4px 14px rgba(46, 139, 87, 0.18);
+        .variant-chip:hover:not(:disabled):not(.out-of-stock) .variant-swatch {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+        }
+        /* Selected: a soft green ring around the thumbnail + a lift, so it reads
+           clearly as "this one is chosen" without covering the image. */
+        .variant-chip.active .variant-swatch {
+            box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--dark-sea-green),
+                        0 6px 18px rgba(46, 139, 87, 0.3);
+        }
+        .variant-chip.active .variant-size {
+            color: var(--dark-sea-green);
+            font-weight: 700;
         }
         .variant-chip.out-of-stock {
-            opacity: 0.55;
+            opacity: 0.5;
             cursor: not-allowed;
-            text-decoration: line-through;
         }
+        /* Square (rounded) thumbnail showing the variant's first image; falls back
+           to the colour name as a solid fill when the variant has no image yet. */
         .variant-swatch {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            /* Fallback colour when the variant's name doesn't resolve as a CSS
-               colour (e.g. "Lemon Glow" → stays grey, but the label still
-               makes the variant identifiable). */
+            width: 96px;
+            height: 96px;
+            border-radius: 14px;
             background-color: #cbd5e1;
-            border: 1px solid rgba(0, 0, 0, 0.12);
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.12);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border: 1px solid rgba(0, 0, 0, 0.10);
             flex-shrink: 0;
             position: relative;
+            transition: box-shadow .15s;
         }
-        .variant-chip.active .variant-swatch::after {
-            content: '✓';
+        /* Dim out-of-stock variants with a translucent veil over the image. */
+        .variant-chip.out-of-stock .variant-swatch::before {
+            content: '';
             position: absolute;
             inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-weight: 700;
-            font-size: 0.95rem;
-            text-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+            background: rgba(255, 255, 255, 0.45);
+            border-radius: 14px;
         }
-        .variant-info {
-            display: flex;
-            flex-direction: column;
-            line-height: 1.2;
-            text-align: left;
-        }
-        .variant-color-name {
+        /* Just the size under the thumbnail (no colour name, no stock text). */
+        .variant-size {
+            font-size: 0.9rem;
             font-weight: 600;
-            font-size: 0.92rem;
             color: var(--dark-text, #1f2937);
         }
-        .variant-meta {
-            font-size: 0.75rem;
-            color: #6b7280;
-            margin-top: 2px;
+        /* Mobile: keep variants on one horizontally-scrollable row. */
+        @media (max-width: 768px) {
+            .variant-list {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 6px;
+                scrollbar-width: thin;
+            }
+            .variant-chip { flex-shrink: 0; }
         }
     </style>
 </head>
@@ -1164,25 +1170,17 @@
                                                  data-size=${variant.size != null ? variant.size : ''},
                                                  data-stock=${variant.stockQuantity}"
                                         th:title="${variant.color} + (${variant.size != null} ? ' / ' + ${variant.size} : '')">
-                                    <!-- Swatch: tries the colour name minus spaces as a CSS named colour
-                                         (e.g. 'Royal Blue' → 'royalblue', 'Sea Green' → 'seagreen').
-                                         If the name doesn't resolve, the circle stays a neutral grey but
-                                         the text label below still tells the user what it is. -->
+                                    <!-- Square thumbnail: the variant's first image, falling back to the
+                                         colour name as a solid fill when the variant has no image yet. -->
                                     <span class="variant-swatch"
-                                          th:style="'background-color: ' + ${#strings.replace(#strings.toLowerCase(variant.color), ' ', '')} + ';'"></span>
-                                    <span class="variant-info">
-                                        <span class="variant-color-name" th:text="${variant.color}">Color</span>
-                                        <small class="variant-meta">
-                                            <span th:if="${variant.size != null}" th:text="'Size ' + ${variant.size} + ' · '">Size — · </span>
-                                            <!-- Only surface the exact count as a low-stock nudge (<10);
-                                                 otherwise just say it's in stock. -->
-                                            <span th:if="${variant.stockQuantity == 0}" style="color:#dc2626;">Out of stock</span>
-                                            <span th:if="${variant.stockQuantity > 0 and variant.stockQuantity &lt; 10}"
-                                                  style="color:#d9480f; font-weight:600;"
-                                                  th:text="'Only ' + ${variant.stockQuantity} + ' left'">Only 3 left</span>
-                                            <span th:if="${variant.stockQuantity >= 10}" style="color:#16a34a;">In stock</span>
-                                        </small>
-                                    </span>
+                                          th:with="firstImg=${#lists.isEmpty(variant.images) ? null : variant.images[0].imageUrl}"
+                                          th:style="${firstImg != null}
+                                                    ? ('background-image: url(' + ${firstImg} + ');')
+                                                    : ('background-color: ' + ${#strings.replace(#strings.toLowerCase(variant.color), ' ', '')} + ';')"></span>
+                                    <!-- Only the size below; the colour is shown by 'Choose variant: X' above. -->
+                                    <span class="variant-size"
+                                          th:if="${variant.size != null and !#strings.isEmpty(variant.size)}"
+                                          th:text="${variant.size}">M</span>
                                 </button>
                             </div>
                         </div>
