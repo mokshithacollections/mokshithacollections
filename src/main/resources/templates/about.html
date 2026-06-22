@@ -814,9 +814,9 @@
                 </div>
                 <div class="col-lg-3 col-md-4 col-6 text-end">
                     <div class="header-icons d-inline-flex align-items-center">
-                        <div class="icon search-icon">
+                        <!--<div class="icon search-icon">
                             <i class="fas fa-search"></i>
-                        </div>
+                        </div>-->
                         <div class="icon user-icon" onclick="window.location.href='/user_redirect'">
                             <i class="fas fa-user"></i>
                         </div>
@@ -1263,7 +1263,7 @@
         
         function setupEventListeners() {
             // Search functionality
-            document.querySelector('.search-icon').addEventListener('click', showSearchModal);
+            //document.querySelector('.search-icon').addEventListener('click', showSearchModal);
             
             // Smooth scrolling for anchor links
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -1306,7 +1306,7 @@
         }
         
         // Common functions
-        function showSearchModal() {
+        /*function showSearchModal() {
             const searchBox = document.createElement('div');
             searchBox.style.cssText = `
                 position: fixed;
@@ -1351,7 +1351,7 @@
                     document.body.removeChild(searchBox);
                 }
             });
-        }
+        }*/
         
         // Add smooth scrolling for timeline on mobile
         if (window.innerWidth <= 992) {

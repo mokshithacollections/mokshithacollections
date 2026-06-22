@@ -12,6 +12,10 @@
 
     <!-- Local CSS -->
     <link rel="stylesheet" type="text/css" th:href="@{/css/home.css}">
+
+    <!-- Preload hero slider images so the first paint isn't blank/janky -->
+    <link rel="preload" as="image" th:href="@{/images/DesktopBG.png}">
+    <link rel="preload" as="image" th:href="@{/images/DesktopBG2.png}">
 </head>
 
 <body>
@@ -110,6 +114,20 @@
 
     <!-- Hero Section -->
     <section class="hero-section">
+        <!-- Background image slider — crossfades, auto-advances every 5s -->
+        <div class="hero-slider" id="heroSlider">
+            <div class="hero-slide slide-1 active"></div>
+            <div class="hero-slide slide-2"></div>
+        </div>
+        <button type="button" class="hero-nav hero-prev" id="heroPrev" aria-label="Previous slide">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button type="button" class="hero-nav hero-next" id="heroNext" aria-label="Next slide">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+        <div class="hero-dots" id="heroDots"></div>
+        <div class="hero-progress"><div class="hero-progress-bar" id="heroProgress"></div></div>
+
         <div class="floating-element floating-1"></div>
         <div class="floating-element floating-2"></div>
 
@@ -251,12 +269,11 @@
                             </h4>
 
                             <div class="product-price">
-                                <!-- Show discount price if set, otherwise the regular price -->
-                                <span th:if="${product.discountPrice != null}" th:text="'₹' + ${product.discountPrice}">₹0</span>
-                                <span th:unless="${product.discountPrice != null}" th:text="'₹' + ${product.price}">₹0</span>
-                                <!-- Strike-through original price only when there's a discount -->
+                                <!-- Regular price first (struck when discounted), then the offer price -->
                                 <span class="old-price" th:if="${product.discountPrice != null}"
                                       th:text="'₹' + ${product.price}">₹0</span>
+                                <span th:if="${product.discountPrice != null}" th:text="'₹' + ${product.discountPrice}">₹0</span>
+                                <span th:unless="${product.discountPrice != null}" th:text="'₹' + ${product.price}">₹0</span>
                             </div>
 
                             <button class="product-btn"
@@ -436,5 +453,89 @@
         window.WISHLIST_VARIANT_IDS = new Set(/*[[${wishlistVariantIds}]]*/ []);
     </script>
     <script type="text/javascript" th:src="@{/js/home.js}"></script>
+
+    <!-- Hero image slider: crossfade + Ken Burns, auto-advance every 7s, prev/next + dots + progress -->
+    <script>
+        (function heroSlider() {
+            var section = document.querySelector('.hero-section');
+            var slider = document.getElementById('heroSlider');
+            if (!section || !slider) return;
+            var slides = Array.prototype.slice.call(slider.querySelectorAll('.hero-slide'));
+            if (slides.length === 0) return;
+
+            var dotsWrap = document.getElementById('heroDots');
+            var prevBtn = document.getElementById('heroPrev');
+            var nextBtn = document.getElementById('heroNext');
+            var progress = document.getElementById('heroProgress');
+            var INTERVAL = 7000;   // 7 seconds per slide
+
+            var current = slides.findIndex(function (s) { return s.classList.contains('active'); });
+            if (current < 0) { current = 0; slides[0].classList.add('active'); }
+
+            // Build dots
+            var dots = [];
+            if (dotsWrap) {
+                slides.forEach(function (_, idx) {
+                    var b = document.createElement('button');
+                    b.type = 'button';
+                    b.setAttribute('aria-label', 'Go to slide ' + (idx + 1));
+                    if (idx === current) b.classList.add('active');
+                    b.addEventListener('click', function () { goTo(idx); play(); });
+                    dotsWrap.appendChild(b);
+                    dots.push(b);
+                });
+            }
+
+            // Only one slide → no controls needed.
+            if (slides.length < 2) {
+                if (prevBtn) prevBtn.style.display = 'none';
+                if (nextBtn) nextBtn.style.display = 'none';
+                if (dotsWrap) dotsWrap.style.display = 'none';
+                if (progress) progress.parentElement.style.display = 'none';
+                return;
+            }
+
+            function goTo(n) {
+                slides[current].classList.remove('active');
+                if (dots[current]) dots[current].classList.remove('active');
+                current = (n + slides.length) % slides.length;
+                slides[current].classList.add('active');
+                if (dots[current]) dots[current].classList.add('active');
+            }
+
+            // Reset the progress bar to 0, then animate it to 100% over INTERVAL.
+            function runProgress() {
+                if (!progress) return;
+                progress.style.transition = 'none';
+                progress.style.width = '0%';
+                void progress.offsetWidth;                 // force reflow so the reset "sticks"
+                progress.style.transition = 'width ' + INTERVAL + 'ms linear';
+                progress.style.width = '100%';
+            }
+            function freezeProgress() {
+                if (!progress) return;
+                var w = getComputedStyle(progress).width;
+                progress.style.transition = 'none';
+                progress.style.width = w;
+            }
+
+            var timer = null;
+            function play() {
+                clearInterval(timer);
+                runProgress();
+                timer = setInterval(function () { goTo(current + 1); runProgress(); }, INTERVAL);
+            }
+            function pause() { clearInterval(timer); timer = null; freezeProgress(); }
+
+            if (prevBtn) prevBtn.addEventListener('click', function () { goTo(current - 1); play(); });
+            if (nextBtn) nextBtn.addEventListener('click', function () { goTo(current + 1); play(); });
+
+            // Pause while hovering, resume on leave.
+            section.addEventListener('mouseenter', pause);
+            section.addEventListener('mouseleave', play);
+
+            play();
+        })();
+    </script>
 </body>
 </html>

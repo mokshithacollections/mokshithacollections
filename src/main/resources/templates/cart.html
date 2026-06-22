@@ -858,9 +858,9 @@
                 </div>
                 <div class="col-lg-3 col-md-4 col-6 text-end">
                     <div class="header-icons d-inline-flex align-items-center">
-                        <div class="icon search-icon">
+                        <!--<div class="icon search-icon">
                             <i class="fas fa-search"></i>
-                        </div>
+                        </div>-->
                         <div class="icon user-icon" onclick="window.location.href='/user_redirect'">
                             <i class="fas fa-user"></i>
                         </div>
@@ -868,10 +868,10 @@
                             <i class="far fa-heart"></i>
                             <span class="cart-count" th:text="${wishlistCount != null ? wishlistCount : 0}">0</span>
                         </div>
-                        <div class="icon cart-icon active">
+                        <!--<div class="icon cart-icon active">
                             <i class="fas fa-shopping-bag"></i>
                             <span class="cart-count" id="headerCartCount" th:text="${cartCount != null ? cartCount : 0}">0</span>
-                        </div>
+                        </div>-->
                         <button class="navbar-toggler d-md-none ms-3" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
                             <i class="fas fa-bars"></i>
                         </button>
@@ -1039,12 +1039,14 @@
                         <div class="mt-4">
                             <p class="mb-2">We Accept:</p>
                             <div class="d-flex gap-2 flex-wrap">
-                                <img src="https://img.icons8.com/color/48/000000/visa.png" alt="Visa" width="40">
-                                <img src="https://img.icons8.com/color/48/000000/mastercard.png" alt="Mastercard" width="40">
-                                <img src="https://img.icons8.com/color/48/000000/american-express.png" alt="Amex" width="40">
                                 <img src="https://img.icons8.com/color/48/000000/rupay.png" alt="RuPay" width="40">
+								<img src="https://img.icons8.com/color/48/000000/visa.png" alt="Visa" width="40">
+								<img src="https://img.icons8.com/color/48/000000/mastercard.png" alt="Cred Pay" width="40">
+								<img src="https://img.icons8.com/color/48/000000/phone-pe.png" alt="PhonePe" width="40">
+								<img src="https://img.icons8.com/color/48/000000/google-pay.png" alt="Google Pay" width="40">
                                 <img src="https://img.icons8.com/color/48/000000/paytm.png" alt="Paytm" width="40">
-                                <img src="https://img.icons8.com/color/48/000000/google-pay.png" alt="Google Pay" width="40">
+								<img src="https://img.icons8.com/color/48/000000/bhim.png" alt="BHIM" width="40">
+                                
                             </div>
                         </div>
                         
@@ -1053,11 +1055,11 @@
                             <div class="row text-center">
                                 <div class="col-4">
                                     <i class="fas fa-shipping-fast text-primary mb-2"></i>
-                                    <p class="small mb-0">Free Shipping</p>
+                                    <p class="small mb-0">Free Shipping Above ₹4999</p>
                                 </div>
                                 <div class="col-4">
                                     <i class="fas fa-exchange-alt text-success mb-2"></i>
-                                    <p class="small mb-0">Easy Returns</p>
+                                    <p class="small mb-0">Exchange on Damazed Product</p>
                                 </div>
                                 <div class="col-4">
                                     <i class="fas fa-shield-alt text-warning mb-2"></i>
@@ -1311,8 +1313,8 @@
         });
 
         // Search functionality
-        const searchIcon = document.querySelector('.search-icon');
-        if (searchIcon) searchIcon.addEventListener('click', showSearchModal);
+        //const searchIcon = document.querySelector('.search-icon');
+        //if (searchIcon) searchIcon.addEventListener('click', showSearchModal);
         
         // (The previous version of this script tracked the cart in a hardcoded
         // in-memory array and had promo-code + Recently Viewed handlers wired
@@ -1351,7 +1353,7 @@
             }, 3000);
         }
         
-        function showSearchModal() {
+        /*function showSearchModal() {
             const searchBox = document.createElement('div');
             searchBox.style.cssText = `
                 position: fixed;
@@ -1396,7 +1398,7 @@
                     document.body.removeChild(searchBox);
                 }
             });
-        }
+        }*/
         
         // Mobile-specific optimizations
         if (window.innerWidth <= 768) {

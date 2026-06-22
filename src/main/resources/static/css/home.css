@@ -111,25 +111,122 @@
         
         /* Hero Section */
 		.hero-section {
-			background: 
-			    url(../images/DesktopBG.png);
-
-		    background-size: cover;
-		    background-position: top;
-		    background-repeat: no-repeat;
 		    padding: 270px 0;
 		    position: relative;
-		   
+		    overflow: hidden;            /* clip the Ken Burns zoom */
+		    /* Show the first image immediately as a fallback so the hero is never
+		       blank before the slide layers paint on the very first load. */
+		    background: #f3ede6 url(../images/DesktopBG.png) top center / cover no-repeat;
 		}
-        
+
+        /* Subtle left-weighted veil so the headline stays readable over any slide. */
         .hero-section::before {
             content: '';
             position: absolute;
-            top: 0;
+            inset: 0;
+            z-index: 1;
+            background: linear-gradient(90deg,
+                        rgba(255, 255, 255, 0.78) 0%,
+                        rgba(255, 255, 255, 0.35) 42%,
+                        rgba(255, 255, 255, 0) 68%);
+            pointer-events: none;
+        }
+
+        /* ----- Hero background slider ----- */
+        .hero-slider { position: absolute; inset: 0; z-index: 0; }
+        .hero-slide {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: top center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transform: scale(1.06);
+            transition: opacity 1.1s ease-in-out;
+        }
+        /* Crossfade via opacity; the slow zoom/pan is a keyframe animation so it
+           also runs for the first slide on page load (a transition would not).
+           The direction alternates per slide for a livelier feel. */
+        .hero-slide.active { opacity: 1; animation: heroZoom 7s ease-out forwards; }
+        /* Gentle zoom only — no left/right panning. */
+        @keyframes heroZoom {
+            from { transform: scale(1.08); }
+            to   { transform: scale(1); }
+        }
+        .hero-slide.slide-1 { background-image: url(../images/DesktopBG.png); }
+        .hero-slide.slide-2 { background-image: url(../images/DesktopBG2.png); }
+
+        /* Prev / next buttons */
+        .hero-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 3;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--dark-sea-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+            transition: background 0.25s, color 0.25s, transform 0.25s;
+            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px);
+        }
+        .hero-nav:hover {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            color: #fff;
+            transform: translateY(-50%) scale(1.1);
+        }
+        .hero-prev { left: 22px; }
+        .hero-next { right: 22px; }
+
+        /* Dots */
+        .hero-dots {
+            position: absolute;
+            bottom: 26px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+            display: flex;
+            gap: 10px;
+        }
+        .hero-dots button {
+            width: 11px;
+            height: 11px;
+            padding: 0;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .hero-dots button.active {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            width: 30px;
+            border-radius: 6px;
+        }
+
+        /* Thin timeline that fills over each slide's 7s, then resets. */
+        .hero-progress {
+            position: absolute;
             left: 0;
+            bottom: 0;
             width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.25);
+            z-index: 3;
+        }
+        .hero-progress-bar {
             height: 100%;
-           
+            width: 0;
+            background: linear-gradient(90deg, var(--dark-sea-green), var(--light-sea-green));
         }
         
         .hero-content {
@@ -404,13 +501,16 @@
             font-weight: 700;
             font-size: 1.2rem;
             margin-bottom: 10px;
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 8px;
         }
-        
+
         .product-price .old-price {
             color: #999;
             text-decoration: line-through;
-            font-size: 0.9rem;
-            margin-left: 8px;
+            font-size: 1.2rem;        /* same size as the price */
             font-weight: 400;
         }
         
@@ -691,6 +791,12 @@
             .hero-subtitle { font-size: 1.05rem; margin-bottom: 24px; }
             .hero-btn { padding: 11px 24px; font-size: 0.95rem; }
 
+            /* Smaller slider controls on phones */
+            .hero-nav { width: 38px; height: 38px; font-size: 0.9rem; }
+            .hero-prev { left: 10px; }
+            .hero-next { right: 10px; }
+            .hero-dots { bottom: 14px; }
+
             /* Tighter vertical rhythm — less empty space between sections */
             section.py-5 { padding-top: 1.75rem !important; padding-bottom: 1.75rem !important; }
             section.my-5 { margin-top: 0.5rem !important; margin-bottom: 0.5rem !important; }
@@ -712,7 +818,8 @@
             .product-card { margin-bottom: 0; border-radius: 12px; }
             .product-content { padding: 14px 12px; }
             .product-title { font-size: 0.95rem; }
-            .product-price { font-size: 1.05rem; margin-bottom: 8px; }
+            .product-price { font-size: 1.05rem; margin-bottom: 8px; flex-direction: column; align-items: flex-start; gap: 1px; }
+            .product-price .old-price { font-size: 1.05rem; }
             .product-btn { padding: 9px; font-size: 0.9rem; }
             .product-wishlist { width: 32px; height: 32px; }
         }

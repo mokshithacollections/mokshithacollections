@@ -64,7 +64,7 @@ function getCsrfToken() {
             });
             
             // Search functionality
-            document.querySelector('.search-icon').addEventListener('click', showSearchModal);
+            //document.querySelector('.search-icon').addEventListener('click', showSearchModal);
             
             // Format phone number
             document.getElementById('phone').addEventListener('input', function() {
@@ -528,7 +528,7 @@ function getCsrfToken() {
             }, 3000);
         }
         
-        function showSearchModal() {
+        /*function showSearchModal() {
             const searchBox = document.createElement('div');
             searchBox.style.cssText = `
                 position: fixed;
@@ -573,7 +573,7 @@ function getCsrfToken() {
                     document.body.removeChild(searchBox);
                 }
             });
-        }
+        }*/
         
         // Mobile optimizations
         if (window.innerWidth <= 768) {

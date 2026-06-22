@@ -495,7 +495,7 @@
         .product-title {
             font-size: 1.1rem;
             color: var(--dark-text);
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             font-weight: 600;
             height: 2.8rem;
             overflow: hidden;
@@ -529,13 +529,16 @@
             font-weight: 700;
             font-size: 1.2rem;
             margin-bottom: 10px;
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 8px;
         }
-        
+
         .product-price .old-price {
             color: #999;
             text-decoration: line-through;
-            font-size: 0.9rem;
-            margin-left: 8px;
+            font-size: 1.2rem;        /* same size as the price */
             font-weight: 400;
         }
         
@@ -946,9 +949,10 @@
             }
             .product-card { margin-bottom: 18px; border-radius: 12px; }
             .product-content { padding: 14px 12px; }
-            .product-title { font-size: 0.95rem; height: 2.6rem; margin-bottom: 6px; }
+            .product-title { font-size: 0.95rem; height: 2.6rem; margin-bottom: 5px; }
             .product-variants { font-size: 0.72rem; margin-bottom: 6px; }
-            .product-price { font-size: 1.05rem; margin-bottom: 8px; }
+            .product-price { font-size: 1.05rem; margin-bottom: 8px; flex-direction: column; align-items: flex-start; gap: 1px; }
+            .product-price .old-price { font-size: 1.05rem; }
             .product-btn { padding: 9px; font-size: 0.9rem; }
             .product-badge { font-size: 0.7rem; padding: 4px 9px; }
             .product-wishlist { width: 32px; height: 32px; }
@@ -1239,16 +1243,17 @@
                                     <a th:href="@{/product-detail/{id}(id=${product.productId})}"
                                        class="product-title"
                                        th:text="${product.name}">Product Name</a>
-                                    <div class="product-variants"
-                                         th:if="${product.colorCount != null and product.colorCount > 1}"
-                                         th:text="'Available in ' + ${product.colorCount} + ' colours'">
-                                        Available in 3 colours
-                                    </div>
+								   <div class="product-variants"
+								        th:text="${product.colorCount != null and product.colorCount >= 1 ?
+								                 'Available in ' + product.colorCount + (product.colorCount == 1 ? ' colour' : ' colours') :
+								                 'No variants available'}">
+								   </div>
                                     <div class="product-price">
-                                        <span th:if="${product.discountPrice != null}" th:text="'₹' + ${product.discountPrice}">₹0</span>
-                                        <span th:unless="${product.discountPrice != null}" th:text="'₹' + ${product.price}">₹0</span>
+                                        <!-- Regular price first (struck when discounted), then the offer price -->
                                         <span class="old-price" th:if="${product.discountPrice != null}"
                                               th:text="'₹' + ${product.price}">₹0</span>
+                                        <span th:if="${product.discountPrice != null}" th:text="'₹' + ${product.discountPrice}">₹0</span>
+                                        <span th:unless="${product.discountPrice != null}" th:text="'₹' + ${product.price}">₹0</span>
                                     </div>
                                     <button class="product-btn"
                                             th:classappend="${cartProductIds != null and cartProductIds.contains(product.productId)} ? 'in-cart'"
@@ -2049,7 +2054,10 @@
         const priceRange = document.querySelector('.price-range');
         const priceValues = document.querySelector('.price-values');
         
-        priceRange.addEventListener('input', function() {
+        // The old single .price-range slider was replaced by the dual-range slider,
+        // so this element no longer exists — guard it or it throws and halts the
+        // rest of this script (which broke the search modal, etc.).
+        if (priceRange && priceValues) priceRange.addEventListener('input', function() {
             const maxPrice = parseInt(this.value).toLocaleString('en-IN');
             priceValues.innerHTML = `<span>₹0</span><span>₹${maxPrice}</span>`;
         });
@@ -2080,14 +2088,16 @@
             });
             
             // Reset price range
-            priceRange.value = 50000;
-            priceValues.innerHTML = `<span>₹0</span><span>₹50,000</span>`;
+            if (priceRange) priceRange.value = 50000;
+            if (priceValues) priceValues.innerHTML = `<span>₹0</span><span>₹50,000</span>`;
             
             showNotification('All filters cleared!');
         });
         
-        // Wishlist toggle (same as index.html)
-        document.querySelectorAll('.product-wishlist').forEach(btn => {
+        // Wishlist toggle (static placeholder) — DISABLED: the real, API-backed
+        // wishlist handler is bound earlier in this file. This selector is emptied
+        // so it no longer double-toggles the heart and fakes the count.
+        document.querySelectorAll('.product-wishlist--disabled').forEach(btn => {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -2117,8 +2127,8 @@
         });
 
         const userIcon = document.getElementById('userIcon');
-        userIcon.addEventListener('click', () => {
-            window.location.href = 'account.html';
+        if (userIcon) userIcon.addEventListener('click', () => {
+            window.location.href = '/user_redirect';
         });
 
         const cartIcon = document.getElementById('cartIcon');
@@ -2188,26 +2198,34 @@
                     <button class="close-search" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
                     <h3 style="margin-bottom: 20px; color: var(--dark-text);">Search Products</h3>
                     <div style="display: flex;">
-                        <input type="text" placeholder="Search for sarees, dresses, collections..." 
+                        <input type="text" class="search-input" placeholder="Search for sarees, dresses, collections..."
                                style="flex: 1; padding: 15px; border: 2px solid #eee; border-radius: 5px 0 0 5px; font-size: 1rem;">
-                        <button style="background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green)); color: white; border: none; padding: 0 30px; border-radius: 0 5px 5px 0; cursor: pointer;">
+                        <button type="button" class="do-search" style="background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green)); color: white; border: none; padding: 0 30px; border-radius: 0 5px 5px 0; cursor: pointer;">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
-                    <div style="margin-top: 20px; color: #666; font-size: 0.9rem;">
-                        <p>Popular searches: <a href="#" style="color: var(--dark-sea-green); margin-right: 10px;">Silk Sarees</a> 
-                        <a href="#" style="color: var(--dark-sea-green); margin-right: 10px;">Evening Dresses</a> 
-                        <a href="#" style="color: var(--dark-sea-green);">Party Wear</a></p>
-                    </div>
                 </div>
             `;
-            
+
             document.body.appendChild(searchBox);
-            
+
+            var input = searchBox.querySelector('.search-input');
+            // Run the search: go to the shop filtered by the query (backend reads ?search=).
+            function runSearch() {
+                var q = input.value.trim();
+                window.location.href = '/shop' + (q ? ('?search=' + encodeURIComponent(q)) : '');
+            }
+            searchBox.querySelector('.do-search').addEventListener('click', runSearch);
+            input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); runSearch(); } });
+            searchBox.querySelectorAll('.popular-q').forEach(function (a) {
+                a.addEventListener('click', function (e) { e.preventDefault(); input.value = a.getAttribute('data-q'); runSearch(); });
+            });
+            setTimeout(function () { input.focus(); }, 50);
+
             searchBox.querySelector('.close-search').addEventListener('click', function() {
                 document.body.removeChild(searchBox);
             });
-            
+
             searchBox.addEventListener('click', function(e) {
                 if (e.target === searchBox) {
                     document.body.removeChild(searchBox);
