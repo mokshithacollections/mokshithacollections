@@ -53,16 +53,28 @@
                     <h3 class="form-section-head"><i class="fas fa-folder-tree"></i>Placement &amp; visibility</h3>
                     <p class="form-section-sub">Nest this under a parent category, and choose whether customers can see it.</p>
                     <div class="form-row">
+                        <div class="form-toggle">
+                            <input type="checkbox" id="isParent" name="isParent"
+                                   th:checked="${category != null and category.isParent != null and category.isParent}">
+                            <label for="isParent">Group category — holds other categories, not products</label>
+                        </div>
+                        <div class="helper">Turn this on for a top-level grouping like “Sarees”.
+                            Products are then assigned only to its sub-categories, not to the group itself.</div>
+                    </div>
+
+                    <div class="form-row" id="parentRow">
                         <label>Parent category</label>
-                        <select name="parentId">
+                        <select name="parentId" id="parentSelect">
                             <option value="">— None (top-level) —</option>
                             <option th:each="c : ${allCategories}"
                                     th:value="${c.categoryId}"
                                     th:text="${c.name}"
-                                    th:if="${category == null or c.categoryId != category.categoryId}"
+                                    th:if="${(category == null or c.categoryId != category.categoryId)
+                                             and (c.isParent != null and c.isParent)}"
                                     th:selected="${category != null and category.parentId != null and category.parentId == c.categoryId}">
                             </option>
                         </select>
+                        <div class="helper">Only group categories can be parents. Pick the group this category belongs under.</div>
                     </div>
 
                     <div class="form-row">
@@ -94,15 +106,28 @@
     const CATEGORY_ID = /*[[${category != null ? category.categoryId : null}]]*/ null;
     /*]]>*/
 
+    // A group category can't itself sit under a parent — disable the parent
+    // picker while "Group category" is checked.
+    const isParentCb = document.getElementById('isParent');
+    const parentRow = document.getElementById('parentRow');
+    function syncParentRow() {
+        const grp = isParentCb.checked;
+        parentRow.style.opacity = grp ? 0.5 : 1;
+        document.getElementById('parentSelect').disabled = grp;
+    }
+    if (isParentCb) { isParentCb.addEventListener('change', syncParentRow); syncParentRow(); }
+
     document.getElementById('categoryForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
+        const isParent = isParentCb.checked;
         const body = {
             name: fd.get('name'),
             slug: fd.get('slug'),
             description: fd.get('description') || null,
-            parentId: fd.get('parentId') ? parseInt(fd.get('parentId'), 10) : null,
-            isActive: fd.get('isActive') === 'on'
+            parentId: isParent ? null : (fd.get('parentId') ? parseInt(fd.get('parentId'), 10) : null),
+            isActive: fd.get('isActive') === 'on',
+            isParent: isParent
         };
         try {
             const isUpdate = CATEGORY_ID !== null && CATEGORY_ID !== undefined && CATEGORY_ID !== '';

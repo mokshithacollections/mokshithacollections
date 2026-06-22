@@ -34,6 +34,8 @@
                         <td>
                             <a th:href="@{/admin/categories/{id}(id=${c.categoryId})}"
                                th:text="${c.name}" style="font-weight:500;">Name</a>
+                            <span th:if="${c.isParent != null and c.isParent}" class="pill pill-admin"
+                                  style="margin-left:6px;"><i class="fas fa-layer-group"></i> Group</span>
                         </td>
                         <td><code th:text="${c.slug}">slug</code></td>
                         <td>

@@ -944,15 +944,21 @@
             cursor: pointer;
             font-family: inherit;
             transition: border-color .15s, box-shadow .15s, transform .15s;
+            -webkit-tap-highlight-color: transparent;   /* no grey flash on tap (mobile) */
         }
+        /* Selection is shown by the green ring (.active), so suppress the lingering
+           focus outline left after a tap. Keyboard users still get a ring via
+           :focus-visible below. */
+        .variant-chip:focus { outline: none; }
+        .variant-chip:focus-visible { outline: 2px solid var(--dark-sea-green); outline-offset: 3px; }
         .variant-chip:hover:not(:disabled):not(.out-of-stock) {
             transform: translateY(-3px);
         }
-        .variant-chip:hover:not(:disabled):not(.out-of-stock) .variant-swatch {
+        .variant-chip:hover:not(:disabled):not(.out-of-stock):not(.active) .variant-swatch {
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
         }
-        /* Selected: a soft green ring around the thumbnail + a lift, so it reads
-           clearly as "this one is chosen" without covering the image. */
+        /* Selected: a soft green ring around the thumbnail image only (same on
+           desktop and mobile) — not a border around the whole chip. */
         .variant-chip.active .variant-swatch {
             box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--dark-sea-green),
                         0 6px 18px rgba(46, 139, 87, 0.3);

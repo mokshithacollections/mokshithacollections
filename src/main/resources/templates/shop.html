@@ -167,23 +167,32 @@
         }
         
         .filter-title {
-            font-size: 1.3rem;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
+            font-size: 1.25rem;
+            margin-bottom: 22px;
+            padding-bottom: 14px;
             border-bottom: 2px solid #f0f0f0;
             color: var(--dark-text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        
+        .filter-title i { color: var(--dark-sea-green); font-size: 1.05rem; }
+
         .filter-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f2f2f2;
         }
-        
+        .filter-group:last-of-type { border-bottom: 0; padding-bottom: 6px; }
+
         .filter-group h5 {
-            font-size: 1rem;
-            margin-bottom: 15px;
-            color: #555;
+            font-size: 0.82rem;
+            margin-bottom: 14px;
+            color: var(--dark-text);
             font-family: 'Poppins', sans-serif;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .filter-options {
@@ -214,6 +223,36 @@
         .filter-options label:hover {
             color: var(--dark-sea-green);
         }
+
+        /* Category tree: parent rows with a chevron toggle + collapsible children. */
+        .cat-tree li { display: block; margin-bottom: 6px; }
+        .cat-tree .cat-row { display: flex; align-items: center; gap: 6px; }
+        .cat-toggle {
+            border: 0; background: transparent; cursor: pointer;
+            width: 22px; height: 22px; padding: 0; flex-shrink: 0; border-radius: 5px;
+            display: inline-flex; align-items: center; justify-content: center;
+            color: var(--dark-sea-green); font-size: 0.7rem;
+        }
+        .cat-toggle:hover { background: rgba(85, 0, 12, 0.08); }
+        .cat-toggle i { transition: transform 0.2s ease; }
+        .cat-toggle.open i { transform: rotate(90deg); }
+        .cat-toggle-spacer { display: inline-block; width: 22px; flex-shrink: 0; }
+        .cat-tree .cat-row a { font-weight: 500; }
+
+        /* Sub-categories drawn as a tree: a vertical guide line with little
+           horizontal connectors to each child. */
+        .subcat-list {
+            list-style: none;
+            padding-left: 0 !important;
+            margin: 8px 0 10px 10px;
+            border-left: 2px solid #e8e8e8;
+        }
+        .subcat-list li { position: relative; padding-left: 16px; margin-bottom: 7px; }
+        .subcat-list li::before {
+            content: ''; position: absolute; left: 0; top: 0.72em;
+            width: 11px; height: 2px; background: #e8e8e8;
+        }
+        .subcat-list a { font-size: 0.9rem; color: #777; }
         
         .color-option {
             width: 25px;
@@ -241,6 +280,26 @@
             margin-top: 10px;
             font-size: 0.9rem;
             color: #666;
+        }
+
+        /* Dual-range price slider (two overlapping range inputs) — thick track. */
+        .price-slider { position: relative; height: 38px; margin: 6px 0 2px; }
+        .ps-track { position: absolute; top: 15px; left: 0; right: 0; height: 8px; background: #e5e7eb; border-radius: 5px; }
+        .ps-fill { position: absolute; top: 15px; height: 8px; background: var(--dark-sea-green); border-radius: 5px; }
+        .price-slider input[type=range] {
+            position: absolute; top: 0; left: 0; width: 100%; height: 38px; margin: 0;
+            background: none; pointer-events: none; -webkit-appearance: none; appearance: none;
+        }
+        .price-slider input[type=range]::-webkit-slider-runnable-track { height: 8px; background: none; border: none; }
+        .price-slider input[type=range]::-moz-range-track { height: 8px; background: none; border: none; }
+        .price-slider input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none; pointer-events: auto; margin-top: -7px;
+            width: 22px; height: 22px; border-radius: 50%; background: #fff;
+            border: 3px solid var(--dark-sea-green); cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+        }
+        .price-slider input[type=range]::-moz-range-thumb {
+            pointer-events: auto; width: 22px; height: 22px; border-radius: 50%; background: #fff;
+            border: 3px solid var(--dark-sea-green); cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.3);
         }
         
         .filter-btn {
@@ -277,6 +336,9 @@
         
         /* Mobile filter-drawer controls — hidden on desktop, shown ≤991px */
         .filter-toggle-btn { display: none; }
+        .mobile-action-bar { display: none; }
+        .sort-sheet { display: none; }
+        .sort-sheet-backdrop { display: none; }
         .filter-close-btn { display: none; }
         .filter-backdrop {
             display: none;
@@ -750,25 +812,63 @@
 
         /* ---- Tablet & below: filters become a slide-in drawer ---- */
         @media (max-width: 991.98px) {
-            .shop-container { padding: 30px 0; }
+            /* Leave room at the bottom so the fixed action bar never covers content. */
+            .shop-container { padding: 30px 0 90px; }
 
-            /* The "Filters & Sort" trigger button */
-            .filter-toggle-btn {
+            /* Sorting lives in the bottom "Sort" button on mobile — hide the top dropdown. */
+            .shop-top-bar .sort-options { display: none; }
+
+            /* Fixed bottom action bar: Sort (left) + Filter (right), always visible. */
+            .mobile-action-bar {
                 display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 8px;
-                width: 100%;
-                padding: 12px;
-                margin-bottom: 18px;
-                background: #fff;
-                border: 2px solid var(--dark-sea-green);
-                color: var(--dark-sea-green);
-                border-radius: 10px;
-                font-weight: 600;
-                cursor: pointer;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+                gap: 12px;
+                position: fixed;
+                bottom: 16px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 1150;
             }
+            .mobile-action-btn {
+                display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+                padding: 13px 26px; border-radius: 999px; font-weight: 600; font-size: 0.95rem;
+                cursor: pointer; white-space: nowrap;
+                background: #fff; color: var(--dark-sea-green);
+                border: 1.5px solid var(--dark-sea-green);
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+            }
+            .mobile-action-btn.primary {
+                background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+                color: #fff; border: none;
+            }
+            .mobile-action-btn:active { transform: scale(0.97); }
+            /* Hide the bar while a sheet/drawer is open. */
+            body.filter-open .mobile-action-bar,
+            body.sort-open .mobile-action-bar { display: none; }
+
+            /* Sort bottom-sheet */
+            .sort-sheet {
+                display: block;
+                position: fixed; left: 0; right: 0; bottom: 0; z-index: 1200;
+                background: #fff; border-radius: 18px 18px 0 0; padding: 8px 18px 26px;
+                box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.2);
+                transform: translateY(110%); transition: transform 0.3s ease;
+            }
+            .sort-sheet.open { transform: translateY(0); }
+            .sort-sheet-handle { width: 40px; height: 4px; background: #ddd; border-radius: 2px; margin: 6px auto 12px; }
+            .sort-sheet-title { font-weight: 600; color: var(--dark-text); margin-bottom: 6px; }
+            .sort-opt {
+                display: block; width: 100%; text-align: left; background: none; border: 0;
+                padding: 14px 4px; font-size: 1rem; color: #444; cursor: pointer; border-bottom: 1px solid #f2f2f2;
+            }
+            .sort-opt:last-child { border-bottom: 0; }
+            .sort-opt.active { color: var(--dark-sea-green); font-weight: 600; }
+            .sort-opt.active::after { content: '\2713'; float: right; }
+            .sort-sheet-backdrop {
+                display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5);
+                z-index: 1190; opacity: 0; transition: opacity 0.25s ease;
+            }
+            .sort-sheet-backdrop.show { display: block; opacity: 1; }
+            body.sort-open { overflow: hidden; }
 
             /* Sidebar slides in from the left as an off-canvas drawer */
             .filter-sidebar {
@@ -970,7 +1070,7 @@
                         <button type="button" class="filter-close-btn" id="closeFilters" aria-label="Close filters">
                             <i class="fas fa-times"></i>
                         </button>
-                        <h3 class="filter-title">Filter Products</h3>
+                        <h3 class="filter-title"><i class="fas fa-sliders-h"></i> Filter Products</h3>
 
                         <!-- Search -->
                         <div class="filter-group">
@@ -983,18 +1083,39 @@
                         <!-- Category Filter (clickable list, server-side filter) -->
                         <div class="filter-group">
                             <h5>Category</h5>
-                            <ul class="filter-options" style="list-style:none; padding:0;">
+                            <ul class="filter-options cat-tree" style="list-style:none; padding:0;">
                                 <li>
                                     <a th:href="@{/shop}"
                                        th:classappend="${filters == null or filters.categorySlug == null} ? 'fw-bold text-success'"
                                        style="text-decoration:none;">All categories</a>
                                 </li>
-                                <li th:each="cat : ${categories}">
-                                    <a th:href="@{/shop(categorySlug=${cat.slug})}"
-                                       th:text="${cat.name}"
-                                       th:classappend="${filters != null and filters.categorySlug != null and filters.categorySlug == cat.slug} ? 'fw-bold text-success'"
-                                       style="text-decoration:none;">Category</a>
+
+                                <!-- Top-level categories (groups + standalone leaves). A group
+                                     gets a +/- toggle that opens its (initially collapsed) children. -->
+                                <li th:each="parent : ${categories}" th:if="${parent.parentId == null}" class="cat-node">
+                                    <div class="cat-row">
+                                        <button type="button" class="cat-toggle"
+                                                th:if="${parent.isParent != null and parent.isParent}"
+                                                aria-expanded="false" aria-label="Expand sub-categories">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                        <span th:unless="${parent.isParent != null and parent.isParent}"
+                                              class="cat-toggle-spacer"></span>
+                                        <a th:href="@{/shop(categorySlug=${parent.slug})}"
+                                           th:text="${parent.name}"
+                                           th:classappend="${filters != null and filters.categorySlug != null and filters.categorySlug == parent.slug} ? 'fw-bold text-success'"
+                                           style="text-decoration:none;">Category</a>
+                                    </div>
+                                    <ul class="subcat-list" style="display:none; list-style:none;">
+                                        <li th:each="child : ${categories}" th:if="${child.parentId == parent.categoryId}">
+                                            <a th:href="@{/shop(categorySlug=${child.slug})}"
+                                               th:text="${child.name}"
+                                               th:classappend="${filters != null and filters.categorySlug != null and filters.categorySlug == child.slug} ? 'fw-bold text-success'"
+                                               style="text-decoration:none;">Sub-category</a>
+                                        </li>
+                                    </ul>
                                 </li>
+
                                 <li th:if="${categories == null or #lists.isEmpty(categories)}"
                                     class="text-muted small">No categories yet.</li>
                             </ul>
@@ -1004,13 +1125,24 @@
                                    th:value="${filters.categorySlug}">
                         </div>
 
-                        <!-- Price Range (numeric inputs — backend supports min/max) -->
+                        <!-- Price Range: dual-range slider synced with the Min/Max boxes.
+                             Only minPrice/maxPrice are submitted (backend unchanged). -->
                         <div class="filter-group">
                             <h5>Price Range (₹)</h5>
-                            <div class="d-flex gap-2">
-                                <input type="number" name="minPrice" class="form-control" placeholder="Min" min="0"
+                            <div class="price-slider" id="priceSlider" data-min="0" data-max="50000" data-step="500">
+                                <div class="ps-track"></div>
+                                <div class="ps-fill" id="psFill"></div>
+                                <input type="range" id="psMinRange" min="0" max="50000" step="500" value="0" aria-label="Minimum price">
+                                <input type="range" id="psMaxRange" min="0" max="50000" step="500" value="50000" aria-label="Maximum price">
+                            </div>
+                            <div class="price-values">
+                                <span id="psMinLabel">₹0</span>
+                                <span id="psMaxLabel">₹50,000</span>
+                            </div>
+                            <div class="d-flex gap-2 mt-2">
+                                <input type="number" name="minPrice" id="minPrice" class="form-control" placeholder="Min" min="0" max="50000"
                                        th:value="${filters != null ? filters.minPrice : ''}">
-                                <input type="number" name="maxPrice" class="form-control" placeholder="Max" min="0"
+                                <input type="number" name="maxPrice" id="maxPrice" class="form-control" placeholder="Max" min="0" max="50000"
                                        th:value="${filters != null ? filters.maxPrice : ''}">
                             </div>
                         </div>
@@ -1038,10 +1170,15 @@
                 
                 <!-- Products Section -->
                 <div class="col-lg-9">
-                    <!-- Mobile-only: opens the filter drawer -->
-                    <button type="button" class="filter-toggle-btn" id="openFilters">
-                        <i class="fas fa-sliders-h"></i> Filter Products
-                    </button>
+                    <!-- Mobile-only: fixed bottom action bar — Sort (left) + Filter (right) -->
+                    <div class="mobile-action-bar">
+                        <button type="button" class="mobile-action-btn" id="openSort">
+                            <i class="fas fa-arrow-down-wide-short"></i> Sort
+                        </button>
+                        <button type="button" class="mobile-action-btn primary" id="openFilters">
+                            <i class="fas fa-sliders-h"></i> Filter
+                        </button>
+                    </div>
 
                     <!-- Shop Top Bar -->
                     <div class="shop-top-bar">
@@ -1430,6 +1567,21 @@
         </div>
         <!-- Dimmed backdrop shown behind the mobile filter drawer -->
         <div class="filter-backdrop" id="filterBackdrop"></div>
+
+        <!-- Mobile sort bottom-sheet (opened by the Sort button) -->
+        <div class="sort-sheet-backdrop" id="sortBackdrop"></div>
+        <div class="sort-sheet" id="sortSheet" role="dialog" aria-label="Sort products">
+            <div class="sort-sheet-handle"></div>
+            <div class="sort-sheet-title">Sort by</div>
+            <button type="button" class="sort-opt" data-sort="createdAt,desc"
+                    th:classappend="${filters == null or filters.sort == null or filters.sort == 'createdAt,desc'} ? 'active'">Newest</button>
+            <button type="button" class="sort-opt" data-sort="price,asc"
+                    th:classappend="${filters != null and filters.sort == 'price,asc'} ? 'active'">Price: Low to High</button>
+            <button type="button" class="sort-opt" data-sort="price,desc"
+                    th:classappend="${filters != null and filters.sort == 'price,desc'} ? 'active'">Price: High to Low</button>
+            <button type="button" class="sort-opt" data-sort="name,asc"
+                    th:classappend="${filters != null and filters.sort == 'name,asc'} ? 'active'">Name: A–Z</button>
+        </div>
     </section>
 
     <!-- Footer -->
@@ -2062,6 +2214,105 @@
                 }
             });
         }
+    </script>
+
+    <!-- Category tree expand/collapse — isolated in its own script so it always
+         runs, independent of any error in the larger script block above. -->
+    <script>
+        (function initCategoryTree() {
+            var nodes = document.querySelectorAll('.cat-tree .cat-node');
+            nodes.forEach(function (node) {
+                var toggle = node.querySelector('.cat-toggle');
+                var sub = node.querySelector('.subcat-list');
+                if (!toggle) return;                       // standalone leaf, no toggle
+                // A group with no sub-categories doesn't need a toggle.
+                if (!sub || !sub.querySelector('li')) { toggle.style.visibility = 'hidden'; return; }
+
+                function setOpen(open) {
+                    sub.style.display = open ? 'block' : 'none';
+                    toggle.classList.toggle('open', open);   // CSS rotates the chevron
+                    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                }
+
+                // Auto-open if one of this group's children is the active filter.
+                if (sub.querySelector('a.fw-bold')) setOpen(true);
+
+                toggle.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    setOpen(sub.style.display === 'none');
+                });
+            });
+        })();
+
+        // ----- Dual-range price slider (syncs both ways with the Min/Max boxes) -----
+        (function priceSlider() {
+            var wrap = document.getElementById('priceSlider');
+            if (!wrap) return;
+            var minR = document.getElementById('psMinRange');
+            var maxR = document.getElementById('psMaxRange');
+            var minBox = document.getElementById('minPrice');
+            var maxBox = document.getElementById('maxPrice');
+            var fill = document.getElementById('psFill');
+            var minLabel = document.getElementById('psMinLabel');
+            var maxLabel = document.getElementById('psMaxLabel');
+            var MIN = +wrap.dataset.min, MAX = +wrap.dataset.max;
+
+            function clamp(v) { v = +v; if (isNaN(v)) return null; return Math.min(Math.max(v, MIN), MAX); }
+            function fmt(n) { return '₹' + (+n).toLocaleString('en-IN'); }
+            function paint() {
+                var lo = +minR.value, hi = +maxR.value;
+                fill.style.left = ((lo - MIN) / (MAX - MIN) * 100) + '%';
+                fill.style.width = ((hi - lo) / (MAX - MIN) * 100) + '%';
+                if (minLabel) minLabel.textContent = fmt(lo);
+                if (maxLabel) maxLabel.textContent = fmt(hi);
+            }
+            // Seed the thumbs from any applied filter values (else the full range).
+            minR.value = (minBox.value !== '' && clamp(minBox.value) !== null) ? clamp(minBox.value) : MIN;
+            maxR.value = (maxBox.value !== '' && clamp(maxBox.value) !== null) ? clamp(maxBox.value) : MAX;
+            if (+maxR.value <= +minR.value) maxR.value = MAX;
+            // Always show the current values in the boxes too.
+            minBox.value = minR.value;
+            maxBox.value = maxR.value;
+
+            minR.addEventListener('input', function () {
+                if (+minR.value > +maxR.value) minR.value = maxR.value;
+                minBox.value = minR.value;
+                paint();
+            });
+            maxR.addEventListener('input', function () {
+                if (+maxR.value < +minR.value) maxR.value = minR.value;
+                maxBox.value = maxR.value;
+                paint();
+            });
+            // Typing in a box moves the matching thumb (leave the box text as-is while typing).
+            minBox.addEventListener('input', function () {
+                var v = minBox.value === '' ? MIN : clamp(minBox.value);
+                if (v !== null) { minR.value = v; if (+minR.value > +maxR.value) maxR.value = minR.value; paint(); }
+            });
+            maxBox.addEventListener('input', function () {
+                var v = maxBox.value === '' ? MAX : clamp(maxBox.value);
+                if (v !== null) { maxR.value = v; if (+maxR.value < +minR.value) minR.value = maxR.value; paint(); }
+            });
+            paint();
+        })();
+
+        // ----- Mobile sort bottom-sheet -----
+        (function sortSheet() {
+            var openBtn = document.getElementById('openSort');
+            var sheet = document.getElementById('sortSheet');
+            var backdrop = document.getElementById('sortBackdrop');
+            if (!openBtn || !sheet) return;
+            function open() { sheet.classList.add('open'); if (backdrop) backdrop.classList.add('show'); document.body.classList.add('sort-open'); }
+            function close() { sheet.classList.remove('open'); if (backdrop) backdrop.classList.remove('show'); document.body.classList.remove('sort-open'); }
+            openBtn.addEventListener('click', open);
+            if (backdrop) backdrop.addEventListener('click', close);
+            sheet.querySelectorAll('.sort-opt').forEach(function (b) {
+                b.addEventListener('click', function () {
+                    if (typeof applySort === 'function') applySort(b.getAttribute('data-sort'));
+                });
+            });
+            window.addEventListener('resize', function () { if (window.innerWidth > 991.98) close(); });
+        })();
     </script>
 </body>
 </html>

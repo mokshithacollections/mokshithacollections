@@ -14,6 +14,9 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
 
     Optional<ProductCategory> findBySlug(String slug);
 
+    /** True if this category has at least one sub-category. */
+    boolean existsByParentCategoryId(Long parentId);
+
     /** Null out the parent link on any sub-categories so a parent can be deleted. */
     @Modifying
     @Query("UPDATE ProductCategory c SET c.parent = null WHERE c.parent.categoryId = :parentId")

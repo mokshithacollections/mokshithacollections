@@ -38,10 +38,13 @@ public class AdminCategoryService {
         if (categoryRepository.findBySlug(req.getSlug()).isPresent()) {
             throw new ConflictException("Slug already in use");
         }
+        boolean isGroup = Boolean.TRUE.equals(req.getIsParent());
+
+        // A group category holds other categories, not products, and is never
+        // itself nested under another (we keep the hierarchy one level deep).
         ProductCategory parent = null;
-        if (req.getParentId() != null) {
-            parent = categoryRepository.findById(req.getParentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Parent category not found"));
+        if (!isGroup && req.getParentId() != null) {
+            parent = resolveParent(req.getParentId(), null);
         }
 
         ProductCategory c = ProductCategory.builder()
@@ -50,6 +53,7 @@ public class AdminCategoryService {
                 .description(req.getDescription())
                 .parent(parent)
                 .isActive(req.getIsActive() == null ? true : req.getIsActive())
+                .isParent(isGroup)
                 .build();
         return CategoryService.toResponse(categoryRepository.save(c));
     }
@@ -70,16 +74,46 @@ public class AdminCategoryService {
             c.setSlug(req.getSlug());
         }
 
-        if (req.getParentId() != null) {
-            if (req.getParentId().equals(categoryId)) {
-                throw new BadRequestException("A category cannot be its own parent");
+        // The form always sends the group flag; fall back to the current value.
+        boolean isGroup = req.getIsParent() != null
+                ? req.getIsParent()
+                : Boolean.TRUE.equals(c.getIsParent());
+
+        if (isGroup) {
+            // Group categories can't hold products, and have no parent themselves.
+            if (productRepository.countByCategoryCategoryId(categoryId) > 0) {
+                throw new BadRequestException("This category has products assigned, so it can't "
+                        + "be a group category. Move those products to another category first.");
             }
-            ProductCategory parent = categoryRepository.findById(req.getParentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Parent category not found"));
-            c.setParent(parent);
+            c.setParent(null);
+            c.setIsParent(true);
+        } else {
+            // Can't demote a group that still has sub-categories (would orphan them).
+            if (categoryRepository.existsByParentCategoryId(categoryId)) {
+                throw new BadRequestException("This category still has sub-categories. Reassign or "
+                        + "remove them before making it a normal (non-group) category.");
+            }
+            if (req.getParentId() != null) {
+                c.setParent(resolveParent(req.getParentId(), categoryId));
+            }
+            c.setIsParent(false);
         }
 
         return CategoryService.toResponse(categoryRepository.save(c));
+    }
+
+    /** Loads and validates a chosen parent: must exist, be a group, and not be self. */
+    private ProductCategory resolveParent(Long parentId, Long selfId) {
+        if (selfId != null && parentId.equals(selfId)) {
+            throw new BadRequestException("A category cannot be its own parent");
+        }
+        ProductCategory parent = categoryRepository.findById(parentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Parent category not found"));
+        if (!Boolean.TRUE.equals(parent.getIsParent())) {
+            throw new BadRequestException("\"" + parent.getName() + "\" is not a group category, "
+                    + "so it can't be used as a parent. Mark it as a group category first.");
+        }
+        return parent;
     }
 
     /** Toggle a category's visibility (Active/Inactive) without deleting it. */

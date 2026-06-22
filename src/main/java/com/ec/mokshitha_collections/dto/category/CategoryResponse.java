@@ -14,4 +14,5 @@ public class CategoryResponse {
     private final String description;
     private final Long parentId;
     private final Boolean isActive;
+    private final Boolean isParent;
 }

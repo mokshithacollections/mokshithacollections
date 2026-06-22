@@ -112,21 +112,14 @@
         /* Hero Section */
 		.hero-section {
 			background: 
-			    url(../images/DesktopBG.png),
-			    linear-gradient(to bottom, 
-				rgba(248, 224, 151, 0.3),
-				rgba(233, 173, 69, 0.9), 
-			        rgba(233, 173, 69, 1)
-			        
-			        
-			    );
+			    url(../images/DesktopBG.png);
 
-		    background-size: contain;
-		    background-position: right;
+		    background-size: cover;
+		    background-position: top;
 		    background-repeat: no-repeat;
-		    padding: 170px 0;
+		    padding: 270px 0;
 		    position: relative;
-		    overflow: hidden;
+		   
 		}
         
         .hero-section::before {

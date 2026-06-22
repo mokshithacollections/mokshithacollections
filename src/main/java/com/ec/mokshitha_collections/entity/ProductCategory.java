@@ -31,4 +31,13 @@ public class ProductCategory {
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
+
+    /**
+     * True = a "group" category that only holds other categories (shown in the
+     * parent dropdown, hidden from the product category dropdown). False/null =
+     * a normal leaf category that products are assigned to. Nullable so adding
+     * the column to an existing table doesn't require a default; null = leaf.
+     */
+    @Column(name = "is_parent")
+    private Boolean isParent;
 }

@@ -184,6 +184,7 @@
                                 <option th:each="c : ${categories}"
                                         th:value="${c.categoryId}"
                                         th:text="${c.name}"
+                                        th:if="${c.isParent == null or !c.isParent}"
                                         th:selected="${product != null and product.category != null and product.category.categoryId == c.categoryId}">
                                 </option>
                             </select>

@@ -35,4 +35,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>,
 
     /** All products in a category — used when hard-deleting a category. */
     List<Product> findByCategoryCategoryId(Long categoryId);
+
+    /** How many products are filed directly under a category. */
+    long countByCategoryCategoryId(Long categoryId);
 }

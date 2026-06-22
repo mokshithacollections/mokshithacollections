@@ -21,4 +21,7 @@ public class CategoryCreateRequest {
     private Long parentId;
 
     private Boolean isActive;
+
+    /** True = a group/parent category (holds other categories, not products). */
+    private Boolean isParent;
 }
