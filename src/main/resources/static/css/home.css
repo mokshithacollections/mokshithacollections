@@ -111,12 +111,12 @@
         
         /* Hero Section */
 		.hero-section {
-		    padding: 270px 0;
+		    padding: 330px 0;
 		    position: relative;
 		    overflow: hidden;            /* clip the Ken Burns zoom */
 		    /* Show the first image immediately as a fallback so the hero is never
 		       blank before the slide layers paint on the very first load. */
-		    background: #f3ede6 url(../images/DesktopBG.png) top center / cover no-repeat;
+		    background: #f3ede6 url(../images/DesktopBG2.png) top center / cover no-repeat;
 		}
 
         /* Subtle left-weighted veil so the headline stays readable over any slide. */
@@ -153,8 +153,8 @@
             from { transform: scale(1.08); }
             to   { transform: scale(1); }
         }
-        .hero-slide.slide-1 { background-image: url(../images/DesktopBG.png); }
-        .hero-slide.slide-2 { background-image: url(../images/DesktopBG2.png); }
+        .hero-slide.slide-1 { background-image: url(../images/DesktopBG2.png); }
+        .hero-slide.slide-2 { background-image: url(../images/DesktopBG.png); }
 
         /* Prev / next buttons */
         .hero-nav {
@@ -174,7 +174,7 @@
             cursor: pointer;
             font-size: 1.1rem;
             box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
-            transition: background 0.25s, color 0.25s, transform 0.25s;
+            transition: background 0.25s, color 0.25s, transform 0.25s, opacity 0.25s;
             -webkit-backdrop-filter: blur(4px);
             backdrop-filter: blur(4px);
         }
@@ -185,6 +185,18 @@
         }
         .hero-prev { left: 22px; }
         .hero-next { right: 22px; }
+
+        /* On hover-capable devices, keep the arrows hidden until the hero is
+           hovered. (Touch devices have no hover, so they stay visible there.) */
+        @media (hover: hover) {
+            .hero-nav { opacity: 0; }
+            .hero-section:hover .hero-nav { opacity: 1; }
+        }
+        /* Touch devices: arrows are always shown, so keep them subtle (low opacity). */
+        @media (hover: none) {
+            .hero-nav { opacity: 0.45; }
+            .hero-nav:active { opacity: 0.9; }
+        }
 
         /* Dots */
         .hero-dots {
@@ -272,6 +284,9 @@
             box-shadow: 0 10px 20px rgba(46, 139, 87, 0.2);
             color: white;
         }
+
+        /* Mobile-only bottom CTA bar (shown ≤767px); hidden on desktop. */
+        .hero-actions-mobile { display: none; }
         
         /* Category Sections */
         .section-title {
@@ -365,26 +380,27 @@
             margin-bottom: 14px;
         }
 
-        /* Responsive: shrink the square so it stays image-left/content-right (row) */
+        /* Responsive: stack image on top, content below (column / up-to-down).
+           Image fills the full width (no circle), edge-to-edge. */
         @media (max-width: 767.98px) {
-            .category-card { flex-direction: row; align-items: center; gap: 16px; padding: 14px; }
-            .category-image { flex-basis: 130px; width: 130px; height: 130px; }
-            .category-title { font-size: 1.3rem; }
-            .category-desc { font-size: 0.9rem; margin-bottom: 12px; }
+            .category-card { flex-direction: column; align-items: stretch; gap: 0; padding: 0; text-align: center; overflow: hidden; }
+            .category-image {
+                flex: 0 0 auto;
+                width: 100%;
+                height: 230px;
+                border-radius: 0;        /* no circle */
+                aspect-ratio: auto;
+            }
+            .category-image img { object-fit: cover; }   /* fill the whole area */
+            .category-content { align-items: center; padding: 16px 18px 20px; }
+            .category-title { font-size: 1.4rem; }
+            .category-desc { font-size: 0.92rem; margin-bottom: 14px; }
         }
 
         @media (max-width: 400px) {
-            .category-card { flex-direction: row; gap: 12px; padding: 12px; }
-            .category-image { flex-basis: 104px; width: 104px; height: 104px; }
-            .category-title { font-size: 1.1rem; }
-            .category-desc {
-                font-size: 0.84rem;
-                /* keep the row compact on tiny screens */
-                display: -webkit-box;
-                -webkit-line-clamp: 3;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
-            }
+            .category-image { height: 190px; }
+            .category-title { font-size: 1.2rem; }
+            .category-desc { font-size: 0.86rem; }
         }
         
         .category-title {
@@ -774,11 +790,11 @@
                 max-width: 100%;
                 text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
             }
-            /* The outlined "Shop Now" button (carries inline styles) → white outline */
+            /* The outlined "Shop Now" button (carries inline styles) → brand outline */
             .hero-btn[style] {
-                background: rgba(255, 255, 255, 0.18) !important;
-                border-color: #fff !important;
-                color: #fff !important;
+                background: transparent !important;
+                border-color: var(--dark-sea-green) !important;
+                color: var(--dark-sea-green) !important;
             }
 
             .testimonial-card { margin: 10px 0; }
@@ -786,10 +802,37 @@
 
         /* ---- Phones ---- */
         @media (max-width: 767.98px) {
-            .hero-section { padding: 56px 0 44px; }
+            .hero-section { padding: 120px 0 calc(96px + 2cm); }   /* like before, +2cm taller */
             .hero-title { font-size: 2.3rem; }
             .hero-subtitle { font-size: 1.05rem; margin-bottom: 24px; }
             .hero-btn { padding: 11px 24px; font-size: 0.95rem; }
+
+            /* Hide the in-content CTAs; use the bottom-anchored bar instead. */
+            .hero-content .hero-actions { display: none; }
+            .hero-actions-mobile {
+                display: flex;
+                flex-direction: column;   /* stacked: one button above the other */
+                align-items: stretch;     /* both the same width */
+                gap: 10px;
+                position: absolute;
+                left: 16px;               /* anchored bottom-left */
+                bottom: 18px;
+                z-index: 4;
+            }
+            .hero-actions-mobile .hero-btn {
+                margin: 0;
+                text-align: center;
+                padding: 12px 20px;
+                font-size: 0.92rem;
+                white-space: nowrap;
+                /* Semi-transparent (glassy) background, but a solid full-opacity border. */
+                background: linear-gradient(135deg, rgba(85, 0, 12, 0.6), rgba(136, 0, 18, 0.6));
+                border: 2px solid var(--dark-sea-green);
+                -webkit-backdrop-filter: blur(3px);
+                backdrop-filter: blur(3px);
+            }
+            /* Free the bottom area for the buttons (dots would overlap them). */
+            .hero-dots { display: none; }
 
             /* Smaller slider controls on phones */
             .hero-nav { width: 38px; height: 38px; font-size: 0.9rem; }
