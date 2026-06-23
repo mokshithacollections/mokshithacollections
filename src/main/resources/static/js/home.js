@@ -435,14 +435,14 @@ if (searchIcon) {
             display: flex; align-items: center; justify-content: center;
         `;
         searchBox.innerHTML = `
-            <div style="background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 600px; position: relative;">
+            <div style="background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 600px; position: relative; box-sizing: border-box;">
                 <button class="close-search" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
-                <h3 style="margin-bottom: 20px;">Search Products</h3>
+                <h3 style="margin-bottom: 20px; padding-right: 30px;">Search Products</h3>
                 <form method="get" action="/shop">
                     <div style="display: flex;">
                         <input type="text" name="search" placeholder="Search for sarees, dresses, collections..."
-                               style="flex: 1; padding: 15px; border: 2px solid #eee; border-radius: 5px 0 0 5px; font-size: 1rem;">
-                        <button type="submit" style="background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green)); color: white; border: none; padding: 0 30px; border-radius: 0 5px 5px 0; cursor: pointer;">
+                               style="flex: 1; min-width: 0; padding: 15px; border: 2px solid #eee; border-radius: 5px 0 0 5px; font-size: 1rem; box-sizing: border-box;">
+                        <button type="submit" style="flex-shrink: 0; background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green)); color: white; border: none; padding: 0 24px; border-radius: 0 5px 5px 0; cursor: pointer;">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>

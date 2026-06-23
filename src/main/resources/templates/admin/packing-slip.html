@@ -84,9 +84,9 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            padding-bottom: 20px;
+            padding-bottom: 7px;
             border-bottom: 2px solid var(--line);
-            margin-bottom: 20px;
+            margin-bottom: 7px;
         }
         .brand-name {
             font-size: 1.6rem;
@@ -110,13 +110,13 @@
         /* Order number band */
         .order-band {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 16px;
             background: var(--tint);
             border: 1px solid var(--soft);
             border-radius: 8px;
             padding: 14px 18px;
-            margin-bottom: 24px;
+            margin-bottom: 5px;
         }
         .order-band .cell .lbl {
             font-size: 11px;
@@ -163,7 +163,7 @@
             border: 2px solid #f59e0b;
             border-radius: 8px;
             padding: 14px 18px;
-            margin-bottom: 24px;
+            margin-bottom: 5px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -296,7 +296,7 @@
             }
             @page {
                 size: A4;
-                margin: 12mm;
+                margin: 0mm;
             }
             .cod-callout { border-width: 2px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .order-band, table.items-table thead th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -328,8 +328,8 @@
                 <div>
                     <h1 class="brand-name">Mokshitha Collections</h1>
                     <div class="brand-meta">
-                        123 Fashion Street, Chennai, India · 600001<br>
-                        +91 98765 43210 · info@mokshithacollections.com
+                        101, Sri Nilayam, Mangamoor Road<br>Ongole, Andhra Pradesh - 523001<br>
+                        +91 6303349508 · mokshithacollections@gmail.com
                     </div>
                 </div>
                 <div>
@@ -348,10 +348,10 @@
                     <div class="lbl">Placed</div>
                     <div class="val" th:text="${#temporals.format(order.placedAt, 'd MMM yyyy')}">date</div>
                 </div>
-                <div class="cell">
+                <!--<div class="cell">
                     <div class="lbl">Status</div>
                     <div class="val" th:text="${order.status.name()}">PLACED</div>
-                </div>
+                </div>-->
                 <div class="cell">
                     <div class="lbl">Items</div>
                     <div class="val" th:text="${#lists.size(order.items)} + ' (' +
@@ -374,8 +374,7 @@
                     <h3>From</h3>
                     <div class="name">Mokshitha Collections</div>
                     <div class="lines">
-                        123 Fashion Street<br>
-                        Chennai, Tamil Nadu 600001<br>
+                        101, Sri Nilayam, Mangamoor Road<br>Ongole, Andhra Pradesh - 523001<br>
                         India
                     </div>
                     <div class="phone"><i class="fas fa-phone-alt"></i> +91 98765 43210</div>
@@ -397,7 +396,7 @@
             </div>
 
             <!-- Items -->
-            <section class="items-section">
+            <!--<section class="items-section">
                 <h2>Items to pack</h2>
                 <table class="items-table">
                     <thead>
@@ -426,10 +425,10 @@
                         </tr>
                     </tbody>
                 </table>
-            </section>
+            </section> -->
 
             <!-- Totals -->
-            <div class="totals">
+            <!--<div class="totals">
                 <div class="totals-grid">
                     <div class="lbl">Subtotal</div>
                     <div class="val" th:text="'₹' + ${order.subtotal}">₹0</div>
@@ -446,10 +445,10 @@
                         <span th:text="${order.paymentStatus.name()}">PENDING</span>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Packer note + signature -->
-            <div class="notes-row">
+            <!--<div class="notes-row">
                 <div class="note-box">
                     <h4>Packer note</h4>
                     <p>Verify every item against the list above before sealing the parcel. Include a printed copy of this slip inside the box where customers can find it.</p>
@@ -459,14 +458,14 @@
                     <p style="opacity: 0; user-select: none;">.</p>
                     <div class="sig-line">Signature / Date</div>
                 </div>
-            </div>
+            </div>-->
 
             <!-- Footer -->
-            <div class="slip-footer">
+            <!--<div class="slip-footer">
                 Thank you for shopping with <strong>Mokshitha Collections</strong>.<br>
                 Questions about this order? Email <strong>info@mokshithacollections.com</strong>
                 or call <strong>+91 98765 43210</strong>.
-            </div>
+            </div>-->
 
         </div>
     </div>

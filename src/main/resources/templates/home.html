@@ -9,6 +9,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Great Vibes: used by the birthday wish popup's script title -->
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
 
     <!-- Local CSS -->
     <link rel="stylesheet" type="text/css" th:href="@{/css/home.css}">
@@ -693,5 +695,190 @@
             play();
         })();
     </script>
+
+    <!-- ============================================================= -->
+    <!-- =============== MOKSHITHA BIRTHDAY POPUP ==================== -->
+    <!-- ON/OFF SWITCH is the MK_BDAY_ENABLED line in the <script> below. -->
+    <!-- TO CUSTOMISE: (1) photo  (2) name  (3) message — search REPLACE. -->
+    <!-- ============================================================= -->
+    <div id="mk-bday" role="dialog" aria-modal="true" aria-label="Birthday celebration">
+      <div class="mk-card">
+
+        <button class="mk-close" id="mk-close" aria-label="Close">&times;</button>
+
+        <!-- soft-floating petals -->
+        <span class="mk-petal">✦</span><span class="mk-petal">✦</span>
+        <span class="mk-petal">✦</span><span class="mk-petal">✦</span>
+
+        <!-- ===== HER PHOTO (soft-melted) =====
+             REPLACE the image: drop a .jpg/.png into static/images/ and
+             point th:src at it. (.HEIC and C:\ paths do NOT work on the web.) -->
+        <div class="mk-portrait">
+          <img class="mk-photo"
+               th:src="@{/images/wish.jpeg}"
+               src="/images/wish.jpeg"
+               alt="Managing Director"
+               onerror="this.style.display='none'">
+          <div class="mk-tint"></div>
+          <div class="mk-seal"></div>
+        </div>
+
+        <div class="mk-body">
+          <p class="mk-eyebrow">Mokshitha celebrates</p>
+		  <br>
+          <h2 class="mk-title">Happy Birthday</h2>
+          <!-- REPLACE the name -->
+          <p class="mk-name">Honey</p>
+          <!-- REPLACE the message -->
+          <p class="mk-msg">Wishing you a year as beautiful and timeless as the fabrics you love.
+            With love, from all of us at Mokshitha.</p>
+          <button class="mk-btn" id="mk-cta">Thank you &nbsp;♡</button>
+        </div>
+
+      </div>
+    </div>
+
+    <style>
+      /* All styles scoped under #mk-bday so they NEVER touch the rest of the site */
+      #mk-bday *{margin:0;padding:0;box-sizing:border-box}
+
+      #mk-bday{
+        position:fixed; inset:0; z-index:99999;
+        display:flex; align-items:center; justify-content:center;
+        padding:20px;
+        background:radial-gradient(120% 120% at 50% 0%, rgba(60,12,28,.72), rgba(20,6,12,.88));
+        backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+        font-family:'Poppins','Segoe UI',system-ui,sans-serif;
+        animation:mk-fade .5s ease both;
+      }
+      @keyframes mk-fade{from{opacity:0}}
+
+      #mk-bday .mk-card{
+        position:relative;
+        width:min(380px,100%);
+        border-radius:26px;
+        overflow:hidden;
+        background:linear-gradient(180deg,#7a1733 0%,#5c0f26 46%,#3d0a1b 100%);
+        box-shadow:0 40px 90px -25px rgba(0,0,0,.7),
+                   inset 0 0 0 1px rgba(255,215,150,.35);
+        animation:mk-rise .7s cubic-bezier(.2,.85,.25,1) both;
+      }
+      @keyframes mk-rise{from{opacity:0;transform:translateY(36px) scale(.95)}}
+
+      /* ---------- the melted portrait ---------- */
+      #mk-bday .mk-portrait{ position:relative; height:230px; overflow:hidden; }
+      #mk-bday .mk-photo{
+        width:100%; height:100%; object-fit:cover; display:block;
+        -webkit-mask-image:radial-gradient(135% 100% at 50% 24%, #000 42%, transparent 84%);
+        mask-image:radial-gradient(135% 100% at 50% 24%, #000 42%, transparent 84%);
+        filter:saturate(1.05) contrast(1.02);
+      }
+      #mk-bday .mk-tint{
+        position:absolute; inset:0;
+        background:linear-gradient(180deg,rgba(122,23,51,.0) 30%,rgba(92,15,38,.55) 100%);
+        mix-blend-mode:multiply;
+      }
+      #mk-bday .mk-seal{
+        position:absolute; left:0; right:0; bottom:-1px; height:90px;
+        background:linear-gradient(180deg,transparent,#5c0f26 78%);
+      }
+
+      /* ---------- text ---------- */
+      #mk-bday .mk-body{padding:4px 30px 32px; text-align:center; position:relative; z-index:2}
+      #mk-bday .mk-eyebrow{
+        font-size:.60rem; letter-spacing:.4em; text-transform:uppercase;
+        color:rgba(255,224,180,.8); font-weight:500;
+      }
+      #mk-bday .mk-title{
+        font-family:'Great Vibes','Brush Script MT',cursive;
+        font-size:clamp(2.8rem,12vw,3.4rem); font-weight:400; line-height:1;
+        margin:2px 0 0;
+        background:linear-gradient(100deg,#f6d99b,#fff3d6,#e4b25e,#f6d99b);
+        background-size:300% 100%;
+        -webkit-background-clip:text; background-clip:text; color:transparent;
+        animation:mk-shine 6s linear infinite;
+      }
+      @keyframes mk-shine{to{background-position:300% 0}}
+      #mk-bday .mk-name{
+        font-family:'Playfair Display',Georgia,serif; font-style:italic;
+        font-size:clamp(1.25rem,6vw,1.55rem); color:#fff; margin:6px 0 14px;
+      }
+      #mk-bday .mk-msg{
+        font-weight:300; font-size:.92rem; line-height:1.7;
+        color:rgba(255,245,235,.85); max-width:30ch; margin:0 auto;
+      }
+      #mk-bday .mk-btn{
+        margin-top:22px; cursor:pointer; border:none;
+        font-family:inherit; font-size:.9rem; font-weight:500; color:#5c0f26;
+        padding:12px 30px; border-radius:999px;
+        background:linear-gradient(100deg,#f6d99b,#e4b25e);
+        box-shadow:0 12px 26px -10px rgba(228,178,94,.9);
+        transition:transform .25s, box-shadow .25s;
+      }
+      #mk-bday .mk-btn:hover{transform:translateY(-3px); box-shadow:0 18px 32px -12px rgba(228,178,94,1)}
+      #mk-bday .mk-btn:focus-visible{outline:3px solid #f6d99b; outline-offset:3px}
+
+      #mk-bday .mk-close{
+        position:absolute; top:12px; right:14px; z-index:5;
+        width:34px; height:34px; border:none; cursor:pointer;
+        border-radius:50%; font-size:1.4rem; line-height:1; color:#fff;
+        background:rgba(0,0,0,.28); transition:background .2s,transform .2s;
+      }
+      #mk-bday .mk-close:hover{background:rgba(0,0,0,.5); transform:rotate(90deg)}
+      #mk-bday .mk-close:focus-visible{outline:3px solid #f6d99b; outline-offset:2px}
+
+      #mk-bday .mk-petal{
+        position:absolute; z-index:3; color:#f6d99b; opacity:0; font-size:14px;
+        animation:mk-float 7s ease-in infinite;
+      }
+      #mk-bday .mk-petal:nth-child(2){left:10%; animation-delay:0s}
+      #mk-bday .mk-petal:nth-child(3){left:82%; animation-delay:1.8s; font-size:11px}
+      #mk-bday .mk-petal:nth-child(4){left:32%; animation-delay:3.4s; font-size:17px}
+      #mk-bday .mk-petal:nth-child(5){left:64%; animation-delay:5s}
+      @keyframes mk-float{
+        0%{bottom:30px; opacity:0; transform:rotate(0)}
+        15%{opacity:.9} 85%{opacity:.9}
+        100%{bottom:420px; opacity:0; transform:rotate(180deg)}
+      }
+      @media (prefers-reduced-motion:reduce){ #mk-bday,#mk-bday *{animation:none !important} }
+    </style>
+
+    <script>
+    (function(){
+      /* =================================================================
+         ███  THE ONLY SWITCH YOU NEED  ███
+         true  = show the birthday popup on the home page
+         false = hide it (leave the code here, just flip this off)
+      ================================================================= */
+      var MK_BDAY_ENABLED = true;
+
+      /* Show it at most once per browsing session so returning shoppers
+         aren't nagged. While testing, set this to false to see it on every
+         reload. Set back to true before the big day. */
+      var SHOW_ONCE_PER_SESSION = true;
+
+      var pop = document.getElementById('mk-bday');
+      if(!pop) return;
+
+      if(!MK_BDAY_ENABLED){ pop.remove(); return; }
+
+      if(SHOW_ONCE_PER_SESSION){
+        try{
+          if(sessionStorage.getItem('mkBdaySeen')){ pop.remove(); return; }
+          sessionStorage.setItem('mkBdaySeen','1');
+        }catch(e){ /* private mode — just show it */ }
+      }
+
+      function close(){
+        pop.style.animation='mk-fade .35s ease reverse forwards';
+        setTimeout(function(){ pop.remove(); }, 340);
+      }
+      document.getElementById('mk-close').addEventListener('click', close);
+      document.getElementById('mk-cta').addEventListener('click', close);
+      pop.addEventListener('click', function(e){ if(e.target===pop) close(); });
+      document.addEventListener('keydown', function(e){ if(e.key==='Escape') close(); });
+    })();
+    </script>
+    <!-- ================ END BIRTHDAY POPUP ========================= -->
 </body>
 </html>
