@@ -58,6 +58,11 @@
                 </a>
             </li>
             <li>
+                <a th:href="@{/admin/enquiries}" th:classappend="${active == 'enquiries'} ? 'active'">
+                    <i class="fas fa-envelope-open-text"></i> Enquiries
+                </a>
+            </li>
+            <li>
                 <a th:href="@{/admin/users}" th:classappend="${active == 'users'} ? 'active'">
                     <i class="fas fa-users"></i> Users
                 </a>

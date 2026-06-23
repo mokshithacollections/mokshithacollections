@@ -140,18 +140,19 @@
             background-size: cover;
             background-position: top center;
             background-repeat: no-repeat;
+            z-index: 0;
+            /* Resting (inactive) state: faded out, sunk below — the "set" position. */
             opacity: 0;
-            transform: scale(1.06);
-            transition: opacity 1.1s ease-in-out;
+            transform: translateY(55px) scale(1.04);
+            transition: opacity 1.3s ease, transform 1.3s ease;
         }
-        /* Crossfade via opacity; the slow zoom/pan is a keyframe animation so it
-           also runs for the first slide on page load (a transition would not).
-           The direction alternates per slide for a livelier feel. */
-        .hero-slide.active { opacity: 1; animation: heroZoom 7s ease-out forwards; }
-        /* Gentle zoom only — no left/right panning. */
-        @keyframes heroZoom {
-            from { transform: scale(1.08); }
-            to   { transform: scale(1); }
+        /* Sunset / sunrise: the incoming slide RISES from below + fades in, while
+           the outgoing slide returns to the resting state — sinking down + fading
+           out. The active slide sits on top so it rises over the one that sets. */
+        .hero-slide.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            z-index: 1;
         }
         .hero-slide.slide-1 { background-image: url(../images/DesktopBG2.png); }
 		.hero-slide.slide-2 { background-image: url(../images/DesktopBG3.jpeg); }
@@ -226,22 +227,6 @@
             border-radius: 6px;
         }
 
-        /* Thin timeline that fills over each slide's 7s, then resets. */
-        .hero-progress {
-            position: absolute;
-            left: 0;
-            bottom: 0;
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.25);
-            z-index: 3;
-        }
-        .hero-progress-bar {
-            height: 100%;
-            width: 0;
-            background: linear-gradient(90deg, var(--dark-sea-green), var(--light-sea-green));
-        }
-        
         .hero-content {
             position: relative;
             z-index: 2;
@@ -338,20 +323,22 @@
 
         /* Square image — equal width & height */
         .category-image {
-            flex: 0 0 240px;
+            flex: 0 0 350px;
             width: 240px;
             height: 240px;
             aspect-ratio: 1 / 1;
             overflow: hidden;
-            border-radius: 16px;     /* rounded corners (matches the mobile look) */
+			border-radius: 10px	0 0 10px;
+                /* rounded corners (matches the mobile look) */
             /*background: #f7f7f7;*/
         }
 
         .category-image img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: cover;
             transition: transform 0.5s;
+			
         }
 
         .category-card:hover .category-image img {
@@ -391,6 +378,7 @@
                 height: 230px;
                 border-radius: 0;        /* no circle */
                 aspect-ratio: auto;
+				border-radius: 10px	10px 0 0;
             }
             .category-image img { object-fit: cover; }   /* fill the whole area */
             .category-content { align-items: center; padding: 16px 18px 20px; }
@@ -399,7 +387,7 @@
         }
 
         @media (max-width: 400px) {
-            .category-image { height: 190px; }
+            .category-image { height: 190px; border-radius: 10px	10px 0 0;}
             .category-title { font-size: 1.2rem; }
             .category-desc { font-size: 0.86rem; }
         }
@@ -819,8 +807,8 @@
                 align-items: stretch;     /* both the same width */
                 gap: 10px;
                 position: absolute;
-                left: 16px;               /* anchored bottom-left */
-                bottom: 18px;
+                right: 37%;               /* anchored bottom-left */
+                bottom: 5px;
                 z-index: 4;
             }
             /* Hide "Explore Collections" on mobile — show only "Shop Now". */
@@ -833,9 +821,9 @@
                 white-space: nowrap;
                 /* Semi-transparent (glassy) background, but a solid full-opacity border. */
                 background: linear-gradient(135deg, rgba(85, 0, 12, 0.6), rgba(136, 0, 18, 0.6));
-                border: 2px solid var(--dark-sea-green);
-                -webkit-backdrop-filter: blur(3px);
-                backdrop-filter: blur(3px);
+                border: 2px solid white;
+                -webkit-backdrop-filter: blur(1px);
+                backdrop-filter: blur(2px);
             }
             /* Free the bottom area for the buttons (dots would overlap them). */
             .hero-dots { display: none; }
@@ -901,38 +889,3 @@
             transform: translateY(0);
         }
         
-        /* Floating Elements */
-        .floating-element {
-            position: absolute;
-            z-index: 1;
-            opacity: 0.1;
-        }
-        
-        .floating-1 {
-            top: 20%;
-            left: 5%;
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: var(--dark-sea-green);
-            animation: float 6s ease-in-out infinite;
-        }
-        
-        .floating-2 {
-            bottom: 10%;
-            right: 10%;
-            width: 80px;
-            height: 80px;
-            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-            background: var(--light-sea-green);
-            animation: float 8s ease-in-out infinite reverse;
-        }
-        
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-20px) rotate(10deg);
-            }
-        }

@@ -1114,7 +1114,7 @@
     <section id="stores" class="stores-section">
         <div class="container">
             <div class="section-title animate-fade-in-up">
-                <h2>Visit Our Stores</h2>
+                <h2>Visit Our Store</h2>
                 <p class="section-subtitle">
                     Experience the beauty of our collections in person at our flagship stores
                 </p>
@@ -1404,29 +1404,46 @@
                 submitBtn.innerHTML = 'Sending...';
                 formSpinner.style.display = 'block';
                 
-                // Simulate form submission (replace with actual API call)
-                setTimeout(() => {
-                    // Hide spinner
-                    formSpinner.style.display = 'none';
-                    
-                    // Show success message
-                    formSuccess.style.display = 'block';
-                    
-                    // Reset form
-                    form.reset();
-                    
-                    // Reset button
+                // Submit the enquiry to the backend (saved for admin review).
+                function resetBtn() {
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = 'Send Message <i class="fas fa-paper-plane ms-2"></i>';
-                    
-                    // Scroll to success message
+                }
+                try {
+                    var csrf = (document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/) || [])[1];
+                    const res = await fetch('/api/contact', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-XSRF-TOKEN': csrf ? decodeURIComponent(csrf) : ''
+                        },
+                        body: JSON.stringify({
+                            name: document.getElementById('name').value.trim(),
+                            email: document.getElementById('email').value.trim(),
+                            phone: document.getElementById('phone').value.trim(),
+                            subject: document.getElementById('subject').value,
+                            message: document.getElementById('message').value.trim(),
+                            newsletter: document.getElementById('newsletter').checked
+                        })
+                    });
+                    formSpinner.style.display = 'none';
+                    if (!res.ok) {
+                        let msg = 'Sorry, something went wrong. Please try again.';
+                        try { const d = await res.json(); if (d && d.message) msg = d.message; } catch (_) {}
+                        alert(msg);
+                        resetBtn();
+                        return;
+                    }
+                    formSuccess.style.display = 'block';
+                    form.reset();
+                    resetBtn();
                     formSuccess.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    
-                    // Hide success message after 5 seconds
-                    setTimeout(() => {
-                        formSuccess.style.display = 'none';
-                    }, 5000);
-                }, 2000);
+                    setTimeout(() => { formSuccess.style.display = 'none'; }, 5000);
+                } catch (err) {
+                    formSpinner.style.display = 'none';
+                    alert('Network error — please check your connection and try again.');
+                    resetBtn();
+                }
             });
         }
         

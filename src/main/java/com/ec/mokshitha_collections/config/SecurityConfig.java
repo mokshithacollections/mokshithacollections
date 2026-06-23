@@ -119,6 +119,8 @@ public class SecurityConfig {
                             "/api/products/**", "/api/categories/**", "/api/pincode/**").permitAll()
                     // Razorpay webhook (server-to-server, signature-verified)
                     .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/payments/webhook").permitAll()
+                    // Public contact form submission (anonymous visitors)
+                    .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/contact").permitAll()
                     // Admin area (REST + any future page routes)
                     .requestMatchers("/api/admin/**", "/admin/**").hasRole("ADMIN")
                     // Authenticated user areas (page and REST routes both gated)

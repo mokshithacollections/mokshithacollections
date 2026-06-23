@@ -9,6 +9,8 @@ import com.ec.mokshitha_collections.repository.ProductRepository;
 import com.ec.mokshitha_collections.repository.ProductReviewRepository;
 import com.ec.mokshitha_collections.repository.UserRepository;
 import com.ec.mokshitha_collections.repository.UserWishlistRepository;
+import com.ec.mokshitha_collections.entity.EnquiryStatus;
+import com.ec.mokshitha_collections.service.EnquiryService;
 import com.ec.mokshitha_collections.service.ProductService;
 import com.ec.mokshitha_collections.service.admin.AdminCategoryService;
 import com.ec.mokshitha_collections.service.admin.AdminOrderService;
@@ -43,6 +45,7 @@ public class AdminPageController {
     private final AdminOrderService orderService;
     private final AdminReviewService reviewService;
     private final AdminUserService userService;
+    private final EnquiryService enquiryService;
 
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
@@ -159,6 +162,22 @@ public class AdminPageController {
         Pageable pageable = PageRequest.of(page, 20);
         model.addAttribute("reviews", reviewService.listPending(pageable));
         return "admin/reviews";
+    }
+
+    /* ---------- Enquiries (contact form) ---------- */
+
+    @GetMapping("/enquiries")
+    public String enquiries(@RequestParam(required = false) String status, Model model) {
+        EnquiryStatus filter = null;
+        if ("new".equalsIgnoreCase(status)) filter = EnquiryStatus.NEW;
+        else if ("seen".equalsIgnoreCase(status)) filter = EnquiryStatus.SEEN;
+
+        model.addAttribute("enquiries", enquiryService.list(filter));
+        model.addAttribute("statusFilter", filter == null ? "all" : status.toLowerCase());
+        model.addAttribute("countAll", enquiryService.countAll());
+        model.addAttribute("countNew", enquiryService.countByStatus(EnquiryStatus.NEW));
+        model.addAttribute("countSeen", enquiryService.countByStatus(EnquiryStatus.SEEN));
+        return "admin/enquiries";
     }
 
     /* ---------- Users ---------- */

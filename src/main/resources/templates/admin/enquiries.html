@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Enquiries')}"></head>
+<body>
+<style>
+    .enq-tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+    .enq-tab {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 8px 16px; border-radius: 999px;
+        border: 1px solid var(--admin-border); background: #fff;
+        color: var(--admin-text); font-size: 0.9rem; font-weight: 500;
+    }
+    .enq-tab:hover { background: var(--admin-bg); text-decoration: none; }
+    .enq-tab.active { background: var(--admin-primary); color: #fff; border-color: var(--admin-primary); }
+    .enq-tab .enq-count { background: rgba(0,0,0,0.08); border-radius: 999px; padding: 0 8px; font-size: 0.78rem; font-weight: 600; }
+    .enq-tab.active .enq-count { background: rgba(255,255,255,0.25); }
+    .enq-msg { max-width: 360px; white-space: pre-line; color: var(--admin-text); }
+</style>
+<div class="admin-shell">
+    <aside th:replace="~{admin/_layout :: sidebar('enquiries')}"></aside>
+
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <div>
+                <h1>Enquiries</h1>
+                <div class="breadcrumb" th:text="${countNew} + ' new · ' + ${countAll} + ' total'">0 new</div>
+            </div>
+        </div>
+
+        <!-- Filter tabs: All / New / Seen -->
+        <div class="enq-tabs">
+            <a th:href="@{/admin/enquiries}" class="enq-tab"
+               th:classappend="${statusFilter == 'all'} ? 'active'">
+                All <span class="enq-count" th:text="${countAll}">0</span>
+            </a>
+            <a th:href="@{/admin/enquiries(status='new')}" class="enq-tab"
+               th:classappend="${statusFilter == 'new'} ? 'active'">
+                New <span class="enq-count" th:text="${countNew}">0</span>
+            </a>
+            <a th:href="@{/admin/enquiries(status='seen')}" class="enq-tab"
+               th:classappend="${statusFilter == 'seen'} ? 'active'">
+                Seen <span class="enq-count" th:text="${countSeen}">0</span>
+            </a>
+        </div>
+
+        <div class="table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>From</th>
+                        <th>Subject</th>
+                        <th>Message</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="e : ${enquiries}">
+                        <td>
+                            <strong th:text="${e.name}">Name</strong>
+                            <div style="font-size:0.8rem;color:#888;" th:text="${e.email}">email</div>
+                            <div th:if="${e.phone != null and !#strings.isEmpty(e.phone)}"
+                                 style="font-size:0.8rem;color:#888;" th:text="${e.phone}">phone</div>
+                            <div th:if="${e.newsletter != null and e.newsletter}"
+                                 style="font-size:0.72rem;color:var(--admin-primary);">
+                                <i class="fas fa-envelope"></i> Newsletter opt-in
+                            </div>
+                        </td>
+                        <td th:text="${e.subject != null and !#strings.isEmpty(e.subject) ? e.subject : '—'}">Subject</td>
+                        <td><div class="enq-msg" th:text="${e.message}">message</div></td>
+                        <td th:text="${#temporals.format(e.createdAt, 'd MMM yyyy, HH:mm')}">date</td>
+                        <td>
+                            <span class="pill"
+                                  th:classappend="${e.status.name() == 'NEW'} ? 'pill-placed' : 'pill-muted'"
+                                  th:text="${e.status.name()}">NEW</span>
+                        </td>
+                        <td style="white-space:nowrap;">
+                            <button th:if="${e.status.name() == 'NEW'}" type="button" class="btn btn-outline btn-sm"
+                                    th:attr="data-id=${e.enquiryId}" onclick="onMarkSeen(this)">
+                                <i class="fas fa-check"></i> Mark seen
+                            </button>
+                            <button type="button" class="btn btn-danger btn-sm"
+                                    th:attr="data-id=${e.enquiryId}, data-name=${e.name}" onclick="onDelete(this)">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                    <tr th:if="${enquiries == null or #lists.isEmpty(enquiries)}">
+                        <td class="empty-row" colspan="6">
+                            <i class="fas fa-envelope-open-text"></i>No enquiries here.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<div th:replace="~{admin/_layout :: scripts}"></div>
+<script>
+    // Mark a NEW enquiry as seen.
+    async function onMarkSeen(btn) {
+        try {
+            await adminApi('POST', '/api/admin/enquiries/' + btn.dataset.id + '/seen');
+            toast('Marked as seen', 'success');
+            setTimeout(() => location.reload(), 400);
+        } catch (e) { toast(e.message, 'error'); }
+    }
+
+    // Permanently delete an enquiry.
+    function onDelete(btn) {
+        confirmThen('Delete this enquiry from "' + btn.dataset.name + '"? This cannot be undone.', async () => {
+            try {
+                await adminApi('DELETE', '/api/admin/enquiries/' + btn.dataset.id);
+                toast('Enquiry deleted', 'success');
+                setTimeout(() => location.reload(), 400);
+            } catch (e) { toast(e.message, 'error'); }
+        });
+    }
+</script>
+</body>
+</html>
