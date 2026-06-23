@@ -60,6 +60,17 @@ public class PendingCheckout {
     @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
+    /** True for a "Buy Now" single-item checkout — confirm() must NOT touch the cart. */
+    @Column(name = "buy_now")
+    private Boolean buyNow;
+
+    /* ---------- Applied coupon (null when none) ---------- */
+    @Column(name = "offer_code", length = 40)
+    private String offerCode;
+
+    @Column(name = "discount_amount", precision = 10, scale = 2)
+    private BigDecimal discountAmount;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Offers')}"></head>
+<body>
+<style>
+    .filter-tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+    .filter-tab {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 8px 16px; border-radius: 999px; cursor: pointer;
+        border: 1px solid var(--admin-border); background: #fff;
+        color: var(--admin-text); font-size: 0.9rem; font-weight: 500;
+    }
+    .filter-tab:hover { background: var(--admin-bg); }
+    .filter-tab.active { background: var(--admin-primary); color: #fff; border-color: var(--admin-primary); }
+</style>
+<div class="admin-shell">
+    <aside th:replace="~{admin/_layout :: sidebar('offers')}"></aside>
+
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <div>
+                <h1>Offers</h1>
+                <div class="breadcrumb"
+                     th:text="${#lists.size(offers)} + ' offers'">0 offers</div>
+            </div>
+            <a class="btn btn-primary" th:href="@{/admin/offers/new}">
+                <i class="fas fa-plus"></i> New offer
+            </a>
+        </div>
+
+        <!-- Client-side filter tabs (data attribute drives row visibility) -->
+        <div class="filter-tabs" style="margin-bottom:16px;">
+            <button type="button" class="filter-tab active" data-filter="all" onclick="filterOffers(this)">All</button>
+            <button type="button" class="filter-tab" data-filter="LIVE" onclick="filterOffers(this)">Live</button>
+            <button type="button" class="filter-tab" data-filter="SCHEDULED" onclick="filterOffers(this)">Scheduled</button>
+            <button type="button" class="filter-tab" data-filter="EXPIRED" onclick="filterOffers(this)">Expired</button>
+            <button type="button" class="filter-tab" data-filter="INACTIVE" onclick="filterOffers(this)">Inactive</button>
+        </div>
+
+        <div class="table-wrap">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Offer</th>
+                        <th>Code</th>
+                        <th>Discount</th>
+                        <th>Window</th>
+                        <th>Scope</th>
+                        <th>Priority</th>
+                        <th>State</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="o : ${offers}" th:attr="data-state=${o.state}">
+                        <td>
+                            <a th:href="@{/admin/offers/{id}(id=${o.offerId})}"
+                               th:text="${o.name}" style="font-weight:500;">Offer name</a>
+                        </td>
+                        <td><code th:text="${o.code}">CODE</code></td>
+                        <td>
+                            <span th:if="${o.discountType.name() == 'PERCENTAGE'}"
+                                  th:text="${#numbers.formatDecimal(o.discountValue, 1, 0)} + '%'">10%</span>
+                            <span th:unless="${o.discountType.name() == 'PERCENTAGE'}"
+                                  th:text="'₹' + ${#numbers.formatDecimal(o.discountValue, 1, 2)}">₹500.00</span>
+                            <div class="helper" th:if="${o.maxDiscountAmount != null}"
+                                 th:text="'max ₹' + ${#numbers.formatDecimal(o.maxDiscountAmount, 1, 0)}">max ₹500</div>
+                        </td>
+                        <td style="white-space:nowrap;font-size:0.85rem;">
+                            <div th:text="${#temporals.format(o.startAt, 'dd MMM yyyy, HH:mm')}">start</div>
+                            <div style="color:#9ca3af;" th:text="'→ ' + ${#temporals.format(o.endAt, 'dd MMM yyyy, HH:mm')}">→ end</div>
+                        </td>
+                        <td style="font-size:0.85rem;">
+                            <span th:if="${#lists.isEmpty(o.productIds) and #lists.isEmpty(o.categoryIds)}"
+                                  style="color:#9ca3af;">Entire order</span>
+                            <span th:unless="${#lists.isEmpty(o.productIds) and #lists.isEmpty(o.categoryIds)}">
+                                <span th:if="${not #lists.isEmpty(o.productIds)}"
+                                      th:text="${#lists.size(o.productIds)} + ' product(s)'">2 products</span>
+                                <span th:if="${not #lists.isEmpty(o.productIds) and not #lists.isEmpty(o.categoryIds)}">, </span>
+                                <span th:if="${not #lists.isEmpty(o.categoryIds)}"
+                                      th:text="${#lists.size(o.categoryIds)} + ' category(s)'">1 category</span>
+                            </span>
+                        </td>
+                        <td th:text="${o.priority}">0</td>
+                        <td>
+                            <span th:switch="${o.state}">
+                                <span th:case="'LIVE'" class="pill pill-active">Live</span>
+                                <span th:case="'SCHEDULED'" class="pill"
+                                      style="background:#dbeafe;color:#1e40af;">Scheduled</span>
+                                <span th:case="'EXPIRED'" class="pill"
+                                      style="background:#fee2e2;color:#991b1b;">Expired</span>
+                                <span th:case="'INACTIVE'" class="pill pill-muted">Inactive</span>
+                            </span>
+                        </td>
+                        <td style="white-space:nowrap;">
+                            <a class="btn btn-outline btn-sm"
+                               th:href="@{/admin/offers/{id}(id=${o.offerId})}">Edit</a>
+                            <button type="button" class="btn btn-outline btn-sm"
+                                    th:attr="data-id=${o.offerId}, data-active=${o.active}"
+                                    th:text="${o.active != null and o.active} ? 'Deactivate' : 'Activate'"
+                                    onclick="onToggleActive(this)">Deactivate</button>
+                            <button type="button" class="btn btn-danger btn-sm"
+                                    th:attr="data-id=${o.offerId}, data-name=${o.name}"
+                                    onclick="onRemove(this)">Remove</button>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(offers)}">
+                        <td class="empty-row" colspan="8">
+                            <i class="fas fa-tag"></i>
+                            No offers yet. <a th:href="@{/admin/offers/new}">Create one</a>.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<div th:replace="~{admin/_layout :: scripts}"></div>
+<script>
+    // Show/hide rows by their data-state, driven by the filter tabs.
+    function filterOffers(btn) {
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        const f = btn.dataset.filter;
+        document.querySelectorAll('.admin-table tbody tr[data-state]').forEach(tr => {
+            tr.style.display = (f === 'all' || tr.dataset.state === f) ? '' : 'none';
+        });
+    }
+
+    function onToggleActive(btn) {
+        const id = btn.dataset.id;
+        const isActive = btn.dataset.active === 'true';
+        const path = isActive ? 'deactivate' : 'activate';
+        adminApi('POST', '/api/admin/offers/' + id + '/' + path)
+            .then(() => {
+                toast(isActive ? 'Offer deactivated' : 'Offer activated', 'success');
+                setTimeout(() => location.reload(), 500);
+            })
+            .catch(e => toast(e.message, 'error'));
+    }
+
+    function onRemove(btn) {
+        const id = btn.dataset.id;
+        const name = btn.dataset.name;
+        confirmThen('Permanently delete offer "' + name + '"? This cannot be undone.', async () => {
+            try {
+                await adminApi('DELETE', '/api/admin/offers/' + id);
+                toast('Offer deleted', 'success');
+                setTimeout(() => location.reload(), 600);
+            } catch (e) { toast(e.message, 'error'); }
+        });
+    }
+</script>
+</body>
+</html>

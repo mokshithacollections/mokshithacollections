@@ -27,6 +27,8 @@ public class OrderResponse {
     private final String razorpayPaymentId;
     private final BigDecimal subtotal;
     private final BigDecimal shippingFee;
+    private final String offerCode;
+    private final BigDecimal discountAmount;
     private final BigDecimal totalAmount;
     private final LocalDateTime placedAt;
     private final LocalDateTime updatedAt;

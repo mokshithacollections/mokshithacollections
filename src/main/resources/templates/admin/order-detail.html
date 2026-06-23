@@ -69,6 +69,11 @@
                 <table class="admin-table" style="margin-top:16px;">
                     <tr><td>Subtotal</td><td style="text-align:right;" th:text="'₹' + ${order.subtotal}">₹0</td></tr>
                     <tr><td>Shipping</td><td style="text-align:right;" th:text="'₹' + ${order.shippingFee}">₹0</td></tr>
+                    <tr th:if="${order.discountAmount != null and order.discountAmount > 0}">
+                        <td>Discount <span th:if="${order.offerCode != null}"
+                                           th:text="'(' + ${order.offerCode} + ')'" style="opacity:.7;">(CODE)</span></td>
+                        <td style="text-align:right; color:#1e7a34;" th:text="'-₹' + ${order.discountAmount}">-₹0</td>
+                    </tr>
                     <tr style="font-weight:700;font-size:1.05rem;">
                         <td>Total</td>
                         <td style="text-align:right;" th:text="'₹' + ${order.totalAmount}">₹0</td>

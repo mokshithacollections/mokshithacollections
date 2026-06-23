@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Offer')}"></head>
+<body>
+<style>
+    .multi-select { min-height: 140px; }
+    .scope-hint { background: #f1f5f9; border-radius: 8px; padding: 10px 14px; font-size: 0.85rem; color: #475569; }
+</style>
+<div class="admin-shell">
+    <aside th:replace="~{admin/_layout :: sidebar('offers')}"></aside>
+
+    <main class="admin-main">
+        <div class="admin-page-header">
+            <div>
+                <h1 th:text="${offer != null} ? 'Edit offer' : 'New offer'">New offer</h1>
+                <div class="breadcrumb">
+                    <a th:href="@{/admin/offers}">Offers</a> /
+                    <span th:text="${offer != null ? offer.name : 'New'}">New</span>
+                </div>
+            </div>
+            <a class="btn btn-outline" th:href="@{/admin/offers}">Back to list</a>
+        </div>
+
+        <div class="card">
+            <form id="offerForm">
+
+                <!-- ===== Basic information ===== -->
+                <div class="form-section">
+                    <h3 class="form-section-head"><i class="fas fa-circle-info"></i>Basic information</h3>
+                    <p class="form-section-sub">Give the offer a name customers will recognise and a code they type at checkout.</p>
+                    <div class="form-grid-2">
+                        <div class="form-row">
+                            <label>Offer name *</label>
+                            <input type="text" name="name" required maxlength="120"
+                                   placeholder="e.g. Diwali Festive Sale"
+                                   th:value="${offer != null ? offer.name : ''}">
+                        </div>
+                        <div class="form-row">
+                            <label>Offer code *</label>
+                            <input type="text" name="code" required maxlength="40"
+                                   style="text-transform:uppercase;"
+                                   placeholder="e.g. DIWALI25"
+                                   th:value="${offer != null ? offer.code : ''}">
+                            <div class="helper">Stored uppercase; customers match it case-insensitively.</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label>Description</label>
+                        <textarea name="description"
+                                  placeholder="Optional — shown to customers / for your own reference"
+                                  th:text="${offer != null ? offer.description : ''}"></textarea>
+                    </div>
+                </div>
+
+                <!-- ===== Discount ===== -->
+                <div class="form-section">
+                    <h3 class="form-section-head"><i class="fas fa-percent"></i>Discount</h3>
+                    <p class="form-section-sub">Choose how much comes off and any caps.</p>
+                    <div class="form-grid-2">
+                        <div class="form-row">
+                            <label>Discount type *</label>
+                            <select name="discountType" id="discountType" required>
+                                <option value="PERCENTAGE"
+                                        th:selected="${offer != null and offer.discountType.name() == 'PERCENTAGE'}">
+                                    Percentage (%)
+                                </option>
+                                <option value="FIXED"
+                                        th:selected="${offer != null and offer.discountType.name() == 'FIXED'}">
+                                    Fixed amount (₹)
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label>Discount value *</label>
+                            <input type="number" name="discountValue" required min="0.01" step="0.01"
+                                   placeholder="e.g. 25"
+                                   th:value="${offer != null ? offer.discountValue : ''}">
+                            <div class="helper" id="discountValueHint">For percentage, 1–100. For fixed, the rupee amount off.</div>
+                        </div>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-row">
+                            <label>Maximum discount amount</label>
+                            <input type="number" name="maxDiscountAmount" min="0" step="0.01"
+                                   placeholder="Optional — caps the discount (₹)"
+                                   th:value="${offer != null and offer.maxDiscountAmount != null ? offer.maxDiscountAmount : ''}">
+                            <div class="helper">Mainly for percentage offers — the discount never exceeds this.</div>
+                        </div>
+                        <div class="form-row">
+                            <label>Minimum order amount</label>
+                            <input type="number" name="minOrderAmount" min="0" step="0.01"
+                                   placeholder="Optional — required cart subtotal (₹)"
+                                   th:value="${offer != null and offer.minOrderAmount != null ? offer.minOrderAmount : ''}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Validity window ===== -->
+                <div class="form-section">
+                    <h3 class="form-section-head"><i class="fas fa-calendar-days"></i>Validity window</h3>
+                    <p class="form-section-sub">The offer is only redeemable between these times.</p>
+                    <div class="form-grid-2">
+                        <div class="form-row">
+                            <label>Starts at *</label>
+                            <input type="datetime-local" name="startAt" required
+                                   th:value="${offer != null ? #temporals.format(offer.startAt, 'yyyy-MM-dd''T''HH:mm') : ''}">
+                        </div>
+                        <div class="form-row">
+                            <label>Ends at *</label>
+                            <input type="datetime-local" name="endAt" required
+                                   th:value="${offer != null ? #temporals.format(offer.endAt, 'yyyy-MM-dd''T''HH:mm') : ''}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Applicability (item-scoped) ===== -->
+                <div class="form-section">
+                    <h3 class="form-section-head"><i class="fas fa-filter"></i>Applicable items</h3>
+                    <p class="form-section-sub">Restrict the discount to specific products and/or categories.
+                        Leave both empty to apply it to the whole order.</p>
+                    <p class="scope-hint" style="margin-bottom:14px;">
+                        <i class="fas fa-circle-info"></i>
+                        Hold <strong>Ctrl</strong> (or <strong>⌘</strong> on Mac) to select more than one. Selecting none = applies to all.
+                    </p>
+                    <div class="form-grid-2">
+                        <div class="form-row">
+                            <label>Applicable products</label>
+                            <select name="productIds" id="productIds" multiple class="multi-select">
+                                <option th:each="p : ${allProducts}"
+                                        th:value="${p.productId}"
+                                        th:text="${p.name}"
+                                        th:selected="${offer != null and offer.productIds.contains(p.productId)}">Product</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label>Applicable categories</label>
+                            <select name="categoryIds" id="categoryIds" multiple class="multi-select">
+                                <option th:each="c : ${allCategories}"
+                                        th:value="${c.categoryId}"
+                                        th:text="${c.name + ((c.isParent != null and c.isParent) ? ' (group)' : '')}"
+                                        th:selected="${offer != null and offer.categoryIds.contains(c.categoryId)}">Category</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Limits & status ===== -->
+                <div class="form-section">
+                    <h3 class="form-section-head"><i class="fas fa-sliders"></i>Limits &amp; status</h3>
+                    <div class="form-grid-2">
+                        <div class="form-row">
+                            <label>Per-customer limit</label>
+                            <input type="number" name="perCustomerLimit" min="1" step="1"
+                                   placeholder="Optional — uses allowed per customer"
+                                   th:value="${offer != null and offer.perCustomerLimit != null ? offer.perCustomerLimit : ''}">
+                            <div class="helper">Leave empty for unlimited uses.</div>
+                        </div>
+                        <div class="form-row">
+                            <label>Priority</label>
+                            <input type="number" name="priority" step="1"
+                                   placeholder="0"
+                                   th:value="${offer != null and offer.priority != null ? offer.priority : '0'}">
+                            <div class="helper">Higher wins when several offers could apply.</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-toggle">
+                            <input type="checkbox" id="active" name="active"
+                                   th:checked="${offer == null or (offer.active != null and offer.active)}">
+                            <label for="active">Active — available for customers to redeem</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        <span th:text="${offer != null} ? 'Save changes' : 'Create offer'">Create</span>
+                    </button>
+                    <a class="btn btn-outline" th:href="@{/admin/offers}">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<div th:replace="~{admin/_layout :: scripts}"></div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const OFFER_ID = /*[[${offer != null ? offer.offerId : null}]]*/ null;
+    /*]]>*/
+
+    // Tune the value hint to match the chosen discount type.
+    const dt = document.getElementById('discountType');
+    const hint = document.getElementById('discountValueHint');
+    function syncHint() {
+        hint.textContent = dt.value === 'PERCENTAGE'
+            ? 'Enter 1–100 (percent off).'
+            : 'Enter the rupee amount taken off.';
+    }
+    dt.addEventListener('change', syncHint); syncHint();
+
+    function selectedIds(id) {
+        return Array.from(document.getElementById(id).selectedOptions)
+            .map(o => parseInt(o.value, 10));
+    }
+    function numOrNull(v) {
+        return (v === '' || v === null || v === undefined) ? null : parseFloat(v);
+    }
+    function intOrNull(v) {
+        return (v === '' || v === null || v === undefined) ? null : parseInt(v, 10);
+    }
+
+    document.getElementById('offerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const body = {
+            name: fd.get('name'),
+            code: fd.get('code'),
+            description: fd.get('description') || null,
+            discountType: fd.get('discountType'),
+            discountValue: numOrNull(fd.get('discountValue')),
+            startAt: fd.get('startAt'),   // yyyy-MM-ddTHH:mm  (server pattern allows optional :ss)
+            endAt: fd.get('endAt'),
+            minOrderAmount: numOrNull(fd.get('minOrderAmount')),
+            maxDiscountAmount: numOrNull(fd.get('maxDiscountAmount')),
+            perCustomerLimit: intOrNull(fd.get('perCustomerLimit')),
+            priority: intOrNull(fd.get('priority')),
+            active: fd.get('active') === 'on',
+            productIds: selectedIds('productIds'),
+            categoryIds: selectedIds('categoryIds')
+        };
+        try {
+            const isUpdate = OFFER_ID !== null && OFFER_ID !== undefined && OFFER_ID !== '';
+            const url = isUpdate ? '/api/admin/offers/' + OFFER_ID : '/api/admin/offers';
+            await adminApi('POST', url, body);
+            toast(isUpdate ? 'Saved' : 'Created', 'success');
+            setTimeout(() => { window.location.href = '/admin/offers'; }, 500);
+        } catch (e) { toast(e.message, 'error'); }
+    });
+</script>
+</body>
+</html>

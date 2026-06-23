@@ -810,6 +810,10 @@
         }
         
         @media (max-width: 768px) {
+			
+			.header-top { padding: 4px 0; font-size: 0.60rem; }
+			.main-header { padding-top: 7px !important; padding-bottom: 7px !important; }
+						
             /* Remove the section padding on mobile. */
             .product-detail-container {
                 padding: 0;
@@ -2241,10 +2245,9 @@
                     return;
                 }
                 const qty = parseInt(quantityInput.value, 10) || 1;
-                try {
-                    await apiPost('/api/cart/items', { variantId: SELECTED_VARIANT_ID, quantity: qty });
-                    window.location.href = '/checkout';
-                } catch (e) { showNotification(e.message, 'error'); }
+                // Buy Now is a direct single-item purchase — go straight to checkout
+                // for this variant WITHOUT touching the cart.
+                window.location.href = '/checkout?variantId=' + SELECTED_VARIANT_ID + '&qty=' + qty;
             });
         }
         

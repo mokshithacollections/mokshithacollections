@@ -900,6 +900,8 @@
 
         /* ---- Phones ---- */
         @media (max-width: 767.98px) {
+			.header-top { padding: 4px 0; font-size: 0.60rem; }
+			.main-header { padding-top: 7px !important; padding-bottom: 7px !important; }
             .account-header { padding: 28px 0; }
             .account-welcome { flex-direction: column; text-align: center; }
             .account-stats { justify-content: center; }

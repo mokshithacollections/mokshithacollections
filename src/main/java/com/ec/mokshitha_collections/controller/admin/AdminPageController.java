@@ -13,6 +13,7 @@ import com.ec.mokshitha_collections.entity.EnquiryStatus;
 import com.ec.mokshitha_collections.service.EnquiryService;
 import com.ec.mokshitha_collections.service.ProductService;
 import com.ec.mokshitha_collections.service.admin.AdminCategoryService;
+import com.ec.mokshitha_collections.service.admin.AdminOfferService;
 import com.ec.mokshitha_collections.service.admin.AdminOrderService;
 import com.ec.mokshitha_collections.service.admin.AdminProductService;
 import com.ec.mokshitha_collections.service.admin.AdminReviewService;
@@ -46,6 +47,7 @@ public class AdminPageController {
     private final AdminReviewService reviewService;
     private final AdminUserService userService;
     private final EnquiryService enquiryService;
+    private final AdminOfferService offerService;
 
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
@@ -178,6 +180,30 @@ public class AdminPageController {
         model.addAttribute("countNew", enquiryService.countByStatus(EnquiryStatus.NEW));
         model.addAttribute("countSeen", enquiryService.countByStatus(EnquiryStatus.SEEN));
         return "admin/enquiries";
+    }
+
+    /* ---------- Offers ---------- */
+
+    @GetMapping("/offers")
+    public String offers(Model model) {
+        model.addAttribute("offers", offerService.list());
+        return "admin/offers";
+    }
+
+    @GetMapping("/offers/new")
+    public String offerNew(Model model) {
+        model.addAttribute("offer", null); // signals "new"
+        model.addAttribute("allProducts", productRepository.findAll());
+        model.addAttribute("allCategories", categoryService.listAll());
+        return "admin/offer-form";
+    }
+
+    @GetMapping("/offers/{id}")
+    public String offerEdit(@PathVariable Long id, Model model) {
+        model.addAttribute("offer", offerService.getById(id));
+        model.addAttribute("allProducts", productRepository.findAll());
+        model.addAttribute("allCategories", categoryService.listAll());
+        return "admin/offer-form";
     }
 
     /* ---------- Users ---------- */

@@ -27,12 +27,12 @@
                 <div class="col-md-6">
                     <span th:if="${user != null}" th:text="'Welcome back, ' + ${user.firstName} + '!'">Welcome back!</span>
                     <span th:unless="${user != null}">
-                        <i class="fas fa-phone-alt"></i> +91 6303349508 &nbsp; +91 7989056928 &nbsp;|&nbsp;
+                        <i class="fas fa-phone-alt"></i> +91 6303349508 &nbsp; +91 7989056928 &nbsp; | &nbsp;
                         <i class="fas fa-envelope"></i> mokshithacollections@gmail.com
                     </span>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <span>Free Shipping on Orders Above ₹4999</span>
+                    <span><i class="fas fa-truck"></i>&nbsp; Free Shipping on Orders Above ₹4999</span>
                 </div>
             </div>
         </div>
@@ -111,6 +111,84 @@
 
         </div>
     </header>
+
+    <!-- ============ Offer announcement banner (between nav and hero) ============
+         Shown only when there are LIVE/SCHEDULED offers. Each slide counts down
+         (DD:HH:MM:SS) to the offer's start (scheduled) or end (live). If there's
+         more than one offer it auto-advances every 5s. -->
+    <div th:if="${offerBanners != null and not #lists.isEmpty(offerBanners)}"
+         class="offer-banner" id="offerBanner">
+
+        <!-- Floating confetti + sparkles (shared decoration across all slides) -->
+        <div class="ob-confetti" aria-hidden="true">
+            <i class="fas fa-star c1"></i>
+            <i class="fas fa-certificate c2"></i>
+            <i class="fas fa-gift c3"></i>
+            <span class="dot d1"></span>
+            <span class="dot d2"></span>
+            <span class="dot d3"></span>
+            <span class="dot d4"></span>
+            <span class="dot d5"></span>
+            <i class="fas fa-star c4"></i>
+            <i class="fas fa-certificate c5"></i>
+        </div>
+
+        <div class="offer-banner-track" id="offerBannerTrack">
+            <div class="offer-slide" th:each="ob,iter : ${offerBanners}"
+                 th:classappend="${iter.first} ? 'active'"
+                 th:attr="data-seconds=${ob.secondsRemaining}, data-mode=${ob.mode}">
+                <div class="ob-inner">
+                    <!-- Left: badge + headline + validity window -->
+                    <div class="ob-left">
+                        <div class="ob-badge-row">
+                            <span class="ob-badge" th:classappend="${ob.mode == 'LIVE'} ? 'live' : 'soon'">
+                                <span class="ob-badge-dot"></span>
+                                <span th:text="${ob.mode == 'LIVE'} ? 'LIVE NOW' : 'COMING SOON'">LIVE NOW</span>
+                            </span>
+                            <span class="ob-start">
+                                <i class="fas fa-calendar-days"></i>
+                                <span th:text="${ob.validityText}">23 Jun → 30 Jun 2026</span>
+                            </span>
+                        </div>
+                        <div class="ob-headline">
+                            <span class="ob-discount" th:text="${ob.discountLabel}">25% OFF</span>
+                            <span class="ob-name" th:text="${ob.name}">Festive Sale</span>
+                        </div>
+                        <div class="ob-desc" th:if="${ob.description != null and !#strings.isEmpty(ob.description)}"
+                             th:text="${ob.description}">A short description of the offer</div>
+                    </div>
+
+                    <!-- Right: a single glassy panel groups the code + the timer -->
+                    <div class="ob-right">
+                        <div class="ob-coupon">
+                            <span class="ob-coupon-label">Coupon Code</span>
+                            <span class="ob-code" th:text="${ob.code}">CODE</span>
+                        </div>
+                        <span class="ob-divider"></span>
+                        <div class="ob-countdown">
+                            <span class="ob-cd-label" th:text="${ob.countdownLabel}">Ends in</span>
+                            <div class="ob-timer">
+                                <div class="ob-unit"><span class="ob-num" data-unit="d">00</span><span class="ob-u">Days</span></div>
+                                <span class="ob-sep">:</span>
+                                <div class="ob-unit"><span class="ob-num" data-unit="h">00</span><span class="ob-u">Hrs</span></div>
+                                <span class="ob-sep">:</span>
+                                <div class="ob-unit"><span class="ob-num" data-unit="m">00</span><span class="ob-u">Min</span></div>
+                                <span class="ob-sep">:</span>
+                                <div class="ob-unit"><span class="ob-num" data-unit="s">00</span><span class="ob-u">Sec</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- dots only when more than one offer -->
+        <div class="offer-dots" th:if="${#lists.size(offerBanners) > 1}">
+            <button type="button" class="offer-dot" th:each="ob,iter : ${offerBanners}"
+                    th:classappend="${iter.first} ? 'active'"
+                    th:attr="data-index=${iter.index}" aria-label="Show offer"></button>
+        </div>
+    </div>
 
     <!-- Hero Section -->
     <section class="hero-section">
@@ -541,6 +619,77 @@
             section.addEventListener('mouseenter', pause);
             section.addEventListener('mouseleave', play);
 
+            play();
+        })();
+    </script>
+
+    <!-- Offer banner: per-slide DD:HH:MM:SS countdown + auto-slider (5s) -->
+    <script>
+        (function offerBanner() {
+            var banner = document.getElementById('offerBanner');
+            if (!banner) return;
+            var slides = Array.prototype.slice.call(banner.querySelectorAll('.offer-slide'));
+            if (slides.length === 0) return;
+
+            // ---- Per-slide countdown (ticks every second from server-computed seconds) ----
+            var states = slides.map(function (slide) {
+                return {
+                    el: slide,
+                    remaining: parseInt(slide.getAttribute('data-seconds'), 10) || 0,
+                    mode: slide.getAttribute('data-mode'),
+                    nums: {
+                        d: slide.querySelector('[data-unit="d"]'),
+                        h: slide.querySelector('[data-unit="h"]'),
+                        m: slide.querySelector('[data-unit="m"]'),
+                        s: slide.querySelector('[data-unit="s"]')
+                    }
+                };
+            });
+            function pad(n) { return (n < 10 ? '0' : '') + n; }
+            function render(st) {
+                var t = st.remaining;
+                var d = Math.floor(t / 86400); t -= d * 86400;
+                var h = Math.floor(t / 3600);  t -= h * 3600;
+                var m = Math.floor(t / 60);
+                var s = t - m * 60;
+                if (st.nums.d) st.nums.d.textContent = pad(d);
+                if (st.nums.h) st.nums.h.textContent = pad(h);
+                if (st.nums.m) st.nums.m.textContent = pad(m);
+                if (st.nums.s) st.nums.s.textContent = pad(s);
+            }
+            states.forEach(render);
+            var reloaded = false;
+            setInterval(function () {
+                states.forEach(function (st) {
+                    if (st.remaining > 0) { st.remaining--; render(st); }
+                    else if (!reloaded) {
+                        // A scheduled offer just went live, or a live one just ended —
+                        // refresh once so the server re-classifies the banner.
+                        reloaded = true;
+                        setTimeout(function () { window.location.reload(); }, 1500);
+                    }
+                });
+            }, 1000);
+
+            // ---- Slider (only if more than one offer) ----
+            if (slides.length < 2) return;
+            var dots = Array.prototype.slice.call(banner.querySelectorAll('.offer-dot'));
+            var current = 0;
+            function goTo(n) {
+                slides[current].classList.remove('active');
+                if (dots[current]) dots[current].classList.remove('active');
+                current = (n + slides.length) % slides.length;
+                slides[current].classList.add('active');
+                if (dots[current]) dots[current].classList.add('active');
+            }
+            var timer = null;
+            function play() { clearInterval(timer); timer = setInterval(function () { goTo(current + 1); }, 5000); }
+            function pause() { clearInterval(timer); timer = null; }
+            dots.forEach(function (dot, idx) {
+                dot.addEventListener('click', function () { goTo(idx); play(); });
+            });
+            banner.addEventListener('mouseenter', pause);
+            banner.addEventListener('mouseleave', play);
             play();
         })();
     </script>

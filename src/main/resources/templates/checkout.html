@@ -825,6 +825,8 @@
 
         /* ---- Phones ---- */
         @media (max-width: 767.98px) {
+			.header-top { padding: 4px 0; font-size: 0.60rem; }
+			.main-header { padding-top: 7px !important; padding-bottom: 7px !important; }
             .checkout-form-container { padding: 24px 18px; border-radius: 12px; margin-bottom: 20px; }
             .order-summary-container { padding: 22px 18px; border-radius: 12px; }
             .form-section-title { font-size: 1.25rem; margin-bottom: 20px; }
@@ -984,7 +986,10 @@
                 </span>
             </div>
 
-            <form id="checkoutForm" th:if="${checkoutItems != null and not #lists.isEmpty(checkoutItems)}">
+            <form id="checkoutForm" th:if="${checkoutItems != null and not #lists.isEmpty(checkoutItems)}"
+                  th:attr="data-buynow=${buyNow != null and buyNow},
+                           data-variant=${buyNowVariantId},
+                           data-qty=${buyNowQty}">
                 <div class="row">
                     <!-- Left Column: Form. On mobile it comes AFTER the summary
                          (order-2); on desktop it returns to the left (order-lg-1). -->
@@ -1031,13 +1036,13 @@
                         <div class="checkout-form-container">
                             <h3 class="form-section-title">Shipping Address</h3>
 
-                            <!-- No saved addresses yet: send user to /account to add one -->
+                            <!-- No saved addresses yet: add one right here via a modal -->
                             <div th:if="${user == null or user.addresses == null or #lists.isEmpty(user.addresses)}"
                                  class="alert alert-info">
                                 <i class="fas fa-info-circle me-2"></i>
                                 You don't have any saved addresses yet.
-                                <a th:href="@{/user_redirect}" class="alert-link">Add one from your account</a>
-                                before placing an order.
+                                <a href="#" class="alert-link" data-bs-toggle="modal" data-bs-target="#addAddressModal">Add an address</a>
+                                to continue.
                             </div>
 
                             <!-- Pick from saved addresses; default address is pre-selected -->
@@ -1062,7 +1067,7 @@
                                         <span th:text="${addr.phone}">Phone</span>
                                     </label>
                                 </div>
-                                <a th:href="@{/user_redirect}" class="small">+ Add a new address</a>
+                                <a href="#" class="small" data-bs-toggle="modal" data-bs-target="#addAddressModal">+ Add a new address</a>
                             </div>
                         </div>
 
@@ -1082,6 +1087,20 @@
                                         <div class="payment-title">Pay Online — UPI / Card / Net Banking / Wallet</div>
                                         <div class="payment-description">Secure payment via Razorpay.</div>
                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- Accepted payment methods -->
+                            <div class="mt-3">
+                                <p class="mb-2 small text-muted">We accept:</p>
+                                <div class="d-flex gap-2 flex-wrap align-items-center">
+                                    <img src="https://img.icons8.com/color/48/000000/rupay.png" alt="RuPay" width="40">
+                                    <img src="https://img.icons8.com/color/48/000000/visa.png" alt="Visa" width="40">
+                                    <img src="https://img.icons8.com/color/48/000000/mastercard.png" alt="Mastercard" width="40">
+                                    <img src="https://img.icons8.com/color/48/000000/phone-pe.png" alt="PhonePe" width="40">
+                                    <img src="https://img.icons8.com/color/48/000000/google-pay.png" alt="Google Pay" width="40">
+                                    <img src="https://img.icons8.com/color/48/000000/paytm.png" alt="Paytm" width="40">
+                                    <img src="https://img.icons8.com/color/48/000000/bhim.png" alt="BHIM" width="40">
                                 </div>
                             </div>
                         </div>
@@ -1116,7 +1135,9 @@
                     <!-- Right Column: Order Summary. On mobile it moves to the TOP
                          (order-1) so the customer sees items + total first. -->
                     <div class="col-lg-4 order-1 order-lg-2">
-                        <div class="order-summary-container">
+                        <div class="order-summary-container" id="orderSummary"
+                             th:attr="data-subtotal=${checkoutSubtotal},
+                                      data-shipping=${shippingFee != null ? shippingFee : 0}">
                             <h3 class="order-summary-title">Order Summary</h3>
 
                             <!-- Only in-stock items are listed (out-of-stock dropped) -->
@@ -1153,9 +1174,18 @@
                                           th:if="${shippingFee == null or shippingFee == 0}"
                                           style="color: var(--dark-sea-green);">FREE</span>
                                 </div>
+                                <!-- Coupon discount (shown only once a code is applied) -->
+                                <div class="summary-row" id="discountRow" style="display:none;">
+                                    <span class="summary-label">
+                                        Discount <span id="discountCodeLabel" style="opacity:.7;"></span>
+                                    </span>
+                                    <span class="summary-value" id="discountValue"
+                                          style="color: var(--dark-sea-green); font-weight:600;">-₹0</span>
+                                </div>
                                 <div class="summary-total">
                                     <span>Total</span>
-                                    <span th:text="'₹' + ${orderTotal != null ? orderTotal : checkoutSubtotal}">₹0</span>
+                                    <span id="summaryTotalValue"
+                                          th:text="'₹' + ${orderTotal != null ? orderTotal : checkoutSubtotal}">₹0</span>
                                 </div>
                                 <small class="text-muted"
                                        th:if="${shippingFee != null and shippingFee > 0}">
@@ -1167,13 +1197,49 @@
                                 </small>
                             </div>
 
+            <!-- Promo code (live coupon redemption) -->
+                            <style>
+                                .order-summary-container .promo-code { margin: 22px 0 0; }
+                                .order-summary-container .promo-title { font-size: 1.05rem; margin-bottom: 12px; color: var(--dark-text); }
+                                .order-summary-container .promo-form { display: flex; gap: 10px; }
+                                .order-summary-container .promo-input { flex: 1; min-width: 0; padding: 12px 15px;
+                                    border: 2px solid #eee; border-radius: 8px; font-family: 'Poppins', sans-serif; text-transform: uppercase; }
+                                .order-summary-container .promo-input:focus { outline: none; border-color: var(--dark-sea-green); }
+                                .order-summary-container .promo-btn { background: var(--dark-sea-green); color: #fff; border: none;
+                                    padding: 0 22px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: opacity .3s; }
+                                .order-summary-container .promo-btn:disabled { opacity: .5; cursor: not-allowed; }
+                                .order-summary-container .accepted-pay p { font-weight: 600; color: #555; }
+                                .order-summary-container .promo-msg { margin-top: 8px; font-size: 0.85rem; min-height: 1em; }
+                                .order-summary-container .promo-msg.error { color: #c0392b; }
+                                .order-summary-container .promo-applied {
+                                    display: flex; align-items: center; justify-content: space-between;
+                                    gap: 10px; margin-top: 4px; padding: 11px 14px; border-radius: 8px;
+                                    background: #eef7ef; border: 1px solid #cfe8d4; color: #1e7a34; font-size: 0.9rem; }
+                                .order-summary-container .promo-applied .fa-check-circle { margin-right: 6px; }
+                                .order-summary-container .promo-remove { background: none; border: none; color: #c0392b;
+                                    font-weight: 600; cursor: pointer; font-size: 0.82rem; }
+                            </style>
+                            <div class="promo-code">
+                                <h4 class="promo-title">Have a Promo Code?</h4>
+                                <div class="promo-form" id="promoForm">
+                                    <input type="text" class="promo-input" id="promoCode" placeholder="Enter code" autocomplete="off">
+                                    <button type="button" class="promo-btn" id="applyPromo">Apply</button>
+                                </div>
+                                <div class="promo-applied" id="promoApplied" style="display:none;">
+                                    <span><i class="fas fa-check-circle"></i> Code <strong id="appliedCodeLabel"></strong> applied</span>
+                                    <button type="button" class="promo-remove" id="removePromo">Remove</button>
+                                </div>
+                                <div class="promo-msg" id="promoMsg"></div>
+                                <input type="hidden" id="appliedOfferCode" value="">
+                            </div>
+
                             <!-- Delivery Estimate -->
                             <div class="mt-4 pt-3 border-top">
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-shipping-fast text-primary me-3"></i>
                                     <div>
                                         <div class="small">Estimated Delivery</div>
-                                        <div class="fw-bold">5-7 business days</div>
+                                        <div class="fw-bold">7-10 business days</div>
                                     </div>
                                 </div>
                             </div>
@@ -1184,8 +1250,8 @@
                                     <i class="fas fa-headset text-success me-3"></i>
                                     <div>
                                         <div class="small">Need help with your order?</div>
-                                        <div class="fw-bold">+91 98765 43210</div>
-                                        <div class="small text-muted">Available 10AM - 8PM</div>
+                                        <div class="fw-bold">+91 6303349508</div>
+                                        <div class="small text-muted">Available 11AM - 8PM</div>
                                     </div>
                                 </div>
                             </div>
@@ -1324,6 +1390,89 @@
             });
         }
 
+        // ----- Promo code: validate + preview the discount -----
+        (function promoCode() {
+            var input = document.getElementById('promoCode');
+            var applyBtn = document.getElementById('applyPromo');
+            var removeBtn = document.getElementById('removePromo');
+            var msg = document.getElementById('promoMsg');
+            var form = document.getElementById('promoForm');
+            var appliedBox = document.getElementById('promoApplied');
+            var appliedLabel = document.getElementById('appliedCodeLabel');
+            var hidden = document.getElementById('appliedOfferCode');
+            var summary = document.getElementById('orderSummary');
+            var discountRow = document.getElementById('discountRow');
+            var discountValueEl = document.getElementById('discountValue');
+            var discountCodeLabel = document.getElementById('discountCodeLabel');
+            var totalEl = document.getElementById('summaryTotalValue');
+            if (!applyBtn || !summary) return;
+
+            var subtotal = parseFloat(summary.dataset.subtotal) || 0;
+            var shipping = parseFloat(summary.dataset.shipping) || 0;
+            var cf = document.getElementById('checkoutForm');
+
+            function setMsg(text, isError) {
+                msg.textContent = text || '';
+                msg.className = 'promo-msg' + (isError ? ' error' : '');
+            }
+            function fmt(n) { return '₹' + (Math.round(n * 100) / 100).toLocaleString('en-IN'); }
+
+            function applyDiscount(code, amount) {
+                hidden.value = code;
+                appliedLabel.textContent = code;
+                form.style.display = 'none';
+                appliedBox.style.display = 'flex';
+                setMsg('');
+                discountCodeLabel.textContent = '(' + code + ')';
+                discountValueEl.textContent = '-' + fmt(amount);
+                discountRow.style.display = 'flex';
+                var newTotal = Math.max(0, subtotal + shipping - amount);
+                totalEl.textContent = fmt(newTotal);
+            }
+            function clearDiscount() {
+                hidden.value = '';
+                appliedBox.style.display = 'none';
+                form.style.display = 'flex';
+                discountRow.style.display = 'none';
+                totalEl.textContent = fmt(subtotal + shipping);
+                input.value = '';
+                setMsg('');
+            }
+
+            applyBtn.addEventListener('click', function () {
+                var code = (input.value || '').trim().toUpperCase();
+                if (!code) { setMsg('Enter a promo code.', true); return; }
+                applyBtn.disabled = true;
+                var original = applyBtn.textContent;
+                applyBtn.textContent = '...';
+                var params = { code: code };
+                if (cf && cf.dataset.buynow === 'true' && cf.dataset.variant) {
+                    params.variantId = cf.dataset.variant;
+                    params.qty = cf.dataset.qty || '1';
+                }
+                fetch('/api/offers/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-XSRF-TOKEN': getCsrfToken() },
+                    body: new URLSearchParams(params)
+                })
+                .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+                .then(function (r) {
+                    if (r.ok && r.data.status === 'success') {
+                        applyDiscount(r.data.code, parseFloat(r.data.discountAmount));
+                    } else {
+                        setMsg(r.data.message || 'Could not apply this code.', true);
+                    }
+                })
+                .catch(function () { setMsg('Network error. Please try again.', true); })
+                .finally(function () { applyBtn.disabled = false; applyBtn.textContent = original; });
+            });
+
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') { e.preventDefault(); applyBtn.click(); }
+            });
+            if (removeBtn) removeBtn.addEventListener('click', clearDiscount);
+        })();
+
         // ----- Cash on Delivery: create the order directly -----
         function placeCodOrder(addressId) {
             const original = placeBtn.innerHTML;
@@ -1352,10 +1501,21 @@
             placeBtn.disabled = true;
             placeBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Starting secure payment...';
             try {
+                // For a "Buy Now" checkout, send the single variant so the server
+                // charges only that item and ignores the cart.
+                var cf = document.getElementById('checkoutForm');
+                var createParams = { addressId: addressId };
+                if (cf && cf.dataset.buynow === 'true' && cf.dataset.variant) {
+                    createParams.variantId = cf.dataset.variant;
+                    createParams.qty = cf.dataset.qty || '1';
+                }
+                // Carry an applied coupon — the server re-validates it before charging.
+                var appliedCode = (document.getElementById('appliedOfferCode') || {}).value;
+                if (appliedCode) createParams.offerCode = appliedCode;
                 const res = await fetch('/api/payments/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-XSRF-TOKEN': getCsrfToken() },
-                    body: new URLSearchParams({ addressId: addressId })
+                    body: new URLSearchParams(createParams)
                 });
                 const data = await res.json();
                 if (!res.ok) { alert(data.message || 'Could not start payment.'); resetBtn(original); return; }
@@ -1822,6 +1982,264 @@
                 btn.style.minHeight = '48px';
             });
         }
+    </script>
+
+    <!-- Account-page button styles, scoped to this modal so they match exactly
+         (and don't affect the checkout "Place Order" button which also uses .btn-primary). -->
+    <style>
+        #addAddressModal .btn-primary {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            color: #fff; border: none; padding: 15px 20px; border-radius: 8px;
+            font-weight: 600; cursor: pointer; transition: all 0.3s; text-decoration: none;
+        }
+        #addAddressModal .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(85,0,12,0.3); }
+        #addAddressModal .btn-secondary {
+            background: transparent; border: 2px solid #ddd; color: #666;
+            padding: 15px 35px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;
+        }
+        #addAddressModal .btn-secondary:hover { background: #f8f9fa; border-color: #ccc; }
+        /* Tighter, uniform field spacing — matches the account page (overrides
+           checkout's global .form-group { margin-bottom: 25px }). */
+        #addAddressModal .form-group { margin-bottom: 12px; }
+        #addAddressModal .row { margin-bottom: 12px; }
+        #addAddressModal .row .form-group { margin-bottom: 0; }
+        #addAddressModal .form-label { margin-bottom: 6px; }
+    </style>
+
+    <!-- Add Address modal — same form + behaviour as the account page, inline on
+         checkout so a user without an address never has to leave. -->
+    <div class="modal fade" id="addAddressModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Address</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAddressForm">
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-control" name="firstName"
+                                       th:value="${user != null ? user.firstName : ''}" required>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-control" name="lastName"
+                                       th:value="${user != null ? user.lastName : ''}" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" name="phone"
+                                   th:value="${user != null ? user.phone : ''}">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Street Address</label>
+                            <input type="text" class="form-control" name="streetAddress" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label class="form-label">PIN Code</label>
+                                <input type="text" class="form-control" name="pinCode" required
+                                       inputmode="numeric" maxlength="6" placeholder="6-digit PIN">
+                                <small class="form-text pincode-status"></small>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label class="form-label">City</label>
+                                <input type="text" class="form-control" name="city" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label class="form-label">State</label>
+                                <select class="form-control" name="state" required>
+                                    <option value="">Select State</option>
+                                    <optgroup label="States">
+                                        <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                        <option value="Assam">Assam</option>
+                                        <option value="Bihar">Bihar</option>
+                                        <option value="Chhattisgarh">Chhattisgarh</option>
+                                        <option value="Goa">Goa</option>
+                                        <option value="Gujarat">Gujarat</option>
+                                        <option value="Haryana">Haryana</option>
+                                        <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                        <option value="Jharkhand">Jharkhand</option>
+                                        <option value="Karnataka">Karnataka</option>
+                                        <option value="Kerala">Kerala</option>
+                                        <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                        <option value="Maharashtra">Maharashtra</option>
+                                        <option value="Manipur">Manipur</option>
+                                        <option value="Meghalaya">Meghalaya</option>
+                                        <option value="Mizoram">Mizoram</option>
+                                        <option value="Nagaland">Nagaland</option>
+                                        <option value="Odisha">Odisha</option>
+                                        <option value="Punjab">Punjab</option>
+                                        <option value="Rajasthan">Rajasthan</option>
+                                        <option value="Sikkim">Sikkim</option>
+                                        <option value="Tamil Nadu">Tamil Nadu</option>
+                                        <option value="Telangana">Telangana</option>
+                                        <option value="Tripura">Tripura</option>
+                                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                        <option value="Uttarakhand">Uttarakhand</option>
+                                        <option value="West Bengal">West Bengal</option>
+                                    </optgroup>
+                                    <optgroup label="Union Territories">
+                                        <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                                        <option value="Chandigarh">Chandigarh</option>
+                                        <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                                        <option value="Delhi">Delhi</option>
+                                        <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                                        <option value="Ladakh">Ladakh</option>
+                                        <option value="Lakshadweep">Lakshadweep</option>
+                                        <option value="Puducherry">Puducherry</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label class="form-label">Country</label>
+                                <select class="form-control" name="country">
+                                    <option value="India" selected>India</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Address Type</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="addressType" value="HOME" checked>
+                                    <label class="form-check-label">Home</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="addressType" value="WORK">
+                                    <label class="form-check-label">Work</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="addressType" value="OTHER">
+                                    <label class="form-check-label">Other</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" name="isDefault" id="setAsDefaultCheckout" checked>
+                            <label class="form-check-label" for="setAsDefaultCheckout">Set as default address</label>
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn-primary flex-grow-1">Save Address</button>
+                            <button type="button" class="btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mirrors the account page's add-address: PIN auto-fill + same submit.
+        (function () {
+            var form = document.getElementById('addAddressForm');
+            if (!form) return;
+
+            var pin = form.querySelector('[name="pinCode"]');
+            var cityEl = form.querySelector('[name="city"]');
+            var stateEl = form.querySelector('[name="state"]');
+            var statusEl = form.querySelector('.pincode-status');
+
+            // ---- Auto-fill City + State from the PIN code (same source as account) ----
+            if (pin) {
+                var timer;
+                pin.addEventListener('input', function () {
+                    var v = pin.value.trim();
+                    clearTimeout(timer);
+                    if (/^\d{6}$/.test(v)) timer = setTimeout(function () { lookupPincode(v); }, 350);
+                    else if (statusEl) statusEl.textContent = '';
+                });
+            }
+            async function lookupPincode(p) {
+                if (statusEl) { statusEl.textContent = 'Looking up PIN…'; statusEl.style.color = '#666'; }
+                var r = await fetchPincode(p);
+                if (!r || (!r.city && !r.state)) {
+                    if (statusEl) { statusEl.textContent = 'PIN not found — please enter city/state manually.'; statusEl.style.color = '#dc2626'; }
+                    return;
+                }
+                if (cityEl && r.city) cityEl.value = r.city;
+                var matched = false;
+                if (stateEl && r.state) {
+                    var target = String(r.state).trim().toLowerCase();
+                    var opt = Array.prototype.find.call(stateEl.options, function (o) { return o.value.trim().toLowerCase() === target; });
+                    if (opt) { stateEl.value = opt.value; matched = true; }
+                }
+                if (statusEl) {
+                    statusEl.style.color = 'var(--dark-sea-green, #2E8B57)';
+                    statusEl.textContent = '✓ ' + (r.city || '') + ', ' + (r.state || '') + (matched ? '' : ' (please pick the state)');
+                }
+            }
+            async function fetchPincode(p) {
+                try {
+                    var res = await fetch('/api/pincode/' + p, { headers: { 'Accept': 'application/json' } });
+                    if (res.ok) { var d = await res.json(); if (d && d.found) return { city: d.city, state: d.state }; }
+                } catch (_) {}
+                try {
+                    var res2 = await fetch('https://api.postalpincode.in/pincode/' + p);
+                    var arr = await res2.json();
+                    var rec = Array.isArray(arr) ? arr[0] : null;
+                    var po = rec && rec.Status === 'Success' && rec.PostOffice && rec.PostOffice[0];
+                    if (po) return { city: po.District, state: po.State };
+                } catch (_) {}
+                return null;
+            }
+
+            // ---- Submit (reuses /account/address/add, like the account page) ----
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                if (!form.reportValidity()) return;
+                var submitBtn = form.querySelector('button[type="submit"]');
+                var label = submitBtn ? submitBtn.innerHTML : '';
+                if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = 'Saving...'; }
+
+                var data = Object.fromEntries(new FormData(form).entries());
+                data.isDefault = form.querySelector('input[name="isDefault"]').checked;
+                delete data.userId; delete data._csrf;
+
+                try {
+                    var res = await fetch('/account/address/add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-XSRF-TOKEN': getCsrfToken() },
+                        body: new URLSearchParams(data)
+                    });
+                    if (!res.ok) {
+                        var msg = 'Could not save the address. Please check the fields.';
+                        try { var d = await res.json(); if (d && d.message) msg = d.message; } catch (_) {}
+                        alert(msg);
+                        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = label; }
+                        return;
+                    }
+                    var m = bootstrap.Modal.getInstance(document.getElementById('addAddressModal'));
+                    if (m) m.hide();
+                    window.location.reload();   // show the new address in the list
+                } catch (err) {
+                    alert('Network error — please try again.');
+                    if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = label; }
+                }
+            });
+        })();
+
+        // If addresses exist but none is pre-selected, pre-check the first so
+        // "Place order" always has a shipping address.
+        (function () {
+            var radios = document.querySelectorAll('input[name="addressId"]');
+            if (radios.length && ![].some.call(radios, function (r) { return r.checked; })) {
+                radios[0].checked = true;
+            }
+        })();
     </script>
 </body>
 </html>

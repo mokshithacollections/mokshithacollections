@@ -612,6 +612,8 @@
         }
         
         @media (max-width: 576px) {
+			.header-top { padding: 4px 0; font-size: 0.60rem; }
+			.main-header { padding-top: 7px !important; padding-bottom: 7px !important; }
             .auth-container {
                 padding: 30px 15px;
             }

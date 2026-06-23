@@ -5,6 +5,9 @@ import com.ec.mokshitha_collections.exception.BadRequestException;
 import com.ec.mokshitha_collections.exception.OutOfStockException;
 import com.ec.mokshitha_collections.exception.ResourceNotFoundException;
 import com.ec.mokshitha_collections.repository.*;
+import com.ec.mokshitha_collections.service.OfferService;
+import com.ec.mokshitha_collections.service.OfferService.DiscountLine;
+import com.ec.mokshitha_collections.service.OfferService.DiscountResult;
 import com.ec.mokshitha_collections.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +47,9 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final RazorpayClient razorpay;
     private final OrderService orderService;
+    private final OfferService offerService;
+    private final OfferRepository offerRepository;
+    private final OfferRedemptionRepository offerRedemptionRepository;
 
     @Value("${razorpay.currency:INR}")
     private String currency;
@@ -51,17 +57,25 @@ public class PaymentService {
     @Value("${app.checkout.hold-minutes:15}")
     private int holdMinutes;
 
-    /**
-     * Reserves stock for the user's cart and opens a Razorpay order. Returns the
-     * data the frontend needs to launch the Razorpay checkout widget.
-     */
+    /** Cart checkout: reserve every cart line and open a Razorpay order. */
     @Transactional
     public Map<String, Object> createPayment(Long userId, Long addressId) {
-        UserCart cart = cartRepository.findByUserIdWithItems(userId)
-                .orElseThrow(() -> new BadRequestException("Your cart is empty"));
-        if (cart.getItems().isEmpty()) {
-            throw new BadRequestException("Your cart is empty");
-        }
+        return createPayment(userId, addressId, null, null, null);
+    }
+
+    /**
+     * Opens a Razorpay order after reserving stock. When {@code buyNowVariantId}
+     * is provided this is a single-item "Buy Now" checkout (the cart is ignored
+     * and untouched); otherwise it reserves the whole cart. An optional
+     * {@code offerCode} is re-validated and applied server-side; the browser's
+     * idea of the discount is never trusted.
+     */
+    @Transactional
+    public Map<String, Object> createPayment(Long userId, Long addressId,
+                                             Long buyNowVariantId, Integer buyNowQty,
+                                             String offerCode) {
+        boolean buyNow = buyNowVariantId != null;
+        List<DiscountLine> discountLines = new ArrayList<>();
 
         Address address = addressRepository.findById(addressId)
                 .orElseThrow(() -> new ResourceNotFoundException("Address not found"));
@@ -74,45 +88,61 @@ public class PaymentService {
         BigDecimal subtotal = BigDecimal.ZERO;
         List<PendingCheckoutItem> snapshot = new ArrayList<>();
 
-        for (CartItem ci : cart.getItems()) {
-            ProductVariant v = variantRepository.findById(ci.getVariant().getVariantId())
+        if (buyNow) {
+            // ----- Buy Now: a single selected variant -----
+            int qty = (buyNowQty == null || buyNowQty < 1) ? 1 : buyNowQty;
+            ProductVariant v = variantRepository.findById(buyNowVariantId)
                     .orElseThrow(() -> new ResourceNotFoundException("Variant no longer exists"));
             int stock = v.getStockQuantity() == null ? 0 : v.getStockQuantity();
-            if (stock <= 0) continue; // out of stock — dropped, same as the checkout view
-
-            int qty = ci.getQuantity();
-            // Atomically reserve — only succeeds if enough stock remains right now.
-            if (variantRepository.reserveStock(v.getVariantId(), qty) == 0) {
-                throw new OutOfStockException("Only " + stock + " left of "
-                        + v.getProduct().getName()
-                        + (v.getColor() != null ? " (" + v.getColor() + ")" : ""));
+            if (stock <= 0 || variantRepository.reserveStock(v.getVariantId(), qty) == 0) {
+                throw new OutOfStockException(stock <= 0
+                        ? v.getProduct().getName() + " is out of stock"
+                        : "Only " + stock + " left of " + v.getProduct().getName()
+                          + (v.getColor() != null ? " (" + v.getColor() + ")" : ""));
             }
+            subtotal = addSnapshotItem(snapshot, v, qty);
+            discountLines.add(OfferService.lineFor(v, qty));
+        } else {
+            // ----- Cart checkout: every in-stock line -----
+            UserCart cart = cartRepository.findByUserIdWithItems(userId)
+                    .orElseThrow(() -> new BadRequestException("Your cart is empty"));
+            if (cart.getItems().isEmpty()) {
+                throw new BadRequestException("Your cart is empty");
+            }
+            for (CartItem ci : cart.getItems()) {
+                ProductVariant v = variantRepository.findById(ci.getVariant().getVariantId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Variant no longer exists"));
+                int stock = v.getStockQuantity() == null ? 0 : v.getStockQuantity();
+                if (stock <= 0) continue; // out of stock — dropped, same as the checkout view
 
-            Product p = v.getProduct();
-            BigDecimal unitPrice = p.getDiscountPrice() != null ? p.getDiscountPrice() : p.getPrice();
-            BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(qty));
-            subtotal = subtotal.add(lineTotal);
-
-            snapshot.add(PendingCheckoutItem.builder()
-                    .productId(p.getProductId())
-                    .productName(p.getName())
-                    .productImageUrl(p.getImageUrl())
-                    .variantId(v.getVariantId())
-                    .variantColor(v.getColor())
-                    .variantSize(v.getSize())
-                    .skuVariant(v.getSkuVariant())
-                    .unitPrice(unitPrice)
-                    .quantity(qty)
-                    .lineTotal(lineTotal)
-                    .build());
-        }
-
-        if (snapshot.isEmpty()) {
-            throw new BadRequestException("All items in your cart are out of stock");
+                int qty = ci.getQuantity();
+                if (variantRepository.reserveStock(v.getVariantId(), qty) == 0) {
+                    throw new OutOfStockException("Only " + stock + " left of "
+                            + v.getProduct().getName()
+                            + (v.getColor() != null ? " (" + v.getColor() + ")" : ""));
+                }
+                subtotal = subtotal.add(addSnapshotItem(snapshot, v, qty));
+                discountLines.add(OfferService.lineFor(v, qty));
+            }
+            if (snapshot.isEmpty()) {
+                throw new BadRequestException("All items in your cart are out of stock");
+            }
         }
 
         BigDecimal shipping = orderService.calculateShipping(subtotal);
-        BigDecimal total = subtotal.add(shipping);
+
+        // Re-validate + compute the coupon discount server-side (never trust the
+        // browser's number). Item-scoped: only matching lines reduce the total.
+        BigDecimal discount = BigDecimal.ZERO;
+        String appliedCode = null;
+        if (offerCode != null && !offerCode.isBlank()) {
+            DiscountResult dr = offerService.computeDiscount(userId, offerCode, discountLines);
+            discount = dr.discountAmount();
+            appliedCode = dr.offer().getCode();
+        }
+
+        BigDecimal total = subtotal.add(shipping).subtract(discount);
+        if (total.signum() < 0) total = BigDecimal.ZERO; // safety: never charge negative
         long amountPaise = total.multiply(BigDecimal.valueOf(100)).longValueExact();
 
         String receipt = "rcpt_" + userId + "_" + (System.currentTimeMillis() % 100000000L);
@@ -129,6 +159,9 @@ public class PaymentService {
                 .shippingAddress(AddressSnapshot.from(address))
                 .paymentMethod(PaymentMethod.ONLINE)
                 .status(PendingCheckoutStatus.HELD)
+                .buyNow(buyNow)
+                .offerCode(appliedCode)
+                .discountAmount(discount.signum() > 0 ? discount : null)
                 .expiresAt(LocalDateTime.now().plusMinutes(holdMinutes))
                 .build();
         snapshot.forEach(it -> { it.setPendingCheckout(pending); pending.getItems().add(it); });
@@ -168,6 +201,8 @@ public class PaymentService {
                 .shippingAddress(pending.getShippingAddress())
                 .subtotal(pending.getSubtotal())
                 .shippingFee(pending.getShippingFee())
+                .offerCode(pending.getOfferCode())
+                .discountAmount(pending.getDiscountAmount())
                 .totalAmount(pending.getTotalAmount())
                 .paymentMethod(PaymentMethod.ONLINE)
                 .paymentStatus(PaymentStatus.PAID)
@@ -195,11 +230,28 @@ public class PaymentService {
         }
         Order saved = orderRepository.save(order);
 
-        // Remove the purchased lines from the cart (leave anything else).
-        cartRepository.findByUserIdWithItems(pending.getUserId()).ifPresent(cart -> {
-            cart.getItems().removeIf(ci -> orderedVariantIds.contains(ci.getVariant().getVariantId()));
-            cartRepository.save(cart);
-        });
+        // Record the coupon usage (per-customer-limit + audit). Look the offer up
+        // by code; if it was deleted in the meantime, skip the record but keep the
+        // discount on the order.
+        if (pending.getOfferCode() != null) {
+            offerRepository.findByCodeIgnoreCase(pending.getOfferCode()).ifPresent(offer ->
+                offerRedemptionRepository.save(OfferRedemption.builder()
+                        .offerId(offer.getOfferId())
+                        .userId(pending.getUserId())
+                        .orderId(saved.getOrderId())
+                        .code(pending.getOfferCode())
+                        .discountAmount(pending.getDiscountAmount())
+                        .build()));
+        }
+
+        // Remove the purchased lines from the cart (leave anything else) — but a
+        // "Buy Now" checkout never used the cart, so leave it completely alone.
+        if (!Boolean.TRUE.equals(pending.getBuyNow())) {
+            cartRepository.findByUserIdWithItems(pending.getUserId()).ifPresent(cart -> {
+                cart.getItems().removeIf(ci -> orderedVariantIds.contains(ci.getVariant().getVariantId()));
+                cartRepository.save(cart);
+            });
+        }
 
         pending.setStatus(PendingCheckoutStatus.CONFIRMED);
         pendingRepository.save(pending);
@@ -232,6 +284,26 @@ public class PaymentService {
         for (PendingCheckout p : expired) {
             releasePending(p);
         }
+    }
+
+    /** Appends a snapshot line for a (already-reserved) variant; returns its line total. */
+    private static BigDecimal addSnapshotItem(List<PendingCheckoutItem> snapshot, ProductVariant v, int qty) {
+        Product p = v.getProduct();
+        BigDecimal unitPrice = p.getDiscountPrice() != null ? p.getDiscountPrice() : p.getPrice();
+        BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(qty));
+        snapshot.add(PendingCheckoutItem.builder()
+                .productId(p.getProductId())
+                .productName(p.getName())
+                .productImageUrl(p.getImageUrl())
+                .variantId(v.getVariantId())
+                .variantColor(v.getColor())
+                .variantSize(v.getSize())
+                .skuVariant(v.getSkuVariant())
+                .unitPrice(unitPrice)
+                .quantity(qty)
+                .lineTotal(lineTotal)
+                .build());
+        return lineTotal;
     }
 
     private static String safe(String s) {

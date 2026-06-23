@@ -434,6 +434,15 @@
                               th:text="${order.status.name()}">PLACED</span>
                     </span>
                 </div>
+                <div class="order-info-row"
+                     th:if="${order.discountAmount != null and order.discountAmount > 0}">
+                    <span class="order-info-label">
+                        Discount <span th:if="${order.offerCode != null}" style="opacity:.7;"
+                                       th:text="'(' + ${order.offerCode} + ')'">(CODE)</span>
+                    </span>
+                    <span class="order-info-value" style="color: var(--dark-sea-green); font-weight: 600;"
+                          th:text="'-₹' + ${order.discountAmount}">-₹0</span>
+                </div>
                 <div class="order-info-row total">
                     <span class="order-info-label" style="font-weight: 600; color: var(--dark-text);">Total</span>
                     <span class="order-info-value lg" id="totalValue"

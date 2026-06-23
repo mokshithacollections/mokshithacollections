@@ -738,6 +738,9 @@
         }
         
         @media (max-width: 768px) {
+			.header-top { padding: 4px 0; font-size: 0.60rem; }
+			.main-header { padding-top: 7px !important; padding-bottom: 7px !important; }
+						
             .cart-title {
                 font-size: 2.5rem;
             }
@@ -1009,15 +1012,7 @@
                                   th:text="'₹' + ${cart != null and cart.subtotal != null ? cart.subtotal : 0}">₹0</span>
                         </div>
 
-                        <!-- Promo Code (UI only — no backend coupon support yet) -->
-                        <div class="promo-code">
-                            <h4 class="promo-title">Have a Promo Code?</h4>
-                            <div class="promo-form">
-                                <input type="text" class="promo-input" id="promoCode" placeholder="Enter code">
-                                <button class="promo-btn" id="applyPromo" disabled
-                                        title="Coupon support coming soon">Apply</button>
-                            </div>
-                        </div>
+                        <!-- Promo code + accepted-payment badges moved to the checkout page. -->
 
                         <!-- Checkout Button — enabled only when at least one item is in stock.
                              Out-of-stock items are dropped from the order on the checkout page. -->
@@ -1033,21 +1028,6 @@
                         
                         <div class="secure-checkout">
                             <i class="fas fa-shield-alt"></i> Secure Checkout · SSL Encrypted
-                        </div>
-                        
-                        <!-- Payment Methods -->
-                        <div class="mt-4">
-                            <p class="mb-2">We Accept:</p>
-                            <div class="d-flex gap-2 flex-wrap">
-                                <img src="https://img.icons8.com/color/48/000000/rupay.png" alt="RuPay" width="40">
-								<img src="https://img.icons8.com/color/48/000000/visa.png" alt="Visa" width="40">
-								<img src="https://img.icons8.com/color/48/000000/mastercard.png" alt="Cred Pay" width="40">
-								<img src="https://img.icons8.com/color/48/000000/phone-pe.png" alt="PhonePe" width="40">
-								<img src="https://img.icons8.com/color/48/000000/google-pay.png" alt="Google Pay" width="40">
-                                <img src="https://img.icons8.com/color/48/000000/paytm.png" alt="Paytm" width="40">
-								<img src="https://img.icons8.com/color/48/000000/bhim.png" alt="BHIM" width="40">
-                                
-                            </div>
                         </div>
                         
                         <!-- Trust Badges -->

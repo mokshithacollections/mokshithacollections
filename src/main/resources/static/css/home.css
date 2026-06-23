@@ -116,7 +116,7 @@
 		    overflow: hidden;            /* clip the Ken Burns zoom */
 		    /* Show the first image immediately as a fallback so the hero is never
 		       blank before the slide layers paint on the very first load. */
-		    background: #f3ede6 url(../images/DesktopBG3.jpeg) top center / cover no-repeat;
+		    background: #f3ede6 url(../images/ALL1.jpeg) top center / contain no-repeat;
 		}
 
         /* Subtle left-weighted veil so the headline stays readable over any slide. */
@@ -154,7 +154,7 @@
             transform: translateY(0) scale(1);
             z-index: 1;
         }
-        .hero-slide.slide-1 { background-image: url(../images/DesktopBG3.jpeg); }
+        .hero-slide.slide-1 { background-image: url(../images/ALL1.jpeg); }
 		.hero-slide.slide-2 { background-image: url(../images/DesktopBG3.jpeg); }
         .hero-slide.slide-3 { background-image: url(../images/DesktopBG.png); }
 
@@ -258,6 +258,7 @@
             border: none;
             padding: 12px 35px;
             border-radius: 30px;
+			border: 2px solid white;
             font-weight: 600;
             font-size: 1rem;
             transition: all 0.3s;
@@ -277,8 +278,8 @@
         /* Desktop/tablet CTAs: pinned to the bottom-right of the hero image. */
         .hero-actions {
             position: absolute;
-            right: 5%;
-            bottom: 42px;
+            right: 16.8%;
+            bottom: 200px;
             z-index: 4;
             display: flex;
             gap: 14px;
@@ -290,7 +291,7 @@
            an explicit min-height so hiding them doesn't shrink the image. */
         @media (min-width: 992px) {
             .hero-title, .hero-subtitle { display: none; }
-            .hero-section { min-height: 860px; }
+            .hero-section { min-height: 870px; }
         }
 
         /* Category Sections */
@@ -779,7 +780,7 @@
                area it doesn't fill (top/bottom) takes the image's backdrop colour. */
             .hero-section {
                 background-color: #f6dca0; /* matches the hero art backdrop */
-                background-image: url(../images/SWEETY3.jpg.jpeg);
+                background-image: url(../images/ALL1.jpeg);
                 background-size: contain;
                 background-position: right center;
                 background-repeat: no-repeat;
@@ -808,6 +809,18 @@
             .testimonial-card { margin: 10px 0; }
         }
 
+        /* ---- Tablet only: show the hero image fully (contained), not cropped.
+           The visible image is the slider (.hero-slide), which is cover by
+           default — so contain must be set on the slides themselves here. The
+           section's own bg image is dropped so it doesn't bleed through. ---- */
+        @media (min-width: 768px) and (max-width: 991.98px) {
+            .hero-section { background-image: none; }
+            .hero-slide {
+                background-size: contain;
+                background-position: center;
+            }
+        }
+
         /* ---- Phones ---- */
         @media (max-width: 767.98px) {
             /* Responsive height: ~2cm taller than before, but scales with the
@@ -818,8 +831,8 @@
             }
 
             /* Slimmer header bars on mobile to free up screen space. */
-            .header-top { padding: 4px 0; font-size: 0.72rem; }
-            .main-header { padding-top: 6px !important; padding-bottom: 6px !important; }
+            .header-top { padding: 4px 0; font-size: 0.60rem; }
+            .main-header { padding-top: 7px !important; padding-bottom: 7px !important; }
             .logo { font-size: 1.55rem; }
             .header-icons .icon { margin-left: 14px; font-size: 1.05rem; }
 			.hero-slide.slide-1 { background-image: url(../images/SWEETY3.jpg.jpeg); }
@@ -919,4 +932,197 @@
             opacity: 1;
             transform: translateY(0);
         }
-        
+
+        /* ===================== Offer announcement banner (festival) ===================== */
+        .offer-banner {
+            position: relative;
+            height: 3.5cm;                       /* desktop height */
+            overflow: hidden;
+            background:
+                radial-gradient(120% 140% at 15% -20%, rgba(255,216,107,0.22) 0%, transparent 45%),
+                radial-gradient(120% 140% at 85% 120%, rgba(255,120,150,0.20) 0%, transparent 45%),
+                linear-gradient(120deg, #3a0008 0%, #55000c 32%, #7a0010 62%, #a8001a 100%);
+            background-size: auto, auto, 220% 220%;
+            animation: obGradient 10s ease infinite;
+            color: #fff;
+        }
+        @keyframes obGradient {
+            0%   { background-position: 0 0, 0 0, 0% 50%; }
+            50%  { background-position: 0 0, 0 0, 100% 50%; }
+            100% { background-position: 0 0, 0 0, 0% 50%; }
+        }
+        /* Soft moving sheen sweeping across the banner */
+        .offer-banner::after {
+            content: '';
+            position: absolute; top: 0; bottom: 0; left: -60%;
+            width: 45%;
+            background: linear-gradient(100deg, transparent, rgba(255,255,255,0.16), transparent);
+            transform: skewX(-18deg);
+            animation: obSheen 5s ease-in-out infinite;
+            pointer-events: none; z-index: 1;
+        }
+        @keyframes obSheen {
+            0%   { left: -60%; }
+            55%  { left: 130%; }
+            100% { left: 130%; }
+        }
+
+        /* ---- Floating confetti + sparkles ---- */
+        .ob-confetti { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+        .ob-confetti i, .ob-confetti .dot { position: absolute; opacity: 0.9; }
+        .ob-confetti i { font-size: 0.9rem; }
+        .ob-confetti .dot { width: 7px; height: 7px; border-radius: 50%; }
+        .ob-confetti .c1 { left: 12%; top: 30%; color: #ffd86b; animation: obFloat 5.5s ease-in-out infinite; }
+        .ob-confetti .c2 { left: 30%; top: 62%; color: #ff9bb0; font-size: 0.7rem; animation: obSpin 7s linear infinite; }
+        .ob-confetti .c3 { right: 32%; top: 26%; color: #fff2cf; animation: obFloat 6.2s ease-in-out infinite .8s; }
+        .ob-confetti .c4 { right: 8%;  top: 64%; color: #ffd86b; font-size: 0.7rem; animation: obFloat 5s ease-in-out infinite .3s; }
+        .ob-confetti .c5 { left: 47%;  top: 22%; color: #9be7d8; animation: obSpin 9s linear infinite; }
+        .ob-confetti .d1 { left: 20%; top: 48%; background: #ffd86b; animation: obFall 6s linear infinite; }
+        .ob-confetti .d2 { left: 40%; top: 40%; background: #ff9bb0; animation: obFall 7.5s linear infinite 1s; }
+        .ob-confetti .d3 { right: 24%; top: 50%; background: #fff2cf; animation: obFall 6.8s linear infinite .5s; }
+        .ob-confetti .d4 { right: 14%; top: 36%; background: #9be7d8; animation: obFall 8s linear infinite 1.5s; }
+        .ob-confetti .d5 { left: 60%; top: 58%; background: #ffd86b; animation: obFall 7s linear infinite .9s; }
+        @keyframes obFloat {
+            0%,100% { transform: translateY(0) rotate(0deg); opacity: .55; }
+            50%     { transform: translateY(-10px) rotate(12deg); opacity: 1; }
+        }
+        @keyframes obSpin {
+            from { transform: rotate(0deg); } to { transform: rotate(360deg); }
+        }
+        @keyframes obFall {
+            0%   { transform: translateY(-12px) scale(1); opacity: 0; }
+            15%  { opacity: 1; }
+            100% { transform: translateY(34px) scale(.85); opacity: 0; }
+        }
+
+        .offer-banner-track { position: relative; height: 100%; z-index: 2; }
+
+        .offer-slide {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden;
+            transform: translateY(10px);
+            transition: opacity .7s ease, transform .7s ease, visibility .7s;
+        }
+        .offer-slide.active { opacity: 1; visibility: visible; transform: translateY(0); }
+
+        .ob-inner {
+            width: 100%; max-width: 1120px;
+            padding: 10px 30px 0;
+            display: flex; align-items: center; justify-content: space-between; gap: 26px;
+        }
+        .ob-left { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+
+        .ob-badge-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .ob-start {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 0.78rem; font-weight: 600; color: #ffe9c9;
+            background: rgba(0,0,0,0.16); padding: 3px 11px; border-radius: 999px;
+        }
+        .ob-start i { color: #ffd86b; font-size: 0.74rem; }
+
+        .ob-badge {
+            align-self: flex-start; display: inline-flex; align-items: center; gap: 7px;
+            font-size: 0.64rem; font-weight: 700; letter-spacing: 1.5px;
+            padding: 4px 12px; border-radius: 999px; text-transform: uppercase;
+        }
+        .ob-badge-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+        .ob-badge.live { background: #1db954; color: #fff; box-shadow: 0 0 0 0 rgba(29,185,84,0.7); animation: obPulse 1.8s infinite; }
+        .ob-badge.soon { background: rgba(255,255,255,0.18); color: #ffe9c9; border: 1px solid rgba(255,255,255,0.45); }
+        @keyframes obPulse {
+            0%   { box-shadow: 0 0 0 0 rgba(29,185,84,0.6); }
+            70%  { box-shadow: 0 0 0 9px rgba(29,185,84,0); }
+            100% { box-shadow: 0 0 0 0 rgba(29,185,84,0); }
+        }
+
+        .ob-headline { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+        .ob-discount {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.7rem, 3.4vw, 2.7rem); font-weight: 800; line-height: 1;
+            color: #ffd86b; text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+        }
+        .ob-name {
+            font-size: clamp(0.95rem, 1.6vw, 1.3rem); font-weight: 600;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 38vw;
+        }
+        .ob-desc {
+            font-size: 0.82rem; opacity: 0.85; line-height: 1.3;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 44vw;
+        }
+        /* ---- Right: one glassy panel groups code + timer (no more congestion) ---- */
+        .ob-right {
+            flex-shrink: 0;
+            display: flex; align-items: center; gap: 20px;
+            padding: 12px 22px; border-radius: 16px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.28);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.18);
+            backdrop-filter: blur(6px);
+        }
+        .ob-coupon { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .ob-coupon-label { font-size: 0.62rem; opacity: 0.85; text-transform: uppercase; letter-spacing: 1.5px; }
+        .ob-code {
+            font-weight: 800; font-size: 1.02rem; letter-spacing: 2px; color: #fff;
+            background: rgba(0,0,0,0.22); border: 1.5px dashed rgba(255,216,107,0.9);
+            padding: 6px 16px; border-radius: 9px;
+        }
+        .ob-divider { width: 1px; align-self: stretch; background: rgba(255,255,255,0.3); }
+
+        .ob-countdown { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .ob-cd-label { font-size: 0.62rem; opacity: 0.85; text-transform: uppercase; letter-spacing: 1.5px; }
+        .ob-timer { display: flex; align-items: flex-start; gap: 5px; }
+        .ob-unit {
+            display: flex; flex-direction: column; align-items: center;
+            background: rgba(0,0,0,0.28); border-radius: 9px; padding: 5px 8px; min-width: 42px;
+        }
+        .ob-num { font-size: 1.18rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+        .ob-u { font-size: 0.52rem; opacity: 0.78; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
+        .ob-sep { font-weight: 800; opacity: 0.5; align-self: center; padding-bottom: 8px; }
+
+        .offer-dots {
+            position: absolute; bottom: 7px; left: 0; right: 0;
+            display: flex; justify-content: center; gap: 7px; z-index: 3;
+        }
+        .offer-dot {
+            width: 8px; height: 8px; border-radius: 50%; border: none; cursor: pointer;
+            background: rgba(255,255,255,0.4); padding: 0; transition: all .3s;
+        }
+        .offer-dot.active { background: #ffd86b; width: 20px; border-radius: 4px; }
+
+        @media (max-width: 768px) {
+            /* A touch taller than 2cm so the badge, dates, name, description,
+               code AND timer all fit cleanly without crowding. */
+            .offer-banner { height: 2.6cm; }
+            .ob-confetti { display: none; }     /* keep mobile clean + legible */
+            .ob-inner { padding: 0 11px; gap: 10px; align-items: center; }
+
+            /* Left: compact stacked info */
+            .ob-left { flex: 1; min-width: 0; gap: 4px; }
+            .ob-badge-row { gap: 6px; }
+            .ob-badge { display: inline-flex; font-size: 0.5rem; padding: 2px 8px; letter-spacing: 1px; gap: 4px; }
+            .ob-badge-dot { width: 5px; height: 5px; }
+            .ob-start {
+                display: inline-flex; font-size: 0.58rem; padding: 2px 8px; gap: 4px;
+                white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 52vw;
+            }
+            .ob-start i { font-size: 0.55rem; }
+            .ob-headline { gap: 7px; }
+            .ob-discount { font-size: 1.2rem; }
+            .ob-name { font-size: 0.72rem; max-width: 40vw; }
+            .ob-desc { display: block; font-size: 0.6rem; line-height: 1.25; max-width: 54vw; opacity: 0.82; }
+
+            /* Right: slim vertical panel — code stacked above the timer */
+            .ob-right { flex-direction: column; gap: 5px; padding: 6px 11px; border-radius: 11px; }
+            .ob-divider { display: none; }
+            .ob-coupon { gap: 2px; }
+            .ob-countdown { gap: 2px; }
+            .ob-coupon-label, .ob-cd-label { font-size: 0.44rem; letter-spacing: 0.6px; }
+            .ob-code { font-size: 0.72rem; padding: 2px 9px; letter-spacing: 1px; border-radius: 6px; }
+            .ob-timer { gap: 3px; }
+            .ob-unit { min-width: 21px; padding: 2px 4px; border-radius: 6px; }
+            .ob-num { font-size: 0.72rem; }
+            .ob-u { font-size: 0.35rem; margin-top: 1px; }
+            .ob-sep { padding-bottom: 5px; font-size: 0.62rem; }
+            .offer-dots { bottom: 2px; }
+        }
+

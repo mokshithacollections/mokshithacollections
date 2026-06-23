@@ -18,7 +18,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.ec.mokshitha_collections.dto.cart.CartItemResponse;
+
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * Wires every Thymeleaf template under src/main/resources/templates to a URL.
@@ -89,23 +92,38 @@ public class PageController {
     }
 
     @GetMapping("/checkout")
-    public String checkout(@AuthenticationPrincipal CustomUserDetails principal, Model model) {
-        var cart = cartService.getCart(principal.getUserId());
+    public String checkout(@RequestParam(required = false) Long variantId,
+                           @RequestParam(required = false) Integer qty,
+                           @AuthenticationPrincipal CustomUserDetails principal, Model model) {
 
-        // Only in-stock lines proceed to the order; out-of-stock items are dropped
-        // here (and skipped again on placement) so they can't block checkout.
-        var checkoutItems = cart.getItems().stream()
-                .filter(i -> i.getStockAvailable() == null || i.getStockAvailable() > 0)
-                .toList();
+        List<CartItemResponse> checkoutItems;
+        int droppedCount = 0;
+        boolean buyNow = variantId != null;
+
+        if (buyNow) {
+            // ----- Buy Now: a single selected variant; the cart is left untouched -----
+            checkoutItems = List.of(orderService.buyNowItem(variantId, qty == null ? 1 : qty));
+            model.addAttribute("buyNow", true);
+            model.addAttribute("buyNowVariantId", variantId);
+            model.addAttribute("buyNowQty", qty == null ? 1 : qty);
+        } else {
+            // ----- Cart checkout: every in-stock line (out-of-stock dropped here) -----
+            var cart = cartService.getCart(principal.getUserId());
+            checkoutItems = cart.getItems().stream()
+                    .filter(i -> i.getStockAvailable() == null || i.getStockAvailable() > 0)
+                    .toList();
+            droppedCount = cart.getItems().size() - checkoutItems.size();
+            model.addAttribute("cart", cart);
+        }
+
         BigDecimal subtotal = checkoutItems.stream()
                 .map(i -> i.getLineTotal() != null ? i.getLineTotal() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal shipping = orderService.calculateShipping(subtotal);
 
-        model.addAttribute("cart", cart);
         model.addAttribute("checkoutItems", checkoutItems);
         model.addAttribute("checkoutSubtotal", subtotal);
-        model.addAttribute("droppedCount", cart.getItems().size() - checkoutItems.size());
+        model.addAttribute("droppedCount", droppedCount);
         model.addAttribute("shippingFee", shipping);
         model.addAttribute("orderTotal", subtotal.add(shipping));
         return "checkout";

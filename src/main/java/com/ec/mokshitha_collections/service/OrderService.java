@@ -5,6 +5,7 @@ import com.ec.mokshitha_collections.dto.order.OrderItemResponse;
 import com.ec.mokshitha_collections.dto.order.OrderResponse;
 import com.ec.mokshitha_collections.dto.order.OrderSummaryResponse;
 import com.ec.mokshitha_collections.dto.order.PlaceOrderRequest;
+import com.ec.mokshitha_collections.dto.cart.CartItemResponse;
 import com.ec.mokshitha_collections.entity.*;
 import com.ec.mokshitha_collections.exception.BadRequestException;
 import com.ec.mokshitha_collections.exception.OutOfStockException;
@@ -227,6 +228,35 @@ public class OrderService {
         return toResponse(orderRepository.save(order));
     }
 
+    /**
+     * Builds a single checkout line for a "Buy Now" purchase (one variant, given
+     * quantity) — same shape the checkout page uses for cart lines, so the page
+     * renders it identically without touching the cart.
+     */
+    @Transactional(readOnly = true)
+    public CartItemResponse buyNowItem(Long variantId, int qty) {
+        ProductVariant v = variantRepository.findById(variantId)
+                .orElseThrow(() -> new ResourceNotFoundException("This product is no longer available"));
+        Product p = v.getProduct();
+        int q = qty < 1 ? 1 : qty;
+        BigDecimal unit = p.getDiscountPrice() != null ? p.getDiscountPrice() : p.getPrice();
+        String img = variantImageRepository
+                .findByVariantVariantIdOrderByIsPrimaryDescImageIdAsc(variantId)
+                .stream().findFirst().map(ProductVariantImage::getImageUrl).orElse(p.getImageUrl());
+        return CartItemResponse.builder()
+                .productId(p.getProductId())
+                .productName(p.getName())
+                .imageUrl(img)
+                .variantId(variantId)
+                .color(v.getColor())
+                .size(v.getSize())
+                .unitPrice(unit)
+                .quantity(q)
+                .lineTotal(unit.multiply(BigDecimal.valueOf(q)))
+                .stockAvailable(v.getStockQuantity())
+                .build();
+    }
+
     /* ---------- Mappers ---------- */
 
     public static OrderResponse toResponse(Order o) {
@@ -240,6 +270,8 @@ public class OrderService {
                 .razorpayPaymentId(o.getRazorpayPaymentId())
                 .subtotal(o.getSubtotal())
                 .shippingFee(o.getShippingFee())
+                .offerCode(o.getOfferCode())
+                .discountAmount(o.getDiscountAmount())
                 .totalAmount(o.getTotalAmount())
                 .placedAt(o.getPlacedAt())
                 .updatedAt(o.getUpdatedAt())

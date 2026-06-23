@@ -21,11 +21,19 @@ public class PaymentController {
     private final PaymentService paymentService;
     private final RazorpayClient razorpay;
 
-    /** Reserve stock + open a Razorpay order; returns data to launch the widget. */
+    /**
+     * Reserve stock + open a Razorpay order; returns data to launch the widget.
+     * Pass variantId (+ optional qty) for a "Buy Now" single-item checkout that
+     * ignores the cart; omit them to check out the whole cart.
+     */
     @PostMapping("/create")
     public ResponseEntity<Map<String, Object>> create(@RequestParam Long addressId,
+                                                       @RequestParam(required = false) Long variantId,
+                                                       @RequestParam(required = false) Integer qty,
+                                                       @RequestParam(required = false) String offerCode,
                                                        @AuthenticationPrincipal CustomUserDetails principal) {
-        return ResponseEntity.ok(paymentService.createPayment(principal.getUserId(), addressId));
+        return ResponseEntity.ok(
+                paymentService.createPayment(principal.getUserId(), addressId, variantId, qty, offerCode));
     }
 
     /** Browser callback after a successful payment — verify signature, then confirm. */
