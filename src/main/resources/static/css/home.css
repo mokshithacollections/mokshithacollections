@@ -116,7 +116,7 @@
 		    overflow: hidden;            /* clip the Ken Burns zoom */
 		    /* Show the first image immediately as a fallback so the hero is never
 		       blank before the slide layers paint on the very first load. */
-		    background: #f3ede6 url(../images/DesktopBG2.png) top center / cover no-repeat;
+		    background: #f3ede6 url(../images/DesktopBG3.jpeg) top center / cover no-repeat;
 		}
 
         /* Subtle left-weighted veil so the headline stays readable over any slide. */
@@ -125,10 +125,10 @@
             position: absolute;
             inset: 0;
             z-index: 1;
-            background: linear-gradient(90deg,
+            /*background: linear-gradient(90deg,
                         rgba(255, 255, 255, 0.78) 0%,
                         rgba(255, 255, 255, 0.35) 42%,
-                        rgba(255, 255, 255, 0) 68%);
+                        rgba(255, 255, 255, 0) 68%);*/
             pointer-events: none;
         }
 
@@ -154,7 +154,7 @@
             transform: translateY(0) scale(1);
             z-index: 1;
         }
-        .hero-slide.slide-1 { background-image: url(../images/DesktopBG2.png); }
+        .hero-slide.slide-1 { background-image: url(../images/DesktopBG3.jpeg); }
 		.hero-slide.slide-2 { background-image: url(../images/DesktopBG3.jpeg); }
         .hero-slide.slide-3 { background-image: url(../images/DesktopBG.png); }
 
@@ -273,7 +273,26 @@
 
         /* Mobile-only bottom CTA bar (shown ≤767px); hidden on desktop. */
         .hero-actions-mobile { display: none; }
-        
+
+        /* Desktop/tablet CTAs: pinned to the bottom-right of the hero image. */
+        .hero-actions {
+            position: absolute;
+            right: 5%;
+            bottom: 42px;
+            z-index: 4;
+            display: flex;
+            gap: 14px;
+        }
+
+        /* Desktop only: the hero image carries the messaging, so hide the
+           headline + subtitle (tablet keeps them per the responsive blocks).
+           The text/buttons used to define the hero's height; keep it tall with
+           an explicit min-height so hiding them doesn't shrink the image. */
+        @media (min-width: 992px) {
+            .hero-title, .hero-subtitle { display: none; }
+            .hero-section { min-height: 860px; }
+        }
+
         /* Category Sections */
         .section-title {
             text-align: center;
@@ -760,8 +779,8 @@
                area it doesn't fill (top/bottom) takes the image's backdrop colour. */
             .hero-section {
                 background-color: #f6dca0; /* matches the hero art backdrop */
-                background-image: url(../images/MobileBG.png);
-                background-size: cover;
+                background-image: url(../images/SWEETY3.jpg.jpeg);
+                background-size: contain;
                 background-position: right center;
                 background-repeat: no-repeat;
                 padding: 80px 0 56px;
@@ -791,16 +810,27 @@
 
         /* ---- Phones ---- */
         @media (max-width: 767.98px) {
-            .hero-section { padding: 120px 0 calc(96px + 4cm); }   /* like before, +4cm taller */
+            /* Responsive height: ~2cm taller than before, but scales with the
+               screen and is bounded so it never gets too short or too tall. */
+            .hero-section {
+                padding: 0;
+                min-height: clamp(440px, 64vh, 510px);
+            }
 
+            /* Slimmer header bars on mobile to free up screen space. */
+            .header-top { padding: 4px 0; font-size: 0.72rem; }
+            .main-header { padding-top: 6px !important; padding-bottom: 6px !important; }
+            .logo { font-size: 1.55rem; }
+            .header-icons .icon { margin-left: 14px; font-size: 1.05rem; }
+			.hero-slide.slide-1 { background-image: url(../images/SWEETY3.jpg.jpeg); }
             /* Hide the headline + subtitle on mobile (the image carries them). */
             .hero-title, .hero-subtitle { display: none; }
             .hero-title { font-size: 2.3rem; }
             .hero-subtitle { font-size: 1.05rem; margin-bottom: 24px; }
             .hero-btn { padding: 11px 24px; font-size: 0.95rem; }
 
-            /* Hide the in-content CTAs; use the bottom-anchored bar instead. */
-            .hero-content .hero-actions { display: none; }
+            /* Hide the desktop CTAs; use the mobile bottom bar instead. */
+            .hero-actions { display: none; }
             .hero-actions-mobile {
                 display: flex;
                 flex-direction: column;   /* stacked: one button above the other */
@@ -863,6 +893,7 @@
 
         /* ---- Small phones ---- */
         @media (max-width: 479.98px) {
+			.hero-slide.slide-1 { background-image: url(../images/SWEETY3.jpg.jpeg); }
             .hero-title { font-size: 1.95rem; }
             .hero-subtitle { font-size: 0.98rem; }
             .hero-btn {

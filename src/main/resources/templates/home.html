@@ -144,10 +144,6 @@
                             Discover the perfect blend of tradition and modernity in our exquisite collection
                             of sarees and dresses. Each piece tells a story of craftsmanship and elegance.
                         </p>
-                        <div class="fade-in hero-actions">
-                            <a href="#categories" class="hero-btn me-3">Explore Collections</a>
-                            <a th:href="@{/shop}" class="hero-btn">Shop Now</a>
-                        </div>
                     </div>
                 </div>
                 <div class="col-lg-6 d-none d-lg-block">
@@ -156,9 +152,14 @@
             </div>
         </div>
 
-        <!-- Mobile-only: CTAs anchored at the bottom of the hero image. A direct
-             child of .hero-section so it positions against the section, not the
-             text block. Hidden on desktop (the in-content buttons show there). -->
+        <!-- Desktop/tablet CTAs, pinned to the bottom-right of the hero image.
+             A direct child of .hero-section so it anchors to the section. -->
+        <div class="hero-actions">
+            <a href="#categories" class="hero-btn">Explore Collections</a>
+            <a th:href="@{/shop}" class="hero-btn">Shop Now</a>
+        </div>
+
+        <!-- Mobile-only: CTAs anchored at the bottom of the hero image. -->
         <div class="hero-actions-mobile">
             <a href="#categories" class="hero-btn">Explore Collections</a>
             <a th:href="@{/shop}" class="hero-btn">Shop Now</a>
