@@ -1053,14 +1053,20 @@
                                     <input type="radio" class="form-check-input" name="addressId"
                                            th:id="'addr-' + ${addr.addressId}"
                                            th:value="${addr.addressId}"
+                                           th:attr="data-delivery=${addr.deliveryMethod}, data-city=${addr.city}"
                                            th:checked="${addr.isDefault != null and addr.isDefault}">
                                     <label class="form-check-label" th:for="'addr-' + ${addr.addressId}">
                                         <strong th:text="${addr.firstName} + ' ' + ${addr.lastName}">Name</strong>
                                         <span class="badge bg-secondary ms-2"
                                               th:if="${addr.isDefault != null and addr.isDefault}">Default</span>
+                                        <span class="badge bg-success ms-1"
+                                              th:if="${addr.deliveryMethod != null and addr.deliveryMethod.name() == 'STORE_COLLECT'}">
+                                            <i class="fas fa-store"></i> Store Pickup</span>
                                         <br>
                                         <span th:text="${addr.streetAddress}">Street</span>,
                                         <span th:text="${addr.city}">City</span>,
+                                        <span th:if="${addr.district != null and !#strings.isEmpty(addr.district)}"
+                                              th:text="${addr.district} + ','">District,</span>
                                         <span th:text="${addr.state}">State</span> -
                                         <span th:text="${addr.pinCode}">PIN</span><br>
                                         <span th:text="${addr.country}">Country</span> ·
@@ -1167,12 +1173,9 @@
                                 </div>
                                 <div class="summary-row">
                                     <span class="summary-label">Delivery Charge</span>
-                                    <span class="summary-value"
-                                          th:if="${shippingFee != null and shippingFee > 0}"
-                                          th:text="'₹' + ${shippingFee}">₹100</span>
-                                    <span class="summary-value"
-                                          th:if="${shippingFee == null or shippingFee == 0}"
-                                          style="color: var(--dark-sea-green);">FREE</span>
+                                    <span class="summary-value" id="deliveryValue"
+                                          th:text="${shippingFee != null and shippingFee > 0} ? ('₹' + ${shippingFee}) : 'FREE'"
+                                          th:style="${shippingFee == null or shippingFee == 0} ? 'color: var(--dark-sea-green);' : ''">₹100</span>
                                 </div>
                                 <!-- Coupon discount (shown only once a code is applied) -->
                                 <div class="summary-row" id="discountRow" style="display:none;">
@@ -1187,7 +1190,7 @@
                                     <span id="summaryTotalValue"
                                           th:text="'₹' + ${orderTotal != null ? orderTotal : checkoutSubtotal}">₹0</span>
                                 </div>
-                                <small class="text-muted"
+                                <small class="text-muted" id="addMoreHint"
                                        th:if="${shippingFee != null and shippingFee > 0}">
                                     Add ₹<span th:text="${5000 - checkoutSubtotal}">0</span> more to get free delivery.
                                 </small>
@@ -1390,8 +1393,11 @@
             });
         }
 
-        // ----- Promo code: validate + preview the discount -----
-        (function promoCode() {
+        // ----- Order totals: delivery (Store Collect = free) + promo discount -----
+        (function checkoutTotals() {
+            var summary = document.getElementById('orderSummary');
+            if (!summary) return;
+
             var input = document.getElementById('promoCode');
             var applyBtn = document.getElementById('applyPromo');
             var removeBtn = document.getElementById('removePromo');
@@ -1400,77 +1406,104 @@
             var appliedBox = document.getElementById('promoApplied');
             var appliedLabel = document.getElementById('appliedCodeLabel');
             var hidden = document.getElementById('appliedOfferCode');
-            var summary = document.getElementById('orderSummary');
             var discountRow = document.getElementById('discountRow');
             var discountValueEl = document.getElementById('discountValue');
             var discountCodeLabel = document.getElementById('discountCodeLabel');
             var totalEl = document.getElementById('summaryTotalValue');
-            if (!applyBtn || !summary) return;
+            var deliveryValueEl = document.getElementById('deliveryValue');
 
             var subtotal = parseFloat(summary.dataset.subtotal) || 0;
-            var shipping = parseFloat(summary.dataset.shipping) || 0;
+            var homeShipping = parseFloat(summary.dataset.shipping) || 0; // home-delivery fee for this subtotal
             var cf = document.getElementById('checkoutForm');
+            var discount = 0;
 
+            function fmt(n) { return '₹' + (Math.round(n * 100) / 100).toLocaleString('en-IN'); }
             function setMsg(text, isError) {
+                if (!msg) return;
                 msg.textContent = text || '';
                 msg.className = 'promo-msg' + (isError ? ' error' : '');
             }
-            function fmt(n) { return '₹' + (Math.round(n * 100) / 100).toLocaleString('en-IN'); }
+
+            // Free when the chosen address is Store Collect; otherwise the normal fee.
+            function currentShipping() {
+                var r = document.querySelector('input[name="addressId"]:checked');
+                if (r && r.dataset.delivery === 'STORE_COLLECT') return 0;
+                return homeShipping;
+            }
+            function recalc() {
+                var ship = currentShipping();
+                if (deliveryValueEl) {
+                    if (ship > 0) { deliveryValueEl.textContent = fmt(ship); deliveryValueEl.style.color = ''; }
+                    else { deliveryValueEl.textContent = 'FREE'; deliveryValueEl.style.color = 'var(--dark-sea-green)'; }
+                }
+                if (totalEl) totalEl.textContent = fmt(Math.max(0, subtotal + ship - discount));
+                // Hide the "add more for free delivery" nudge when delivery is already free.
+                var addMore = document.getElementById('addMoreHint');
+                if (addMore) addMore.style.display = ship > 0 ? '' : 'none';
+            }
 
             function applyDiscount(code, amount) {
-                hidden.value = code;
-                appliedLabel.textContent = code;
-                form.style.display = 'none';
-                appliedBox.style.display = 'flex';
+                discount = amount;
+                if (hidden) hidden.value = code;
+                if (appliedLabel) appliedLabel.textContent = code;
+                if (form) form.style.display = 'none';
+                if (appliedBox) appliedBox.style.display = 'flex';
                 setMsg('');
-                discountCodeLabel.textContent = '(' + code + ')';
-                discountValueEl.textContent = '-' + fmt(amount);
-                discountRow.style.display = 'flex';
-                var newTotal = Math.max(0, subtotal + shipping - amount);
-                totalEl.textContent = fmt(newTotal);
+                if (discountCodeLabel) discountCodeLabel.textContent = '(' + code + ')';
+                if (discountValueEl) discountValueEl.textContent = '-' + fmt(amount);
+                if (discountRow) discountRow.style.display = 'flex';
+                recalc();
             }
             function clearDiscount() {
-                hidden.value = '';
-                appliedBox.style.display = 'none';
-                form.style.display = 'flex';
-                discountRow.style.display = 'none';
-                totalEl.textContent = fmt(subtotal + shipping);
-                input.value = '';
+                discount = 0;
+                if (hidden) hidden.value = '';
+                if (appliedBox) appliedBox.style.display = 'none';
+                if (form) form.style.display = 'flex';
+                if (discountRow) discountRow.style.display = 'none';
+                if (input) input.value = '';
                 setMsg('');
+                recalc();
             }
 
-            applyBtn.addEventListener('click', function () {
-                var code = (input.value || '').trim().toUpperCase();
-                if (!code) { setMsg('Enter a promo code.', true); return; }
-                applyBtn.disabled = true;
-                var original = applyBtn.textContent;
-                applyBtn.textContent = '...';
-                var params = { code: code };
-                if (cf && cf.dataset.buynow === 'true' && cf.dataset.variant) {
-                    params.variantId = cf.dataset.variant;
-                    params.qty = cf.dataset.qty || '1';
-                }
-                fetch('/api/offers/apply', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-XSRF-TOKEN': getCsrfToken() },
-                    body: new URLSearchParams(params)
-                })
-                .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
-                .then(function (r) {
-                    if (r.ok && r.data.status === 'success') {
-                        applyDiscount(r.data.code, parseFloat(r.data.discountAmount));
-                    } else {
-                        setMsg(r.data.message || 'Could not apply this code.', true);
+            if (applyBtn) {
+                applyBtn.addEventListener('click', function () {
+                    var code = (input.value || '').trim().toUpperCase();
+                    if (!code) { setMsg('Enter a promo code.', true); return; }
+                    applyBtn.disabled = true;
+                    var original = applyBtn.textContent;
+                    applyBtn.textContent = '...';
+                    var params = { code: code };
+                    if (cf && cf.dataset.buynow === 'true' && cf.dataset.variant) {
+                        params.variantId = cf.dataset.variant;
+                        params.qty = cf.dataset.qty || '1';
                     }
-                })
-                .catch(function () { setMsg('Network error. Please try again.', true); })
-                .finally(function () { applyBtn.disabled = false; applyBtn.textContent = original; });
-            });
+                    fetch('/api/offers/apply', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-XSRF-TOKEN': getCsrfToken() },
+                        body: new URLSearchParams(params)
+                    })
+                    .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+                    .then(function (r) {
+                        if (r.ok && r.data.status === 'success') {
+                            applyDiscount(r.data.code, parseFloat(r.data.discountAmount));
+                        } else {
+                            setMsg(r.data.message || 'Could not apply this code.', true);
+                        }
+                    })
+                    .catch(function () { setMsg('Network error. Please try again.', true); })
+                    .finally(function () { applyBtn.disabled = false; applyBtn.textContent = original; });
+                });
+                if (input) input.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') { e.preventDefault(); applyBtn.click(); }
+                });
+                if (removeBtn) removeBtn.addEventListener('click', clearDiscount);
+            }
 
-            input.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter') { e.preventDefault(); applyBtn.click(); }
+            // Recompute when the chosen delivery address changes (Store Collect → free).
+            document.querySelectorAll('input[name="addressId"]').forEach(function (r) {
+                r.addEventListener('change', recalc);
             });
-            if (removeBtn) removeBtn.addEventListener('click', clearDiscount);
+            recalc(); // sync on load (in case the default address is Store Collect)
         })();
 
         // ----- Cash on Delivery: create the order directly -----
@@ -2037,7 +2070,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Street Address</label>
+                            <label class="form-label">Address Line</label>
                             <input type="text" class="form-control" name="streetAddress" required>
                         </div>
 
@@ -2050,12 +2083,17 @@
                             </div>
                             <div class="col-md-6 form-group">
                                 <label class="form-label">City</label>
-                                <input type="text" class="form-control" name="city" required>
+                                <input type="text" class="form-control" name="city" required readonly
+                                       style="background:#f1f3f5;" placeholder="Auto-filled from PIN">
                             </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6 form-group">
+                            <div class="col-md-4 form-group">
+                                <label class="form-label">District</label>
+                                <input type="text" class="form-control" name="district" placeholder="District">
+                            </div>
+                            <div class="col-md-4 form-group">
                                 <label class="form-label">State</label>
                                 <select class="form-control" name="state" required>
                                     <option value="">Select State</option>
@@ -2101,12 +2139,30 @@
                                     </optgroup>
                                 </select>
                             </div>
-                            <div class="col-md-6 form-group">
+                            <div class="col-md-4 form-group">
                                 <label class="form-label">Country</label>
                                 <select class="form-control" name="country">
                                     <option value="India" selected>India</option>
                                 </select>
                             </div>
+                        </div>
+
+                        <!-- Store pickup option — only shown when the city is the store's city (Ongole) -->
+                        <div class="form-group delivery-method-group" style="display:none;">
+                            <label class="form-label">Delivery Option</label>
+                            <div class="d-flex gap-3 flex-wrap">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="deliveryMethod"
+                                           value="HOME_DELIVERY" checked>
+                                    <label class="form-check-label">Home Delivery <small class="text-muted">(₹100)</small></label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="deliveryMethod"
+                                           value="STORE_COLLECT">
+                                    <label class="form-check-label">Store Collect <small class="text-success">(Free)</small></label>
+                                </div>
+                            </div>
+                            <small class="text-muted">Pick up free from our Ongole store, or get it delivered home.</small>
                         </div>
 
                         <div class="form-group">
@@ -2150,6 +2206,7 @@
 
             var pin = form.querySelector('[name="pinCode"]');
             var cityEl = form.querySelector('[name="city"]');
+            var districtEl = form.querySelector('[name="district"]');
             var stateEl = form.querySelector('[name="state"]');
             var statusEl = form.querySelector('.pincode-status');
 
@@ -2166,11 +2223,23 @@
             async function lookupPincode(p) {
                 if (statusEl) { statusEl.textContent = 'Looking up PIN…'; statusEl.style.color = '#666'; }
                 var r = await fetchPincode(p);
+                console.log('[pincode]', p, '→ city:', r && r.city, '| district:', r && r.district, '| state:', r && r.state);
                 if (!r || (!r.city && !r.state)) {
                     if (statusEl) { statusEl.textContent = 'PIN not found — please enter city/state manually.'; statusEl.style.color = '#dc2626'; }
                     return;
                 }
                 if (cityEl && r.city) cityEl.value = r.city;
+                if (districtEl && r.district) districtEl.value = r.district;
+                // Show store-pickup option only for the store's city (Ongole).
+                var dgroup = form.querySelector('.delivery-method-group');
+                if (dgroup) {
+                    var isStoreCity = cityEl && cityEl.value.trim().toLowerCase() === 'ongole';
+                    dgroup.style.display = isStoreCity ? '' : 'none';
+                    if (!isStoreCity) {
+                        var home = form.querySelector('input[name="deliveryMethod"][value="HOME_DELIVERY"]');
+                        if (home) home.checked = true;
+                    }
+                }
                 var matched = false;
                 if (stateEl && r.state) {
                     var target = String(r.state).trim().toLowerCase();
@@ -2182,17 +2251,29 @@
                     statusEl.textContent = '✓ ' + (r.city || '') + ', ' + (r.state || '') + (matched ? '' : ' (please pick the state)');
                 }
             }
+            // Mirror the server's town logic: Head/GPO name (suffix stripped) → Block → District.
+            function townFromOffices(offices) {
+                var real = function (s) { return s && s !== 'NA' && String(s).trim() !== ''; };
+                var strip = function (n) { return String(n || '').replace(/\s*(H\.?O|S\.?O|B\.?O|G\.?P\.?O|GPO|Bazar|Bazaar)\.?$/i, '').trim(); };
+                var head = offices.find(function (o) { return String(o.BranchType || '').toLowerCase().indexOf('head') >= 0; });
+                if (head && real(strip(head.Name))) return strip(head.Name);
+                var blk = offices.find(function (o) { return real(o.Block); });
+                if (blk) return blk.Block;
+                return offices[0].District || '';
+            }
             async function fetchPincode(p) {
                 try {
                     var res = await fetch('/api/pincode/' + p, { headers: { 'Accept': 'application/json' } });
-                    if (res.ok) { var d = await res.json(); if (d && d.found) return { city: d.city, state: d.state }; }
+                    if (res.ok) { var d = await res.json(); if (d && d.found) return { city: d.city, district: d.district, state: d.state }; }
                 } catch (_) {}
                 try {
                     var res2 = await fetch('https://api.postalpincode.in/pincode/' + p);
                     var arr = await res2.json();
                     var rec = Array.isArray(arr) ? arr[0] : null;
-                    var po = rec && rec.Status === 'Success' && rec.PostOffice && rec.PostOffice[0];
-                    if (po) return { city: po.District, state: po.State };
+                    var offices = (rec && rec.Status === 'Success' && Array.isArray(rec.PostOffice)) ? rec.PostOffice : null;
+                    if (offices && offices.length) {
+                        return { city: townFromOffices(offices), district: offices[0].District, state: offices[0].State };
+                    }
                 } catch (_) {}
                 return null;
             }
@@ -2222,6 +2303,14 @@
                         if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = label; }
                         return;
                     }
+                    // Remember the new address so we can auto-select it after reload
+                    // (then its delivery rule — e.g. free Store Pickup — takes effect).
+                    try {
+                        var dd = await res.json();
+                        if (dd && dd.data && dd.data.addressId) {
+                            sessionStorage.setItem('checkoutNewAddr', dd.data.addressId);
+                        }
+                    } catch (_) {}
                     var m = bootstrap.Modal.getInstance(document.getElementById('addAddressModal'));
                     if (m) m.hide();
                     window.location.reload();   // show the new address in the list
@@ -2232,14 +2321,39 @@
             });
         })();
 
-        // If addresses exist but none is pre-selected, pre-check the first so
-        // "Place order" always has a shipping address.
+        // Pick the right address on load:
+        //  - a just-added address (so its delivery rule, e.g. free Store Pickup, applies), else
+        //  - keep the pre-checked default, else the first one.
+        // Then fire 'change' so the order total recomputes (delivery fee).
         (function () {
             var radios = document.querySelectorAll('input[name="addressId"]');
-            if (radios.length && ![].some.call(radios, function (r) { return r.checked; })) {
-                radios[0].checked = true;
+            if (!radios.length) return;
+
+            var target = null;
+            try {
+                var newId = sessionStorage.getItem('checkoutNewAddr');
+                if (newId) {
+                    sessionStorage.removeItem('checkoutNewAddr');
+                    target = document.getElementById('addr-' + newId);
+                }
+            } catch (_) {}
+
+            if (!target && ![].some.call(radios, function (r) { return r.checked; })) {
+                target = radios[0];
+            }
+            if (target) {
+                target.checked = true; // same-name group auto-unchecks the others
+                target.dispatchEvent(new Event('change', { bubbles: true }));
             }
         })();
+
+        // When the user returns here via the browser Back button, the page can be
+        // served from the back/forward cache (a frozen snapshot) — so an address
+        // edited on the account page (e.g. switched to Store Collect) would still
+        // show the stale delivery fee. Force a fresh server render in that case.
+        window.addEventListener('pageshow', function (e) {
+            if (e.persisted) { window.location.reload(); }
+        });
     </script>
 </body>
 </html>

@@ -129,7 +129,7 @@ public class PaymentService {
             }
         }
 
-        BigDecimal shipping = orderService.calculateShipping(subtotal);
+        BigDecimal shipping = orderService.shippingFor(address, subtotal);
 
         // Re-validate + compute the coupon discount server-side (never trust the
         // browser's number). Item-scoped: only matching lines reduce the total.

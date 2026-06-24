@@ -63,10 +63,10 @@
                                     th:attr="data-id=${u.userId}, data-name=${u.firstName}"
                                     onclick="setActive(this, true)">Activate</button>
 
-                            <button th:if="${!u.admin}" type="button" class="btn btn-outline btn-sm"
+                            <button style= "display:none" th:if="${!u.admin}" type="button" class="btn btn-outline btn-sm"
                                     th:attr="data-id=${u.userId}, data-name=${u.firstName}"
                                     onclick="setAdmin(this, true)">Promote</button>
-                            <button th:if="${u.admin}" type="button" class="btn btn-outline btn-sm"
+                            <button style= "display:none" th:if="${u.admin}" type="button" class="btn btn-outline btn-sm"
                                     th:attr="data-id=${u.userId}, data-name=${u.firstName}"
                                     onclick="setAdmin(this, false)">Demote</button>
                         </td>

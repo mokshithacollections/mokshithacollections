@@ -27,6 +27,7 @@ function getCsrfToken() {
                 if (!form) return;
                 const pin = form.querySelector('[name="pinCode"]');
                 const city = form.querySelector('[name="city"]');
+                const district = form.querySelector('[name="district"]');
                 const state = form.querySelector('[name="state"]');
                 const status = form.querySelector('.pincode-status');
                 if (!pin) return;
@@ -35,7 +36,7 @@ function getCsrfToken() {
                     const v = pin.value.trim();
                     clearTimeout(timer);
                     if (/^\d{6}$/.test(v)) {
-                        timer = setTimeout(() => lookupPincode(v, city, state, status), 350);
+                        timer = setTimeout(() => lookupPincode(v, city, district, state, status), 350);
                     } else if (status) {
                         status.textContent = '';
                     }
@@ -43,15 +44,34 @@ function getCsrfToken() {
             });
         }
 
-        async function lookupPincode(pin, cityEl, stateEl, statusEl) {
+        // Show the Home Delivery / Store Collect radios only when the city is the
+        // store's city (Ongole); otherwise hide them and force HOME_DELIVERY.
+        function syncDeliveryGroup(form) {
+            if (!form) return;
+            const group = form.querySelector('.delivery-method-group');
+            if (!group) return;
+            const cityInput = form.querySelector('[name="city"]');
+            const isStoreCity = cityInput && cityInput.value.trim().toLowerCase() === 'ongole';
+            group.style.display = isStoreCity ? '' : 'none';
+            if (!isStoreCity) {
+                const home = form.querySelector('input[name="deliveryMethod"][value="HOME_DELIVERY"]');
+                if (home) home.checked = true;
+            }
+        }
+
+        async function lookupPincode(pin, cityEl, districtEl, stateEl, statusEl) {
             if (statusEl) { statusEl.textContent = 'Looking up PIN…'; statusEl.style.color = '#666'; }
             const result = await fetchPincode(pin);
+            console.log('[pincode]', pin, '→ city:', result && result.city, '| district:', result && result.district, '| state:', result && result.state);
             if (!result || (!result.city && !result.state)) {
                 if (statusEl) { statusEl.textContent = 'PIN not found — please enter city/state manually.'; statusEl.style.color = '#dc2626'; }
                 return;
             }
-            // City = District; fill it in (user can still edit).
+            // Town (city) + district; fill them in (user can still edit).
             if (cityEl && result.city) cityEl.value = result.city;
+            if (districtEl && result.district) districtEl.value = result.district;
+            // City drives whether store pickup is offered.
+            if (cityEl) syncDeliveryGroup(cityEl.form);
             // State = matching dropdown option (case-insensitive).
             let stateMatched = false;
             if (stateEl && result.state) {
@@ -66,21 +86,34 @@ function getCsrfToken() {
             }
         }
 
+        // Mirror the server's town logic: Head/GPO name (suffix stripped) → Block → District.
+        function townFromOffices(offices) {
+            const real = s => s && s !== 'NA' && String(s).trim() !== '';
+            const strip = n => String(n || '').replace(/\s*(H\.?O|S\.?O|B\.?O|G\.?P\.?O|GPO|Bazar|Bazaar)\.?$/i, '').trim();
+            const head = offices.find(o => String(o.BranchType || '').toLowerCase().includes('head'));
+            if (head && real(strip(head.Name))) return strip(head.Name);
+            const blk = offices.find(o => real(o.Block));
+            if (blk) return blk.Block;
+            return offices[0].District || '';
+        }
+
         // Try our same-origin proxy first; fall back to India Post directly.
         async function fetchPincode(pin) {
             try {
                 const res = await fetch('/api/pincode/' + pin, { headers: { 'Accept': 'application/json' } });
                 if (res.ok) {
                     const d = await res.json();
-                    if (d && d.found) return { city: d.city, state: d.state };
+                    if (d && d.found) return { city: d.city, district: d.district, state: d.state };
                 }
             } catch (_) { /* fall through to direct call */ }
             try {
                 const res = await fetch('https://api.postalpincode.in/pincode/' + pin);
                 const arr = await res.json();
                 const rec = Array.isArray(arr) ? arr[0] : null;
-                const po = rec && rec.Status === 'Success' && rec.PostOffice && rec.PostOffice[0];
-                if (po) return { city: po.District, state: po.State };
+                const offices = (rec && rec.Status === 'Success' && Array.isArray(rec.PostOffice)) ? rec.PostOffice : null;
+                if (offices && offices.length) {
+                    return { city: townFromOffices(offices), district: offices[0].District, state: offices[0].State };
+                }
             } catch (_) { /* give up — manual entry */ }
             return null;
         }
@@ -254,6 +287,7 @@ function getCsrfToken() {
 			            document.getElementById('editCity').value = this.dataset.city;
 			            document.getElementById('editState').value = this.dataset.state;
 			            document.getElementById('editPinCode').value = this.dataset.pincode;
+			            document.getElementById('editDistrict').value = this.dataset.district || '';
 			            document.getElementById('editCountry').value = this.dataset.country;
 
 			            document.getElementById('editTypeHome').checked = this.dataset.type === 'HOME';
@@ -261,6 +295,13 @@ function getCsrfToken() {
 			            document.getElementById('editTypeOther').checked = this.dataset.type === 'OTHER';
 
 			            document.getElementById('editIsDefault').checked = this.dataset.default === 'true';
+
+			            // Delivery method: pick the saved radio, then show/hide by city.
+			            const editForm = document.getElementById('editAddressForm');
+			            const dm = (this.dataset.delivery === 'STORE_COLLECT') ? 'STORE_COLLECT' : 'HOME_DELIVERY';
+			            const dmRadio = editForm.querySelector('input[name="deliveryMethod"][value="' + dm + '"]');
+			            if (dmRadio) dmRadio.checked = true;
+			            syncDeliveryGroup(editForm);
 
 			            // Show modal
 			            const editModal = new bootstrap.Modal(document.getElementById('editAddressModal'));

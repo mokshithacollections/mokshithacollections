@@ -60,6 +60,18 @@ public class OrderService {
     }
 
     /**
+     * Delivery charge for a specific address: free when the customer collects
+     * from the store (STORE_COLLECT), otherwise the normal subtotal-based fee.
+     */
+    public BigDecimal shippingFor(com.ec.mokshitha_collections.entity.Address address, BigDecimal subtotal) {
+        if (address != null
+                && address.getDeliveryMethod() == com.ec.mokshitha_collections.entity.DeliveryMethod.STORE_COLLECT) {
+            return BigDecimal.ZERO;
+        }
+        return calculateShipping(subtotal);
+    }
+
+    /**
      * Atomically converts the user's cart into an Order:
      *  - re-validates stock for every line (cart could have been added to days ago)
      *  - decrements variant stock
@@ -139,7 +151,7 @@ public class OrderService {
             throw new BadRequestException("All items in your cart are out of stock");
         }
 
-        BigDecimal shipping = calculateShipping(subtotal);
+        BigDecimal shipping = shippingFor(address, subtotal);
         BigDecimal total = subtotal.add(shipping);
 
         Order order = Order.builder()
@@ -324,10 +336,12 @@ public class OrderService {
                 .phone(a.getPhone())
                 .streetAddress(a.getStreetAddress())
                 .city(a.getCity())
+                .district(a.getDistrict())
                 .state(a.getState())
                 .pinCode(a.getPinCode())
                 .country(a.getCountry())
                 .addressType(a.getAddressType())
+                .deliveryMethod(a.getDeliveryMethod())
                 .build();
     }
 }

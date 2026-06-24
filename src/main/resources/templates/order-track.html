@@ -548,7 +548,9 @@
                 <div class="body" th:if="${order.shippingAddress != null}">
                     <strong th:text="${order.shippingAddress.firstName + ' ' + order.shippingAddress.lastName}">Name</strong><br>
                     <span th:text="${order.shippingAddress.streetAddress}">Street</span><br>
-                    <span th:text="${order.shippingAddress.city + ', ' + order.shippingAddress.state + ' ' + order.shippingAddress.pinCode}">City</span><br>
+                    <span th:text="${order.shippingAddress.city
+                          + (order.shippingAddress.district != null and !#strings.isEmpty(order.shippingAddress.district) ? ', ' + order.shippingAddress.district : '')
+                          + ', ' + order.shippingAddress.state + ' ' + order.shippingAddress.pinCode}">City, District, State PIN</span><br>
                     <span th:text="${order.shippingAddress.country}">Country</span><br>
                     <span style="color:var(--muted);font-size:0.85rem;"
                           th:text="${order.shippingAddress.phone}">Phone</span>

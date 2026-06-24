@@ -478,6 +478,8 @@
                     <strong th:text="${order.shippingAddress.firstName + ' ' + order.shippingAddress.lastName}">Name</strong><br>
                     <span th:text="${order.shippingAddress.streetAddress}">Street</span>,
                     <span th:text="${order.shippingAddress.city}">City</span>,
+                    <span th:if="${order.shippingAddress.district != null and !#strings.isEmpty(order.shippingAddress.district)}"
+                          th:text="${order.shippingAddress.district + ','}">District,</span>
                     <span th:text="${order.shippingAddress.state}">State</span>
                     <span th:text="${order.shippingAddress.pinCode}">PIN</span><br>
                     <span th:text="${order.shippingAddress.country}">Country</span> ·

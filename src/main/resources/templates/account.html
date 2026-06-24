@@ -441,10 +441,14 @@
 
                                     <div class="address-details">
                                         <span th:text="${addr.streetAddress}">Street</span><br>
-                                        <span th:text="${addr.city + ', ' + addr.state + ' ' + addr.pinCode}">City, State</span><br>
+                                        <span th:text="${addr.city
+                                              + (addr.district != null and !#strings.isEmpty(addr.district) ? ', ' + addr.district : '')
+                                              + ', ' + addr.state + ' ' + addr.pinCode}">City, District, State</span><br>
                                         <span th:text="${addr.country}">Country</span><br>
                                         Phone: <span th:text="${addr.phone}">Phone</span><br>
                                         Type: <span th:text="${addr.addressType}">Type</span>
+                                        <span th:if="${addr.deliveryMethod != null and addr.deliveryMethod.name() == 'STORE_COLLECT'}"
+                                              class="badge bg-success ms-1"><i class="fas fa-store"></i> Store Pickup</span>
                                     </div>
 
                                     <div class="address-actions">
@@ -456,10 +460,12 @@
                                                     data-phone=${addr.phone},
                                                     data-street=${addr.streetAddress},
                                                     data-city=${addr.city},
+                                                    data-district=${addr.district},
                                                     data-state=${addr.state},
                                                     data-pincode=${addr.pinCode},
                                                     data-country=${addr.country},
                                                     data-type=${addr.addressType},
+                                                    data-delivery=${addr.deliveryMethod},
                                                     data-default=${addr.isDefault}">
                                             Edit
                                         </button>
@@ -734,7 +740,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Street Address</label>
+                            <label class="form-label">Address Line</label>
                             <input type="text" class="form-control" name="streetAddress" required>
                         </div>
 
@@ -747,12 +753,17 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">City</label>
-                                <input type="text" class="form-control" name="city" required>
+                                <input type="text" class="form-control" name="city" required readonly
+                                       style="background:#f1f3f5;" placeholder="Auto-filled from PIN">
                             </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <label class="form-label">District</label>
+                                <input type="text" class="form-control" name="district" placeholder="District">
+                            </div>
+                            <div class="col-md-4">
                                 <label class="form-label">State</label>
                                 <select class="form-control" name="state" required>
                                     <option value="">Select State</option>
@@ -798,12 +809,30 @@
                                     </optgroup>
                                 </select>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label">Country</label>
                                 <select class="form-control" name="country">
                                     <option value="India" selected>India</option>
                                 </select>
                             </div>
+                        </div>
+
+                        <!-- Store pickup option — only shown when the city is the store's city (Ongole) -->
+                        <div class="form-group delivery-method-group" style="display:none;">
+                            <label class="form-label">Delivery Option</label>
+                            <div class="d-flex gap-3 flex-wrap">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="deliveryMethod"
+                                           value="HOME_DELIVERY" checked>
+                                    <label class="form-check-label">Home Delivery <small class="text-muted">(₹100)</small></label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="deliveryMethod"
+                                           value="STORE_COLLECT">
+                                    <label class="form-check-label">Store Collect <small class="text-success">(Free)</small></label>
+                                </div>
+                            </div>
+                            <small class="text-muted">Pick up free from our Ongole store, or get it delivered home.</small>
                         </div>
 
                         <div class="form-group">
@@ -883,7 +912,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Street Address</label>
+                            <label class="form-label">Address Line</label>
                             <input type="text" class="form-control"
                                    id="editStreetAddress" name="streetAddress" required>
                         </div>
@@ -897,12 +926,17 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">City</label>
-                                <input type="text" class="form-control" id="editCity" name="city" required>
+                                <input type="text" class="form-control" id="editCity" name="city" required readonly
+                                       style="background:#f1f3f5;" placeholder="Auto-filled from PIN">
                             </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <label class="form-label">District</label>
+                                <input type="text" class="form-control" id="editDistrict" name="district" placeholder="District">
+                            </div>
+                            <div class="col-md-4">
                                 <label class="form-label">State</label>
                                 <select class="form-control" id="editState" name="state" required>
                                     <option value="">Select State</option>
@@ -948,12 +982,30 @@
                                     </optgroup>
                                 </select>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label">Country</label>
                                 <select class="form-control" id="editCountry" name="country">
                                     <option value="India" selected>India</option>
                                 </select>
                             </div>
+                        </div>
+
+                        <!-- Store pickup option — only shown when the city is the store's city (Ongole) -->
+                        <div class="form-group mt-3 delivery-method-group" style="display:none;">
+                            <label class="form-label">Delivery Option</label>
+                            <div class="d-flex gap-3 flex-wrap">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="deliveryMethod"
+                                           value="HOME_DELIVERY" id="editDeliveryHome" checked>
+                                    <label class="form-check-label" for="editDeliveryHome">Home Delivery <small class="text-muted">(₹100)</small></label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="deliveryMethod"
+                                           value="STORE_COLLECT" id="editDeliveryStore">
+                                    <label class="form-check-label" for="editDeliveryStore">Store Collect <small class="text-success">(Free)</small></label>
+                                </div>
+                            </div>
+                            <small class="text-muted">Pick up free from our Ongole store, or get it delivered home.</small>
                         </div>
 
                         <div class="form-group mt-3">

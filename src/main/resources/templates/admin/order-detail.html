@@ -26,6 +26,21 @@
             </div>
         </div>
 
+        <!-- Prominent STORE PICKUP banner so staff never ship a pickup order -->
+        <div th:if="${order.shippingAddress != null and order.shippingAddress.deliveryMethod != null
+                      and order.shippingAddress.deliveryMethod.name() == 'STORE_COLLECT'}"
+             style="display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:16px 20px;
+                    border-radius:12px;background:linear-gradient(135deg,#1e7a34,#27ae60);color:#fff;
+                    box-shadow:0 6px 18px rgba(30,122,52,0.35);">
+            <i class="fas fa-store" style="font-size:1.8rem;"></i>
+            <div>
+                <div style="font-size:1.15rem;font-weight:800;letter-spacing:.5px;">STORE PICKUP</div>
+                <div style="font-size:0.9rem;opacity:.95;">
+                    Customer will collect this order from the Ongole store — <strong>do NOT ship</strong>. Delivery is free.
+                </div>
+            </div>
+        </div>
+
         <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;">
             <!-- Items -->
             <div class="card">
@@ -68,7 +83,10 @@
 
                 <table class="admin-table" style="margin-top:16px;">
                     <tr><td>Subtotal</td><td style="text-align:right;" th:text="'₹' + ${order.subtotal}">₹0</td></tr>
-                    <tr><td>Shipping</td><td style="text-align:right;" th:text="'₹' + ${order.shippingFee}">₹0</td></tr>
+                    <tr th:with="pickup=${order.shippingAddress != null and order.shippingAddress.deliveryMethod != null and order.shippingAddress.deliveryMethod.name() == 'STORE_COLLECT'}">
+                        <td th:text="${pickup} ? 'Shipping (Store Pickup)' : 'Shipping'">Shipping</td>
+                        <td style="text-align:right;" th:text="${pickup} ? 'FREE' : ('₹' + ${order.shippingFee})">₹0</td>
+                    </tr>
                     <tr th:if="${order.discountAmount != null and order.discountAmount > 0}">
                         <td>Discount <span th:if="${order.offerCode != null}"
                                            th:text="'(' + ${order.offerCode} + ')'" style="opacity:.7;">(CODE)</span></td>
@@ -173,7 +191,9 @@
                     <div th:if="${order.shippingAddress != null}">
                         <strong th:text="${order.shippingAddress.firstName + ' ' + order.shippingAddress.lastName}">Name</strong><br>
                         <span th:text="${order.shippingAddress.streetAddress}">Street</span><br>
-                        <span th:text="${order.shippingAddress.city + ', ' + order.shippingAddress.state + ' ' + order.shippingAddress.pinCode}">City</span><br>
+                        <span th:text="${order.shippingAddress.city
+                              + (order.shippingAddress.district != null and !#strings.isEmpty(order.shippingAddress.district) ? ', ' + order.shippingAddress.district : '')
+                              + ', ' + order.shippingAddress.state + ' ' + order.shippingAddress.pinCode}">City, District, State PIN</span><br>
                         <span th:text="${order.shippingAddress.country}">Country</span><br>
                         Phone: <span th:text="${order.shippingAddress.phone}">Phone</span>
                     </div>

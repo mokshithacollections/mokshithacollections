@@ -338,6 +338,18 @@
                 </div>
             </header>
 
+            <!-- Prominent pickup banner so this slip is never shipped by mistake -->
+            <div th:if="${order.shippingAddress != null and order.shippingAddress.deliveryMethod != null
+                          and order.shippingAddress.deliveryMethod.name() == 'STORE_COLLECT'}"
+                 style="margin:14px 0;padding:14px 18px;border:2px solid #1e7a34;border-radius:10px;
+                        background:#eaf7ee;color:#1e7a34;display:flex;align-items:center;gap:12px;">
+                <span style="font-size:1.6rem;">🏬</span>
+                <div>
+                    <div style="font-size:1.1rem;font-weight:800;letter-spacing:.5px;">STORE PICKUP — DO NOT SHIP</div>
+                    <div style="font-size:0.85rem;">Customer collects this order from the Ongole store. No courier dispatch.</div>
+                </div>
+            </div>
+
             <!-- Order info band -->
             <div class="order-band">
                 <div class="cell">
@@ -380,12 +392,20 @@
                     <div class="phone"><i class="fas fa-phone-alt"></i> +91 98765 43210</div>
                 </div>
 
-                <div class="address-card highlight" th:if="${order.shippingAddress != null}">
-                    <h3>Ship To</h3>
+                <div class="address-card highlight" th:if="${order.shippingAddress != null}"
+                     th:with="pickup=${order.shippingAddress.deliveryMethod != null and order.shippingAddress.deliveryMethod.name() == 'STORE_COLLECT'}">
+                    <div th:if="${pickup}"
+                         style="margin:-4px 0 10px;padding:8px 12px;border:2px solid #1e7a34;border-radius:8px;
+                                background:#eaf7ee;color:#1e7a34;font-weight:800;letter-spacing:.5px;text-align:center;">
+                        🏬 STORE PICKUP — DO NOT SHIP
+                    </div>
+                    <h3 th:text="${pickup} ? 'Collect At Store' : 'Ship To'">Ship To</h3>
                     <div class="name" th:text="${order.shippingAddress.firstName + ' ' + order.shippingAddress.lastName}">Customer</div>
                     <div class="lines">
                         <span th:text="${order.shippingAddress.streetAddress}">Street</span><br>
-                        <span th:text="${order.shippingAddress.city + ', ' + order.shippingAddress.state + ' ' + order.shippingAddress.pinCode}">City, State PIN</span><br>
+                        <span th:text="${order.shippingAddress.city
+                              + (order.shippingAddress.district != null and !#strings.isEmpty(order.shippingAddress.district) ? ', ' + order.shippingAddress.district : '')
+                              + ', ' + order.shippingAddress.state + ' ' + order.shippingAddress.pinCode}">City, District, State PIN</span><br>
                         <span th:text="${order.shippingAddress.country}">Country</span>
                     </div>
                     <div class="phone">

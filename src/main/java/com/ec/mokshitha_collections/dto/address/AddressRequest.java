@@ -1,6 +1,7 @@
 package com.ec.mokshitha_collections.dto.address;
 
 import com.ec.mokshitha_collections.entity.AddressType;
+import com.ec.mokshitha_collections.entity.DeliveryMethod;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -30,6 +31,9 @@ public class AddressRequest {
     @Size(max = 100)
     private String city;
 
+    @Size(max = 100)
+    private String district;
+
     @NotBlank(message = "State is required")
     @Size(max = 100)
     private String state;
@@ -44,6 +48,9 @@ public class AddressRequest {
 
     @NotNull(message = "Address type is required")
     private AddressType addressType;
+
+    /** Optional; defaults to HOME_DELIVERY server-side. STORE_COLLECT only honored for the store's city. */
+    private DeliveryMethod deliveryMethod;
 
     private boolean isDefault;
 }

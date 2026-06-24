@@ -2,6 +2,7 @@ package com.ec.mokshitha_collections.service;
 
 import com.ec.mokshitha_collections.dto.address.AddressRequest;
 import com.ec.mokshitha_collections.entity.Address;
+import com.ec.mokshitha_collections.entity.DeliveryMethod;
 import com.ec.mokshitha_collections.entity.User;
 import com.ec.mokshitha_collections.exception.ResourceNotFoundException;
 import com.ec.mokshitha_collections.repository.AddressRepository;
@@ -34,10 +35,12 @@ public class AddressService {
                 .phone(req.getPhone())
                 .streetAddress(req.getStreetAddress())
                 .city(req.getCity())
+                .district(req.getDistrict())
                 .state(req.getState())
                 .pinCode(req.getPinCode())
                 .country(req.getCountry())
                 .addressType(req.getAddressType())
+                .deliveryMethod(resolveDeliveryMethod(req))
                 .isDefault(req.isDefault())
                 .build();
 
@@ -71,13 +74,31 @@ public class AddressService {
         existing.setPhone(req.getPhone());
         existing.setStreetAddress(req.getStreetAddress());
         existing.setCity(req.getCity());
+        existing.setDistrict(req.getDistrict());
         existing.setState(req.getState());
+        existing.setDeliveryMethod(resolveDeliveryMethod(req));
         existing.setPinCode(req.getPinCode());
         existing.setCountry(req.getCountry());
         existing.setAddressType(req.getAddressType());
         existing.setIsDefault(req.isDefault());
 
         addressRepository.save(existing);
+    }
+
+    /** The store's city — only addresses here may pick STORE_COLLECT. */
+    public static final String STORE_CITY = "Ongole";
+
+    /**
+     * STORE_COLLECT is only valid for the store's city; anything else (or a null
+     * request value) falls back to HOME_DELIVERY. Keeps the free-shipping path
+     * from being abused for non-Ongole addresses.
+     */
+    private static DeliveryMethod resolveDeliveryMethod(AddressRequest req) {
+        boolean inStoreCity = req.getCity() != null && STORE_CITY.equalsIgnoreCase(req.getCity().trim());
+        if (inStoreCity && req.getDeliveryMethod() == DeliveryMethod.STORE_COLLECT) {
+            return DeliveryMethod.STORE_COLLECT;
+        }
+        return DeliveryMethod.HOME_DELIVERY;
     }
 
     /** Loads an address by id and asserts the caller owns it; otherwise 403. */

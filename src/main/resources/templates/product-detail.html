@@ -983,8 +983,16 @@
             color: var(--dark-sea-green);
         }
         .variant-chip.out-of-stock {
-            opacity: 0.5;
             cursor: not-allowed;
+        }
+        /* Fade the image + labels (not the whole chip) so the "Sold Out"
+           badge below can stay crisp and fully opaque. */
+        .variant-chip.out-of-stock .variant-swatch {
+            filter: grayscale(45%) contrast(0.95);
+        }
+        .variant-chip.out-of-stock .variant-name,
+        .variant-chip.out-of-stock .variant-size {
+            opacity: 0.5;
         }
         /* Square (rounded) thumbnail showing the variant's first image; falls back
            to the colour name as a solid fill when the variant has no image yet. */
@@ -1008,6 +1016,25 @@
             inset: 0;
             background: rgba(255, 255, 255, 0.45);
             border-radius: 14px;
+        }
+        /* "Sold Out" ribbon across the out-of-stock swatch image. */
+        .variant-chip.out-of-stock .variant-swatch::after {
+            content: 'Sold Out';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) rotate(-10deg);
+            background: rgba(220, 38, 38, 0.95);
+            color: #fff;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            padding: 3px 9px;
+            border-radius: 5px;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            z-index: 2;
         }
         /* Colour name (primary) + size (secondary) under the thumbnail. */
         .variant-name {
@@ -1080,9 +1107,9 @@
                 </div>
                 <div class="col-lg-3 col-md-4 col-6 text-end">
                     <div class="header-icons d-inline-flex align-items-center">
-                        <div class="icon search-icon">
+                        <!--<div class="icon search-icon">
                             <i class="fas fa-search"></i>
-                        </div>
+                        </div>-->
                         <div class="icon user-icon" onclick="window.location.href='/user_redirect'">
                             <i class="fas fa-user"></i>
                         </div>

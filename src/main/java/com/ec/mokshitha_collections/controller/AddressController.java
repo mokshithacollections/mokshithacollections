@@ -21,8 +21,10 @@ public class AddressController {
     public ResponseEntity<ApiResponse> addAddress(
             @Valid @ModelAttribute AddressRequest req,
             @AuthenticationPrincipal CustomUserDetails principal) {
-        addressService.addAddress(principal.getUserId(), req);
-        return ResponseEntity.ok(ApiResponse.success("Address added"));
+        var saved = addressService.addAddress(principal.getUserId(), req);
+        // Return the new id so the checkout page can auto-select it after reload.
+        return ResponseEntity.ok(ApiResponse.success("Address added",
+                java.util.Map.of("addressId", saved.getAddressId())));
     }
 
     @PostMapping("/update/{id}")

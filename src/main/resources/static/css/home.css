@@ -1112,14 +1112,14 @@
             .ob-desc { display: block; font-size: 0.6rem; line-height: 1.25; max-width: 54vw; opacity: 0.82; }
 
             /* Right: slim vertical panel — code stacked above the timer */
-            .ob-right { flex-direction: column; gap: 5px; padding: 6px 11px; border-radius: 11px; }
+            .ob-right { flex-direction: column; gap: 6px; padding: 5px 11px; border-radius: 11px; }
             .ob-divider { display: none; }
             .ob-coupon { gap: 2px; }
             .ob-countdown { gap: 2px; }
             .ob-coupon-label, .ob-cd-label { font-size: 0.44rem; letter-spacing: 0.6px; }
             .ob-code { font-size: 0.72rem; padding: 2px 9px; letter-spacing: 1px; border-radius: 6px; }
             .ob-timer { gap: 3px; }
-            .ob-unit { min-width: 21px; padding: 2px 4px; border-radius: 6px; }
+            .ob-unit { min-width: 23px; padding: 2px 4px; border-radius: 6px; }
             .ob-num { font-size: 0.72rem; }
             .ob-u { font-size: 0.35rem; margin-top: 1px; }
             .ob-sep { padding-bottom: 5px; font-size: 0.62rem; }

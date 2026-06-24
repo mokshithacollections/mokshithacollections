@@ -36,6 +36,10 @@ public class Address {
     @Column(nullable = false)
     private String city;
 
+    /** District (e.g. "Prakasam"). Nullable: older addresses predate this field. */
+    @Column
+    private String district;
+
     @Column(nullable = false)
     private String state;
 
@@ -48,6 +52,11 @@ public class Address {
     @Enumerated(EnumType.STRING)
     @Column(name = "address_type", nullable = false)
     private AddressType addressType;
+
+    /** HOME_DELIVERY (default) or STORE_COLLECT (only for the store's city). */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "delivery_method")
+    private DeliveryMethod deliveryMethod;
 
     @Column(name = "is_default", nullable = false)
     private Boolean isDefault;
