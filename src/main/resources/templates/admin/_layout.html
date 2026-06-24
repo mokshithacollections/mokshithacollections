@@ -72,6 +72,11 @@
                     <i class="fas fa-users"></i> Users
                 </a>
             </li>
+            <li>
+                <a th:href="@{/admin/password}" th:classappend="${active == 'password'} ? 'active'">
+                    <i class="fas fa-key"></i> Change Password
+                </a>
+            </li>
             <li style="margin-top: 16px; border-top: 1px solid #374151;">
                 <a th:href="@{/home}" target="_blank" rel="noopener">
                     <i class="fas fa-external-link-alt"></i> View Storefront

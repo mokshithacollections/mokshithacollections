@@ -206,6 +206,13 @@ public class AdminPageController {
         return "admin/offer-form";
     }
 
+    /* ---------- Account (change password) ---------- */
+
+    @GetMapping("/password")
+    public String changePassword() {
+        return "admin/change-password";
+    }
+
     /* ---------- Users ---------- */
 
     @GetMapping("/users")

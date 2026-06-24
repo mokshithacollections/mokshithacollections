@@ -77,6 +77,12 @@ function getCsrfToken() {
         }
         
         function switchTab(tabName) {
+			
+			window.scrollTo({
+		       top: 0,
+		       behavior: 'smooth' // Remove if you want instant scroll
+		   });
+			   
             // Update tabs
             document.querySelectorAll('.auth-tab').forEach(tab => {
                 tab.classList.remove('active');
