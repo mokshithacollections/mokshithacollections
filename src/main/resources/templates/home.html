@@ -714,9 +714,11 @@
              REPLACE the image: drop a .jpg/.png into static/images/ and
              point th:src at it. (.HEIC and C:\ paths do NOT work on the web.) -->
         <div class="mk-portrait">
+          <!-- Lazy: src is set by JS only when the popup actually shows, so repeat
+               visits / disabled state cost ZERO image bandwidth on Render. -->
           <img class="mk-photo"
-               th:src="@{/images/wish.jpeg}"
-               src="/images/wish.jpeg"
+               th:attr="data-src=@{/images/wish.jpeg}"
+               data-src="/images/wish.jpeg"
                alt="Managing Director"
                onerror="this.style.display='none'">
           <div class="mk-tint"></div>
@@ -868,6 +870,10 @@
           sessionStorage.setItem('mkBdaySeen','1');
         }catch(e){ /* private mode — just show it */ }
       }
+
+      // We're actually showing the popup now → load the photo (and only now).
+      var ph = pop.querySelector('.mk-photo');
+      if(ph && ph.dataset.src){ ph.src = ph.dataset.src; }
 
       function close(){
         pop.style.animation='mk-fade .35s ease reverse forwards';
