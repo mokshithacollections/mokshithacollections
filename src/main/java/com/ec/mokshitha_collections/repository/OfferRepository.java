@@ -21,4 +21,7 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
      * home banner. Ordered so the highest-priority / soonest-starting shows first.
      */
     List<Offer> findByActiveTrueAndEndAtAfterOrderByPriorityDescStartAtAsc(LocalDateTime now);
+
+    /** Active + auto-apply candidates; the service filters them by window/eligibility. */
+    List<Offer> findByActiveTrueAndAutoApplyTrue();
 }

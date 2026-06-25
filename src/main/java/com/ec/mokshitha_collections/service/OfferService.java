@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Customer-facing offer logic: the home-banner feed and the checkout coupon
@@ -108,7 +109,35 @@ public class OfferService {
         }
         Offer offer = offerRepository.findByCodeIgnoreCase(code.trim())
                 .orElseThrow(() -> new BadRequestException("That promo code isn't valid."));
+        return computeForOffer(offer, userId, lines);
+    }
 
+    /**
+     * Best auto-apply offer for the given lines/user, or empty if none is
+     * eligible. Ranked by priority (desc), then by the larger actual discount.
+     * Only one offer is ever applied — the system never stacks coupons.
+     */
+    @Transactional(readOnly = true)
+    public Optional<DiscountResult> bestAutoApply(Long userId, List<DiscountLine> lines) {
+        DiscountResult best = null;
+        for (Offer o : offerRepository.findByActiveTrueAndAutoApplyTrue()) {
+            DiscountResult r;
+            try {
+                r = computeForOffer(o, userId, lines);   // reuses all eligibility checks
+            } catch (BadRequestException notEligible) {
+                continue;
+            }
+            if (best == null) { best = r; continue; }
+            int byPriority = Integer.compare(o.getPriority(), best.offer().getPriority());
+            if (byPriority > 0 || (byPriority == 0 && r.discountAmount().compareTo(best.discountAmount()) > 0)) {
+                best = r;
+            }
+        }
+        return Optional.ofNullable(best);
+    }
+
+    /** Full eligibility + discount computation for one offer (throws on any failure). */
+    private DiscountResult computeForOffer(Offer offer, Long userId, List<DiscountLine> lines) {
         LocalDateTime now = LocalDateTime.now();
         if (offer.getActive() == null || !offer.getActive()) {
             throw new BadRequestException("This promo code isn't active right now.");

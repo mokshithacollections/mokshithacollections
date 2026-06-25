@@ -20,4 +20,12 @@ public interface PendingCheckoutRepository extends JpaRepository<PendingCheckout
 
     /** HELD checkouts whose hold has expired — released by the scheduled job. */
     List<PendingCheckout> findByStatusAndExpiresAtBefore(PendingCheckoutStatus status, LocalDateTime cutoff);
+
+    /**
+     * In-flight (still-held, not-yet-expired) checkouts that already carry this
+     * offer for this user — counted as uses-in-progress so two simultaneous
+     * checkouts can't both slip past the per-customer limit.
+     */
+    long countByUserIdAndOfferCodeIgnoreCaseAndStatusAndExpiresAtAfter(
+            Long userId, String offerCode, PendingCheckoutStatus status, LocalDateTime now);
 }

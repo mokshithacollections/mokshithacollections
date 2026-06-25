@@ -12,6 +12,7 @@ import com.ec.mokshitha_collections.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -50,6 +51,7 @@ public class PaymentService {
     private final OfferService offerService;
     private final OfferRepository offerRepository;
     private final OfferRedemptionRepository offerRedemptionRepository;
+    private final JdbcTemplate jdbc;
 
     @Value("${razorpay.currency:INR}")
     private String currency;
@@ -137,6 +139,9 @@ public class PaymentService {
         String appliedCode = null;
         if (offerCode != null && !offerCode.isBlank()) {
             DiscountResult dr = offerService.computeDiscount(userId, offerCode, discountLines);
+            // Hard per-customer-limit enforcement against the create→confirm race
+            // (e.g. the same user checking out on two devices at once).
+            enforcePerCustomerLimit(dr.offer(), userId);
             discount = dr.discountAmount();
             appliedCode = dr.offer().getCode();
         }
@@ -308,5 +313,38 @@ public class PaymentService {
 
     private static String safe(String s) {
         return s == null ? "" : s;
+    }
+
+    /**
+     * Strictly enforces an offer's per-customer limit, closing the create→confirm
+     * race where the same user checks out on two devices simultaneously.
+     *
+     * A Postgres transaction-scoped advisory lock keyed on (offer, user)
+     * serializes concurrent checkouts for that pair, so the second one only runs
+     * its count after the first has committed its HELD checkout. We count
+     * confirmed redemptions PLUS still-held (not-yet-expired) checkouts that
+     * already carry this offer — both are "uses in progress". The lock releases
+     * automatically when this transaction commits or rolls back.
+     */
+    private void enforcePerCustomerLimit(Offer offer, Long userId) {
+        Integer limit = offer.getPerCustomerLimit();
+        if (limit == null) return;
+
+        try {
+            // numeric ids inlined safely; ::int picks the 2-key advisory-lock overload
+            jdbc.execute("SELECT pg_advisory_xact_lock("
+                    + offer.getOfferId() + "::int, " + userId + "::int)");
+        } catch (Exception e) {
+            // Non-Postgres / advisory locks unavailable — fall back to a best-effort
+            // (unsynchronized) count check below rather than breaking checkout.
+            log.warn("Advisory lock unavailable, per-customer-limit check is best-effort: {}", e.getMessage());
+        }
+
+        long confirmed = offerRedemptionRepository.countByOfferIdAndUserId(offer.getOfferId(), userId);
+        long inFlight = pendingRepository.countByUserIdAndOfferCodeIgnoreCaseAndStatusAndExpiresAtAfter(
+                userId, offer.getCode(), PendingCheckoutStatus.HELD, LocalDateTime.now());
+        if (confirmed + inFlight >= limit) {
+            throw new BadRequestException("You've already used this offer the maximum number of times.");
+        }
     }
 }

@@ -46,6 +46,9 @@ public class OfferRequest {
 
     private Boolean active;
 
+    /** Auto-apply the best eligible offer at checkout (no code typing needed). */
+    private Boolean autoApply;
+
     private Integer priority;
 
     /** Empty = applies to all products. */

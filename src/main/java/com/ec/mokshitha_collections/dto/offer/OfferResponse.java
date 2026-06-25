@@ -25,6 +25,7 @@ public class OfferResponse {
     private final BigDecimal maxDiscountAmount;
     private final Integer perCustomerLimit;
     private final Boolean active;
+    private final Boolean autoApply;
     private final Integer priority;
     private final Set<Long> productIds;
     private final Set<Long> categoryIds;

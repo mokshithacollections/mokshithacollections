@@ -1229,7 +1229,7 @@
                                     <button type="button" class="promo-btn" id="applyPromo">Apply</button>
                                 </div>
                                 <div class="promo-applied" id="promoApplied" style="display:none;">
-                                    <span><i class="fas fa-check-circle"></i> Code <strong id="appliedCodeLabel"></strong> applied</span>
+                                    <span><i class="fas fa-check-circle"></i> <span id="appliedText">Applied</span></span>
                                     <button type="button" class="promo-remove" id="removePromo">Remove</button>
                                 </div>
                                 <div class="promo-msg" id="promoMsg"></div>
@@ -1402,9 +1402,8 @@
             var applyBtn = document.getElementById('applyPromo');
             var removeBtn = document.getElementById('removePromo');
             var msg = document.getElementById('promoMsg');
-            var form = document.getElementById('promoForm');
             var appliedBox = document.getElementById('promoApplied');
-            var appliedLabel = document.getElementById('appliedCodeLabel');
+            var appliedText = document.getElementById('appliedText');
             var hidden = document.getElementById('appliedOfferCode');
             var discountRow = document.getElementById('discountRow');
             var discountValueEl = document.getElementById('discountValue');
@@ -1416,12 +1415,20 @@
             var homeShipping = parseFloat(summary.dataset.shipping) || 0; // home-delivery fee for this subtotal
             var cf = document.getElementById('checkoutForm');
             var discount = 0;
+            var DISMISS_KEY = 'mcOfferDismissed'; // remembers a manual Remove for this session
 
             function fmt(n) { return '₹' + (Math.round(n * 100) / 100).toLocaleString('en-IN'); }
             function setMsg(text, isError) {
                 if (!msg) return;
                 msg.textContent = text || '';
                 msg.className = 'promo-msg' + (isError ? ' error' : '');
+            }
+            function buyNowParams(p) {
+                if (cf && cf.dataset.buynow === 'true' && cf.dataset.variant) {
+                    p.variantId = cf.dataset.variant;
+                    p.qty = cf.dataset.qty || '1';
+                }
+                return p;
             }
 
             // Free when the chosen address is Store Collect; otherwise the normal fee.
@@ -1437,31 +1444,32 @@
                     else { deliveryValueEl.textContent = 'FREE'; deliveryValueEl.style.color = 'var(--dark-sea-green)'; }
                 }
                 if (totalEl) totalEl.textContent = fmt(Math.max(0, subtotal + ship - discount));
-                // Hide the "add more for free delivery" nudge when delivery is already free.
                 var addMore = document.getElementById('addMoreHint');
                 if (addMore) addMore.style.display = ship > 0 ? '' : 'none';
             }
 
-            function applyDiscount(code, amount) {
+            // isAuto = applied automatically (vs. typed by the customer)
+            function applyDiscount(code, amount, isAuto) {
                 discount = amount;
                 if (hidden) hidden.value = code;
-                if (appliedLabel) appliedLabel.textContent = code;
-                if (form) form.style.display = 'none';
+                if (appliedText) appliedText.textContent = (isAuto ? 'Auto Applied: ' : 'Applied: ') + code;
                 if (appliedBox) appliedBox.style.display = 'flex';
-                setMsg('');
+                if (input) input.value = '';
+                setMsg(isAuto ? 'Best offer applied for you — remove it or enter a different code.' : '');
                 if (discountCodeLabel) discountCodeLabel.textContent = '(' + code + ')';
                 if (discountValueEl) discountValueEl.textContent = '-' + fmt(amount);
                 if (discountRow) discountRow.style.display = 'flex';
                 recalc();
             }
-            function clearDiscount() {
+            function clearDiscount(userInitiated) {
                 discount = 0;
                 if (hidden) hidden.value = '';
                 if (appliedBox) appliedBox.style.display = 'none';
-                if (form) form.style.display = 'flex';
                 if (discountRow) discountRow.style.display = 'none';
                 if (input) input.value = '';
                 setMsg('');
+                // A manual Remove sticks for the session so the auto offer doesn't snap back.
+                if (userInitiated) { try { sessionStorage.setItem(DISMISS_KEY, '1'); } catch (e) {} }
                 recalc();
             }
 
@@ -1469,23 +1477,24 @@
                 applyBtn.addEventListener('click', function () {
                     var code = (input.value || '').trim().toUpperCase();
                     if (!code) { setMsg('Enter a promo code.', true); return; }
+                    // Same code already applied (e.g. the auto offer) → tell the customer.
+                    if (hidden && hidden.value && code === hidden.value.trim().toUpperCase()) {
+                        setMsg('This offer is already applied to your checkout.', false);
+                        return;
+                    }
                     applyBtn.disabled = true;
                     var original = applyBtn.textContent;
                     applyBtn.textContent = '...';
-                    var params = { code: code };
-                    if (cf && cf.dataset.buynow === 'true' && cf.dataset.variant) {
-                        params.variantId = cf.dataset.variant;
-                        params.qty = cf.dataset.qty || '1';
-                    }
                     fetch('/api/offers/apply', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-XSRF-TOKEN': getCsrfToken() },
-                        body: new URLSearchParams(params)
+                        body: new URLSearchParams(buyNowParams({ code: code }))
                     })
                     .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
                     .then(function (r) {
                         if (r.ok && r.data.status === 'success') {
-                            applyDiscount(r.data.code, parseFloat(r.data.discountAmount));
+                            // A manually entered code replaces any auto-applied one.
+                            applyDiscount(r.data.code, parseFloat(r.data.discountAmount), false);
                         } else {
                             setMsg(r.data.message || 'Could not apply this code.', true);
                         }
@@ -1496,14 +1505,35 @@
                 if (input) input.addEventListener('keydown', function (e) {
                     if (e.key === 'Enter') { e.preventDefault(); applyBtn.click(); }
                 });
-                if (removeBtn) removeBtn.addEventListener('click', clearDiscount);
+                if (removeBtn) removeBtn.addEventListener('click', function () { clearDiscount(true); });
+            }
+
+            // Auto-apply the best eligible offer on load — unless the customer
+            // already removed one this session or has a code applied.
+            function tryAutoApply() {
+                var dismissed = false;
+                try { dismissed = sessionStorage.getItem(DISMISS_KEY) === '1'; } catch (e) {}
+                if (dismissed || (hidden && hidden.value)) return;
+                fetch('/api/offers/auto', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-XSRF-TOKEN': getCsrfToken() },
+                    body: new URLSearchParams(buyNowParams({}))
+                })
+                .then(function (res) { return res.ok ? res.json() : null; })
+                .then(function (data) {
+                    if (data && data.status === 'success' && !(hidden && hidden.value)) {
+                        applyDiscount(data.code, parseFloat(data.discountAmount), true);
+                    }
+                })
+                .catch(function () { /* no auto offer — silent */ });
             }
 
             // Recompute when the chosen delivery address changes (Store Collect → free).
             document.querySelectorAll('input[name="addressId"]').forEach(function (r) {
                 r.addEventListener('change', recalc);
             });
-            recalc(); // sync on load (in case the default address is Store Collect)
+            recalc();        // sync on load (delivery fee)
+            tryAutoApply();  // then auto-apply the best offer if eligible
         })();
 
         // ----- Cash on Delivery: create the order directly -----

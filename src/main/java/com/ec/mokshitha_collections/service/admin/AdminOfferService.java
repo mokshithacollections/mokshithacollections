@@ -104,6 +104,7 @@ public class AdminOfferService {
         o.setMaxDiscountAmount(req.getMaxDiscountAmount());
         o.setPerCustomerLimit(req.getPerCustomerLimit());
         o.setActive(req.getActive() == null ? Boolean.TRUE : req.getActive());
+        o.setAutoApply(Boolean.TRUE.equals(req.getAutoApply()));
         o.setPriority(req.getPriority() == null ? 0 : req.getPriority());
         o.setProductIds(req.getProductIds() == null ? new HashSet<>() : new HashSet<>(req.getProductIds()));
         o.setCategoryIds(req.getCategoryIds() == null ? new HashSet<>() : new HashSet<>(req.getCategoryIds()));
@@ -127,6 +128,7 @@ public class AdminOfferService {
                 .maxDiscountAmount(o.getMaxDiscountAmount())
                 .perCustomerLimit(o.getPerCustomerLimit())
                 .active(o.getActive())
+                .autoApply(o.getAutoApply())
                 .priority(o.getPriority())
                 .productIds(new HashSet<>(o.getProductIds()))     // force LAZY init inside tx
                 .categoryIds(new HashSet<>(o.getCategoryIds()))

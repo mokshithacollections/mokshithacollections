@@ -45,4 +45,27 @@ public class OfferController {
                 "name", result.offer().getName(),
                 "discountAmount", discount));
     }
+
+    /**
+     * Returns the single best auto-apply offer for the current checkout context
+     * (cart, or a Buy-Now variant), or {status:"none"} when none is eligible.
+     * Preview only — the discount is re-validated at payment time.
+     */
+    @PostMapping("/auto")
+    public ResponseEntity<Map<String, Object>> auto(@RequestParam(required = false) Long variantId,
+                                                    @RequestParam(required = false) Integer qty,
+                                                    @AuthenticationPrincipal CustomUserDetails principal) {
+        Long userId = principal.getUserId();
+        List<DiscountLine> lines = (variantId != null)
+                ? offerService.linesForBuyNow(variantId, qty)
+                : offerService.linesForCart(userId);
+
+        return offerService.bestAutoApply(userId, lines)
+                .<ResponseEntity<Map<String, Object>>>map(r -> ResponseEntity.ok(Map.of(
+                        "status", "success",
+                        "code", r.offer().getCode(),
+                        "name", r.offer().getName(),
+                        "discountAmount", r.discountAmount())))
+                .orElseGet(() -> ResponseEntity.ok(Map.of("status", "none")));
+    }
 }

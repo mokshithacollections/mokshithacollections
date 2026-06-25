@@ -170,6 +170,14 @@
                             <label for="active">Active — available for customers to redeem</label>
                         </div>
                     </div>
+                    <div class="form-row">
+                        <div class="form-toggle">
+                            <input type="checkbox" id="autoApply" name="autoApply"
+                                   th:checked="${offer != null and offer.autoApply != null and offer.autoApply}">
+                            <label for="autoApply">Auto-apply at checkout — applied automatically for eligible customers (no code needed)</label>
+                        </div>
+                        <div class="helper">When several auto-apply offers are eligible, the highest-priority / biggest-saving one wins. Customers can still remove it or enter a different code.</div>
+                    </div>
                 </div>
 
                 <div class="form-actions">
@@ -227,6 +235,7 @@
             perCustomerLimit: intOrNull(fd.get('perCustomerLimit')),
             priority: intOrNull(fd.get('priority')),
             active: fd.get('active') === 'on',
+            autoApply: fd.get('autoApply') === 'on',
             productIds: selectedIds('productIds'),
             categoryIds: selectedIds('categoryIds')
         };

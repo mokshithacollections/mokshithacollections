@@ -65,6 +65,15 @@ public class Offer {
     @Column(nullable = false)
     private Boolean active;
 
+    /**
+     * When true, this offer is auto-applied at checkout for eligible customers.
+     * Nullable so adding the column to an existing table doesn't fail; treated
+     * as false when null.
+     */
+    @Column(name = "auto_apply")
+    @Builder.Default
+    private Boolean autoApply = false;
+
     /** Tie-breaker / ordering when several offers could apply (higher = first). */
     @Column(nullable = false)
     private Integer priority;
@@ -90,6 +99,7 @@ public class Offer {
     void onCreate() {
         if (createdAt == null) createdAt = LocalDateTime.now();
         if (active == null) active = true;
+        if (autoApply == null) autoApply = false;
         if (priority == null) priority = 0;
     }
 }
