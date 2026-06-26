@@ -382,17 +382,7 @@
 
             <!-- Addresses (FROM left, SHIP TO right — emphasised) -->
             <div class="address-block">
-                <div class="address-card">
-                    <h3>From</h3>
-                    <div class="name">Mokshitha Collections</div>
-                    <div class="lines">
-                        101, Sri Nilayam, Mangamoor Road<br>Ongole, Andhra Pradesh - 523001<br>
-                        India
-                    </div>
-                    <div class="phone"><i class="fas fa-phone-alt"></i> +91 6303349508 +91 7989056928</div>
-                </div>
-
-                <div class="address-card highlight" th:if="${order.shippingAddress != null}"
+				<div class="address-card highlight" th:if="${order.shippingAddress != null}"
                      th:with="pickup=${order.shippingAddress.deliveryMethod != null and order.shippingAddress.deliveryMethod.name() == 'STORE_COLLECT'}">
                     <div th:if="${pickup}"
                          style="margin:-4px 0 10px;padding:8px 12px;border:2px solid #1e7a34;border-radius:8px;
@@ -413,6 +403,18 @@
                         <span th:text="${order.shippingAddress.phone}">Phone</span>
                     </div>
                 </div>
+				
+                <div class="address-card">
+                    <h3>From</h3>
+                    <div class="name">Mokshitha Collections</div>
+                    <div class="lines">
+                        101, Sri Nilayam, Mangamoor Road<br>Ongole, Andhra Pradesh - 523001<br>
+                        India
+                    </div>
+                    <div class="phone"><i class="fas fa-phone-alt"></i> +91 6303349508 +91 7989056928</div>
+                </div>
+
+                
             </div>
 
             <!-- Items -->

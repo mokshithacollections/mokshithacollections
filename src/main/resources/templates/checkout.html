@@ -1460,6 +1460,71 @@
                 if (discountValueEl) discountValueEl.textContent = '-' + fmt(amount);
                 if (discountRow) discountRow.style.display = 'flex';
                 recalc();
+                maybeCelebrate(code, amount, isAuto);
+            }
+
+            // Party-popper + confetti overlay celebrating the saving — fires every
+            // time a coupon is applied (auto or manual). Auto-dismisses after ~2.5s;
+            // clicks pass through so it never blocks the page.
+            function maybeCelebrate(code, amount, isAuto) {
+                celebrateCoupon(fmt(amount), code);
+            }
+            function celebrateCoupon(amountText, code) {
+                if (!document.getElementById('mc-celebrate-style')) {
+                    var st = document.createElement('style');
+                    st.id = 'mc-celebrate-style';
+                    st.textContent =
+                        // Dim the whole page to 50% black; text sits directly on it (no box).
+                        '.mc-celebrate{position:fixed;inset:0;z-index:100000;pointer-events:none;overflow:hidden;' +
+                        'background:rgba(0,0,0,.5);animation:mcFadeIn .25s ease}' +
+                        '.mc-celebrate.out{animation:mcFadeOut .5s ease forwards}' +
+                        '@keyframes mcFadeIn{from{opacity:0}to{opacity:1}}@keyframes mcFadeOut{to{opacity:0}}' +
+                        '.mc-celebrate-content{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);' +
+                        'text-align:center;width:90vw;animation:mcPop .5s cubic-bezier(.2,.9,.3,1.3) both}' +
+                        '@keyframes mcPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}' +
+                        '.mc-celebrate-emoji{font-size:3.6rem;animation:mcPopper .6s ease both}' +
+                        '@keyframes mcPopper{0%{transform:scale(0) rotate(-30deg)}60%{transform:scale(1.4) rotate(12deg)}100%{transform:scale(1) rotate(0)}}' +
+                        '.mc-celebrate-title{font-family:"Playfair Display",serif;font-size:1.6rem;font-weight:700;' +
+                        'color:#fff;margin-top:10px;text-shadow:0 2px 14px rgba(0,0,0,.5)}' +
+                        '.mc-celebrate-amount{font-family:"Poppins","Segoe UI",sans-serif;font-size:3rem;font-weight:700;' +
+                        'color:#ffd86b;line-height:1.1;margin:8px 0 4px;letter-spacing:.5px;text-shadow:0 3px 16px rgba(0,0,0,.55)}' +
+                        '.mc-celebrate-sub{font-size:1.05rem;color:#fff;opacity:.95;margin-top:6px;text-shadow:0 1px 10px rgba(0,0,0,.5)}' +
+                        '.mc-confetti{position:absolute;top:-14px;width:10px;height:16px;border-radius:2px;opacity:.95;' +
+                        'animation-name:mcConfetti;animation-timing-function:linear;animation-fill-mode:forwards}' +
+                        '@keyframes mcConfetti{0%{transform:translateY(-14px) rotate(0);opacity:1}100%{transform:translateY(104vh) rotate(720deg);opacity:.2}}' +
+                        // Mobile: hide the emoji and shrink the text.
+                        '@media (max-width:768px){.mc-celebrate-emoji{display:none}' +
+                        '.mc-celebrate-title{font-size:1.3rem}.mc-celebrate-amount{font-size:2.3rem}.mc-celebrate-sub{font-size:.95rem}}' +
+                        '@media (prefers-reduced-motion:reduce){.mc-confetti{display:none}}';
+                    document.head.appendChild(st);
+                }
+                var old = document.getElementById('mcCelebrate');
+                if (old) old.remove();
+
+                var colors = ['#ffd86b', '#880012', '#ff9bb0', '#9be7d8', '#fff2cf', '#1db954', '#ff6b6b', '#4dabf7'];
+                var conf = '';
+                for (var i = 0; i < 110; i++) {   // lots more poppers
+                    var left = (Math.random() * 100).toFixed(2);
+                    var delay = (Math.random() * 0.8).toFixed(2);
+                    var dur = (1.5 + Math.random() * 1.4).toFixed(2);
+                    var w = (7 + Math.random() * 7).toFixed(0);
+                    conf += '<span class="mc-confetti" style="left:' + left + '%;background:' + colors[i % colors.length] +
+                            ';width:' + w + 'px;animation-delay:' + delay + 's;animation-duration:' + dur + 's;"></span>';
+                }
+                var ov = document.createElement('div');
+                ov.id = 'mcCelebrate';
+                ov.className = 'mc-celebrate';
+                ov.setAttribute('aria-hidden', 'true');
+                ov.innerHTML = conf +
+                    '<div class="mc-celebrate-content">' +
+                        '<div class="mc-celebrate-emoji">🎉🎊</div>' +
+                        '<div class="mc-celebrate-title">Hooray! You saved</div>' +
+                        '<div class="mc-celebrate-amount">' + amountText + '</div>' +
+                        '<div class="mc-celebrate-sub">with code <strong>' + code + '</strong></div>' +
+                    '</div>';
+                document.body.appendChild(ov);
+                setTimeout(function () { ov.classList.add('out'); }, 2200);
+                setTimeout(function () { if (ov.parentNode) ov.remove(); }, 2750);
             }
             function clearDiscount(userInitiated) {
                 discount = 0;

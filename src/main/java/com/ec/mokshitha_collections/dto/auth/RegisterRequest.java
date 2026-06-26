@@ -29,7 +29,7 @@ public class RegisterRequest {
     private String lastName;
 
     @Pattern(
-            regexp = "^$|^[0-9+]{10,15}$",
-            message = "Phone must be 10-15 digits, optionally starting with +")
+            regexp = "^$|^[6-9][0-9]{9}$",
+            message = "Phone must be a valid 10-digit mobile number")
     private String phone;
 }

@@ -66,9 +66,11 @@ function getCsrfToken() {
             // Search functionality
             //document.querySelector('.search-icon').addEventListener('click', showSearchModal);
             
-            // Format phone number
+            // Phone: digits only, capped at 10. Drops a pasted 91 country prefix.
             document.getElementById('phone').addEventListener('input', function() {
-                this.value = this.value.replace(/[^0-9+]/g, '');
+                let d = this.value.replace(/[^0-9]/g, '');
+                if (d.length > 10 && d.startsWith('91')) d = d.slice(2);
+                this.value = d.slice(0, 10);
             });
             
             // Password validation on register
@@ -137,9 +139,9 @@ function getCsrfToken() {
                 }
             }
             
-            // Phone validation
+            // Phone validation — exactly 10 digits (Indian mobile starts 6-9)
             if (field.id === 'phone' && value !== '') {
-                const phoneRegex = /^[0-9+]{10,15}$/;
+                const phoneRegex = /^[6-9][0-9]{9}$/;
                 if (!phoneRegex.test(value)) {
                     isValid = false;
                 }
