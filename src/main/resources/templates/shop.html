@@ -697,13 +697,20 @@
         .pagination {
             justify-content: center;
             margin-top: 50px;
+            flex-wrap: wrap;      /* never widen the page on small screens */
+            row-gap: 8px;
         }
-        
+
         .page-link {
             color: var(--dark-sea-green);
             border: 1px solid #dee2e6;
             margin: 0 5px;
             border-radius: 5px;
+        }
+
+        @media (max-width: 576px) {
+            .pagination { margin-top: 30px; }
+            .page-link { margin: 0 3px; padding: 6px 11px; font-size: 0.9rem; }
         }
         
         .page-link:hover {
@@ -1534,21 +1541,38 @@
                     <!-- Pagination — driven by Spring Data Page -->
                     <nav aria-label="Page navigation"
                          th:if="${products != null and products.totalPages > 1}">
-                        <ul class="pagination">
+                        <ul class="pagination"
+                            th:with="cur=${products.number},
+                                     total=${products.totalPages},
+                                     start=${T(java.lang.Math).max(0, products.number - 2)},
+                                     end=${T(java.lang.Math).min(products.totalPages - 1, products.number + 2)}">
                             <!-- Previous -->
                             <li class="page-item" th:classappend="${!products.hasPrevious()} ? 'disabled'">
-                                <a class="page-link"
-                                   th:href="@{/shop(page=${products.number - 1},
+                                <a class="page-link" aria-label="Previous"
+                                   th:href="@{/shop(page=${cur - 1},
                                               categorySlug=${filters?.categorySlug},
                                               search=${filters?.search},
                                               minPrice=${filters?.minPrice},
                                               maxPrice=${filters?.maxPrice},
-                                              sort=${filters?.sort})}">Previous</a>
+                                              sort=${filters?.sort})}">&laquo;</a>
                             </li>
-                            <!-- Numbered pages -->
+
+                            <!-- First page + leading ellipsis (only when the window doesn't start at 1) -->
+                            <li class="page-item" th:if="${start > 0}">
+                                <a class="page-link"
+                                   th:href="@{/shop(page=0,
+                                              categorySlug=${filters?.categorySlug},
+                                              search=${filters?.search},
+                                              minPrice=${filters?.minPrice},
+                                              maxPrice=${filters?.maxPrice},
+                                              sort=${filters?.sort})}">1</a>
+                            </li>
+                            <li class="page-item disabled" th:if="${start > 1}"><span class="page-link">&hellip;</span></li>
+
+                            <!-- Windowed page numbers (current ± 2) -->
                             <li class="page-item"
-                                th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}"
-                                th:classappend="${i == products.number} ? 'active'">
+                                th:each="i : ${#numbers.sequence(start, end)}"
+                                th:classappend="${i == cur} ? 'active'">
                                 <a class="page-link"
                                    th:href="@{/shop(page=${i},
                                               categorySlug=${filters?.categorySlug},
@@ -1558,15 +1582,29 @@
                                               sort=${filters?.sort})}"
                                    th:text="${i + 1}">1</a>
                             </li>
-                            <!-- Next -->
-                            <li class="page-item" th:classappend="${!products.hasNext()} ? 'disabled'">
+
+                            <!-- Trailing ellipsis + last page (only when the window doesn't reach the end) -->
+                            <li class="page-item disabled" th:if="${end < total - 2}"><span class="page-link">&hellip;</span></li>
+                            <li class="page-item" th:if="${end < total - 1}">
                                 <a class="page-link"
-                                   th:href="@{/shop(page=${products.number + 1},
+                                   th:href="@{/shop(page=${total - 1},
                                               categorySlug=${filters?.categorySlug},
                                               search=${filters?.search},
                                               minPrice=${filters?.minPrice},
                                               maxPrice=${filters?.maxPrice},
-                                              sort=${filters?.sort})}">Next</a>
+                                              sort=${filters?.sort})}"
+                                   th:text="${total}">N</a>
+                            </li>
+
+                            <!-- Next -->
+                            <li class="page-item" th:classappend="${!products.hasNext()} ? 'disabled'">
+                                <a class="page-link" aria-label="Next"
+                                   th:href="@{/shop(page=${cur + 1},
+                                              categorySlug=${filters?.categorySlug},
+                                              search=${filters?.search},
+                                              minPrice=${filters?.minPrice},
+                                              maxPrice=${filters?.maxPrice},
+                                              sort=${filters?.sort})}">&raquo;</a>
                             </li>
                         </ul>
                     </nav>
