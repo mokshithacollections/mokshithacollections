@@ -17,6 +17,12 @@
             </a>
         </div>
 
+        <!-- Instant search by name / slug (client-side filter) -->
+        <div class="filters" style="display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+            <input type="text" id="catSearch" placeholder="Search categories by name…"
+                   style="flex:1;min-width:200px;max-width:380px;padding:9px 13px;border:1px solid var(--admin-border);border-radius:8px;">
+        </div>
+
         <div class="table-wrap">
             <table class="admin-table">
                 <thead>
@@ -30,7 +36,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="c : ${categories}">
+                    <tr th:each="c : ${categories}" class="cat-row"
+                        th:attr="data-name=${#strings.toLowerCase(c.name) + ' ' + #strings.toLowerCase(c.slug)}">
                         <td>
                             <a th:href="@{/admin/categories/{id}(id=${c.categoryId})}"
                                th:text="${c.name}" style="font-weight:500;">Name</a>
@@ -65,6 +72,11 @@
                             No categories yet. <a th:href="@{/admin/categories/new}">Create one</a>.
                         </td>
                     </tr>
+                    <tr id="catNoMatch" style="display:none;">
+                        <td class="empty-row" colspan="6">
+                            <i class="fas fa-search"></i> No categories match your search.
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -73,6 +85,24 @@
 
 <div th:replace="~{admin/_layout :: scripts}"></div>
 <script>
+    // Instant client-side filter by category name / slug.
+    (function () {
+        var box = document.getElementById('catSearch');
+        if (!box) return;
+        var rows = Array.prototype.slice.call(document.querySelectorAll('.cat-row'));
+        var noMatch = document.getElementById('catNoMatch');
+        box.addEventListener('input', function () {
+            var q = box.value.trim().toLowerCase();
+            var shown = 0;
+            rows.forEach(function (r) {
+                var match = !q || (r.dataset.name || '').indexOf(q) !== -1;
+                r.style.display = match ? '' : 'none';
+                if (match) shown++;
+            });
+            if (noMatch) noMatch.style.display = (rows.length && shown === 0) ? '' : 'none';
+        });
+    })();
+
     // Flip Active/Inactive via explicit activate/deactivate endpoints.
     function onToggleActive(btn) {
         const id = btn.dataset.id;

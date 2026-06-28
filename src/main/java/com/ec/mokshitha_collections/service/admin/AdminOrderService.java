@@ -40,6 +40,16 @@ public class AdminOrderService {
         return page.map(OrderService::toSummary);
     }
 
+    /** Admin list filtered by a placed-at date window (+ optional status). */
+    @Transactional(readOnly = true)
+    public Page<OrderSummaryResponse> list(OrderStatus statusFilter,
+                                           LocalDateTime from, LocalDateTime to, Pageable pageable) {
+        Page<Order> page = (statusFilter == null)
+                ? orderRepository.findByPlacedAtBetweenOrderByPlacedAtDesc(from, to, pageable)
+                : orderRepository.findByStatusAndPlacedAtBetweenOrderByPlacedAtDesc(statusFilter, from, to, pageable);
+        return page.map(OrderService::toSummary);
+    }
+
     /**
      * Orders placed by a specific user. Runs inside a read-only transaction
      * so OrderService.toSummary can safely call order.getItems().size() on

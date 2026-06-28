@@ -10,15 +10,48 @@
             <div>
                 <h1>Orders</h1>
                 <div class="breadcrumb"
-                     th:text="${orders.totalElements} + ' orders' +
-                              (${statusFilter != null} ? ' · status: ' + ${statusFilter.name()} : '')">
+                     th:text="${orders.totalElements} + ' orders · ' + ${customFrom} + ' → ' + ${customTo} +
+                              (${statusFilter != null} ? ' · ' + ${statusFilter.name()} : '')">
                     0 orders
                 </div>
             </div>
         </div>
 
-        <!-- Status filter -->
+        <!-- Date-range presets -->
+        <div class="filters" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px;">
+            <label style="font-weight:600;">Date:</label>
+            <a class="btn btn-sm" th:classappend="${range == 'today'} ? 'btn-primary' : 'btn-outline'"
+               th:href="@{/admin/orders(range='today', status=${statusFilter})}">Today</a>
+            <a class="btn btn-sm" th:classappend="${range == 'yesterday'} ? 'btn-primary' : 'btn-outline'"
+               th:href="@{/admin/orders(range='yesterday', status=${statusFilter})}">Yesterday</a>
+            <a class="btn btn-sm" th:classappend="${range == 'last7'} ? 'btn-primary' : 'btn-outline'"
+               th:href="@{/admin/orders(range='last7', status=${statusFilter})}">Last 7 days</a>
+            <a class="btn btn-sm" th:classappend="${range == 'month'} ? 'btn-primary' : 'btn-outline'"
+               th:href="@{/admin/orders(range='month', status=${statusFilter})}">This month</a>
+            <a class="btn btn-sm" th:classappend="${range == 'year'} ? 'btn-primary' : 'btn-outline'"
+               th:href="@{/admin/orders(range='year', status=${statusFilter})}">This year</a>
+        </div>
+
+        <!-- Custom date range -->
+        <form class="filters" method="get" th:action="@{/admin/orders}"
+              style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px;">
+            <input type="hidden" name="range" value="custom">
+            <input type="hidden" name="status" th:value="${statusFilter != null ? statusFilter.name() : ''}">
+            <label>Custom:</label>
+            <input type="date" name="from" th:value="${customFrom}"
+                   style="padding:7px 10px;border:1px solid var(--admin-border);border-radius:8px;">
+            <span>→</span>
+            <input type="date" name="to" th:value="${customTo}"
+                   style="padding:7px 10px;border:1px solid var(--admin-border);border-radius:8px;">
+            <button class="btn btn-sm" type="submit"
+                    th:classappend="${range == 'custom'} ? 'btn-primary' : 'btn-outline'">Apply</button>
+        </form>
+
+        <!-- Status filter (preserves the active date window) -->
         <form class="filters" method="get" th:action="@{/admin/orders}">
+            <input type="hidden" name="range" th:value="${range}">
+            <input type="hidden" name="from" th:value="${customFrom}">
+            <input type="hidden" name="to" th:value="${customTo}">
             <label>Status:</label>
             <select name="status" onchange="this.form.submit()">
                 <option value="">All</option>
@@ -80,16 +113,16 @@
         <ul class="pagination" th:if="${orders.totalPages > 1}">
             <li th:classappend="${!orders.hasPrevious()} ? 'disabled'">
                 <a th:if="${orders.hasPrevious()}"
-                   th:href="@{/admin/orders(page=${orders.number - 1}, status=${statusFilter})}">Previous</a>
+                   th:href="@{/admin/orders(page=${orders.number - 1}, status=${statusFilter}, range=${range}, from=${customFrom}, to=${customTo})}">Previous</a>
                 <span th:unless="${orders.hasPrevious()}">Previous</span>
             </li>
             <li th:each="i : ${#numbers.sequence(0, orders.totalPages - 1)}"
                 th:classappend="${i == orders.number} ? 'active'">
-                <a th:href="@{/admin/orders(page=${i}, status=${statusFilter})}" th:text="${i + 1}">1</a>
+                <a th:href="@{/admin/orders(page=${i}, status=${statusFilter}, range=${range}, from=${customFrom}, to=${customTo})}" th:text="${i + 1}">1</a>
             </li>
             <li th:classappend="${!orders.hasNext()} ? 'disabled'">
                 <a th:if="${orders.hasNext()}"
-                   th:href="@{/admin/orders(page=${orders.number + 1}, status=${statusFilter})}">Next</a>
+                   th:href="@{/admin/orders(page=${orders.number + 1}, status=${statusFilter}, range=${range}, from=${customFrom}, to=${customTo})}">Next</a>
                 <span th:unless="${orders.hasNext()}">Next</span>
             </li>
         </ul>

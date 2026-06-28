@@ -1,6 +1,8 @@
 package com.ec.mokshitha_collections.repository;
 
 import com.ec.mokshitha_collections.entity.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -13,6 +15,9 @@ public interface ProductRepository extends JpaRepository<Product, Long>,
 
     /** Latest 4 featured & active products. Used by the home page hero strip. */
     List<Product> findTop4ByIsFeaturedTrueAndIsActiveTrueOrderByCreatedAtDesc();
+
+    /** Admin grid search by product name (case-insensitive, substring). */
+    Page<Product> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
     boolean existsBySkuIgnoreCase(String sku);
 

@@ -17,6 +17,17 @@
             </a>
         </div>
 
+        <!-- Search by product name -->
+        <form class="filters" method="get" th:action="@{/admin/products}"
+              style="display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+            <input type="text" name="search" th:value="${search}"
+                   placeholder="Search products by name…"
+                   style="flex:1;min-width:200px;max-width:380px;padding:9px 13px;border:1px solid var(--admin-border);border-radius:8px;">
+            <button class="btn btn-primary btn-sm" type="submit"><i class="fas fa-search"></i> Search</button>
+            <a th:if="${search != null and !#strings.isEmpty(search)}"
+               class="btn btn-outline btn-sm" th:href="@{/admin/products}">Clear</a>
+        </form>
+
         <div class="table-wrap">
             <table class="admin-table">
                 <thead>
@@ -75,8 +86,11 @@
                     <tr th:if="${#lists.isEmpty(products.content)}">
                         <td class="empty-row" colspan="7">
                             <i class="fas fa-box-open"></i>
-                            No products yet.
-                            <a th:href="@{/admin/products/new}">Create the first one</a>.
+                            <span th:if="${search != null and !#strings.isEmpty(search)}"
+                                  th:text="'No products match “' + ${search} + '”.'">No matches.</span>
+                            <span th:unless="${search != null and !#strings.isEmpty(search)}">
+                                No products yet. <a th:href="@{/admin/products/new}">Create the first one</a>.
+                            </span>
                         </td>
                     </tr>
                 </tbody>
@@ -87,16 +101,16 @@
         <ul class="pagination" th:if="${products.totalPages > 1}">
             <li th:classappend="${!products.hasPrevious()} ? 'disabled'">
                 <a th:if="${products.hasPrevious()}"
-                   th:href="@{/admin/products(page=${products.number - 1})}">Previous</a>
+                   th:href="@{/admin/products(page=${products.number - 1}, search=${search})}">Previous</a>
                 <span th:unless="${products.hasPrevious()}">Previous</span>
             </li>
             <li th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}"
                 th:classappend="${i == products.number} ? 'active'">
-                <a th:href="@{/admin/products(page=${i})}" th:text="${i + 1}">1</a>
+                <a th:href="@{/admin/products(page=${i}, search=${search})}" th:text="${i + 1}">1</a>
             </li>
             <li th:classappend="${!products.hasNext()} ? 'disabled'">
                 <a th:if="${products.hasNext()}"
-                   th:href="@{/admin/products(page=${products.number + 1})}">Next</a>
+                   th:href="@{/admin/products(page=${products.number + 1}, search=${search})}">Next</a>
                 <span th:unless="${products.hasNext()}">Next</span>
             </li>
         </ul>

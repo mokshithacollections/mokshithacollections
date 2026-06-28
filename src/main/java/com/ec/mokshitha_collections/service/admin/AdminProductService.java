@@ -52,6 +52,15 @@ public class AdminProductService {
         return productRepository.findAll(pageable).map(ProductServiceImpl::toSummary);
     }
 
+    /** Admin grid with optional name search (blank = all products). */
+    @Transactional(readOnly = true)
+    public Page<ProductSummaryResponse> listAll(String search, Pageable pageable) {
+        Page<Product> page = (search == null || search.isBlank())
+                ? productRepository.findAll(pageable)
+                : productRepository.findByNameContainingIgnoreCase(search.trim(), pageable);
+        return page.map(ProductServiceImpl::toSummary);
+    }
+
     @Transactional
     public ProductDetailResponse create(ProductCreateRequest req) {
         if (productRepository.existsBySkuIgnoreCase(req.getSku())) {

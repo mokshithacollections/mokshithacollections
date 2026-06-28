@@ -29,6 +29,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 /**
  * Server-rendered admin UI. All write operations are performed by the
  * existing /api/admin/** REST endpoints (called from per-page JS) — these
@@ -76,10 +80,12 @@ public class AdminPageController {
     /* ---------- Products ---------- */
 
     @GetMapping("/products")
-    public String products(@RequestParam(defaultValue = "0") int page,
+    public String products(@RequestParam(required = false) String search,
+                           @RequestParam(defaultValue = "0") int page,
                            Model model) {
         Pageable pageable = PageRequest.of(page, 20, Sort.by(Sort.Direction.DESC, "createdAt"));
-        model.addAttribute("products", productService.listAll(pageable));
+        model.addAttribute("products", productService.listAll(search, pageable));
+        model.addAttribute("search", search);
         return "admin/products";
     }
 
@@ -126,12 +132,38 @@ public class AdminPageController {
 
     @GetMapping("/orders")
     public String orders(@RequestParam(required = false) OrderStatus status,
+                         @RequestParam(required = false) String range,
+                         @RequestParam(required = false) String from,
+                         @RequestParam(required = false) String to,
                          @RequestParam(defaultValue = "0") int page,
                          Model model) {
+        // Resolve the date window. Defaults to the last 7 days.
+        LocalDate today = LocalDate.now();
+        String active = (range == null || range.isBlank()) ? "last7" : range;
+        LocalDate fromD;
+        LocalDate toD;
+        switch (active) {
+            case "today"     -> { fromD = today;                 toD = today; }
+            case "yesterday" -> { fromD = today.minusDays(1);    toD = today.minusDays(1); }
+            case "month"     -> { fromD = today.withDayOfMonth(1); toD = today; }
+            case "year"      -> { fromD = today.withDayOfYear(1);  toD = today; }
+            case "custom"    -> {
+                fromD = parseDateOr(from, today.minusDays(6));
+                toD = parseDateOr(to, today);
+                if (toD.isBefore(fromD)) { LocalDate t = fromD; fromD = toD; toD = t; }
+            }
+            default          -> { active = "last7"; fromD = today.minusDays(6); toD = today; }
+        }
+        LocalDateTime fromDt = fromD.atStartOfDay();
+        LocalDateTime toDt = toD.atTime(LocalTime.MAX);
+
         Pageable pageable = PageRequest.of(page, 20);
-        model.addAttribute("orders", orderService.list(status, pageable));
+        model.addAttribute("orders", orderService.list(status, fromDt, toDt, pageable));
         model.addAttribute("statusFilter", status);
         model.addAttribute("statuses", OrderStatus.values());
+        model.addAttribute("range", active);
+        model.addAttribute("customFrom", fromD.toString());
+        model.addAttribute("customTo", toD.toString());
         return "admin/orders";
     }
 
@@ -155,6 +187,15 @@ public class AdminPageController {
     public String packingSlip(@PathVariable Long id, Model model) {
         model.addAttribute("order", orderService.getById(id));
         return "admin/packing-slip";
+    }
+
+    /** Parse an ISO date (yyyy-MM-dd) from the custom range inputs; fall back if blank/invalid. */
+    private static LocalDate parseDateOr(String value, LocalDate fallback) {
+        try {
+            return (value == null || value.isBlank()) ? fallback : LocalDate.parse(value.trim());
+        } catch (Exception e) {
+            return fallback;
+        }
     }
 
     /* ---------- Reviews ---------- */

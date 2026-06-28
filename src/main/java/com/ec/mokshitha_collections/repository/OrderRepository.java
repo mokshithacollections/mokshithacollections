@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
@@ -28,6 +29,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Page<Order> findAllByOrderByPlacedAtDesc(Pageable pageable);
 
     Page<Order> findByStatusOrderByPlacedAtDesc(OrderStatus status, Pageable pageable);
+
+    /* ---------- Admin orders: date-range filters ---------- */
+
+    Page<Order> findByPlacedAtBetweenOrderByPlacedAtDesc(
+            LocalDateTime from, LocalDateTime to, Pageable pageable);
+
+    Page<Order> findByStatusAndPlacedAtBetweenOrderByPlacedAtDesc(
+            OrderStatus status, LocalDateTime from, LocalDateTime to, Pageable pageable);
 
     long countByStatus(OrderStatus status);
 
