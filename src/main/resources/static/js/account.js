@@ -33,12 +33,19 @@ function getCsrfToken() {
                 if (!pin) return;
                 let timer;
                 pin.addEventListener('input', function () {
-                    const v = pin.value.trim();
+                    // Digits only, max 6 — strips any letters/symbols as they're typed/pasted.
+                    pin.value = pin.value.replace(/[^0-9]/g, '').slice(0, 6);
+                    const v = pin.value;
                     clearTimeout(timer);
                     if (/^\d{6}$/.test(v)) {
                         timer = setTimeout(() => lookupPincode(v, city, district, state, status), 350);
-                    } else if (status) {
-                        status.textContent = '';
+                    } else {
+                        // Incomplete pincode → reset City/District/State to fresh defaults.
+                        if (city) city.value = '';
+                        if (district) district.value = '';
+                        if (state) state.value = '';
+                        if (status) status.textContent = '';
+                        if (typeof syncDeliveryGroup === 'function') syncDeliveryGroup(form);
                     }
                 });
             });
@@ -86,14 +93,18 @@ function getCsrfToken() {
             }
         }
 
-        // Mirror the server's town logic: Head/GPO name (suffix stripped) → Block → District.
+        // Mirror the server: HO → (single SO) → Block → (multi SO) → District.
         function townFromOffices(offices) {
             const real = s => s && s !== 'NA' && String(s).trim() !== '';
-            const strip = n => String(n || '').replace(/\s*(H\.?O|S\.?O|B\.?O|G\.?P\.?O|GPO|Bazar|Bazaar)\.?$/i, '').trim();
+            const strip = n => String(n || '').replace(/\s*(H\.?O|S\.?O|B\.?O|G\.?P\.?O|GPO|\(O\)|Bazar|Bazaar)\.?$/i, '').trim();
             const head = offices.find(o => String(o.BranchType || '').toLowerCase().includes('head'));
             if (head && real(strip(head.Name))) return strip(head.Name);
+            const subs = offices.filter(o => String(o.BranchType || '').toLowerCase().includes('sub'))
+                                 .map(o => strip(o.Name)).filter(real);
+            if (subs.length === 1) return subs[0];   // one SO = a town
             const blk = offices.find(o => real(o.Block));
-            if (blk) return blk.Block;
+            if (blk) return blk.Block;               // many SOs = localities → use the Block
+            if (subs.length) return subs[0];
             return offices[0].District || '';
         }
 

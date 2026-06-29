@@ -2173,7 +2173,8 @@
                             <div class="col-md-6 form-group">
                                 <label class="form-label">PIN Code</label>
                                 <input type="text" class="form-control" name="pinCode" required
-                                       inputmode="numeric" maxlength="6" placeholder="6-digit PIN">
+                                       inputmode="numeric" maxlength="6" pattern="[0-9]{6}"
+                                       title="Enter a 6-digit pincode" placeholder="6-digit PIN">
                                 <small class="form-text pincode-status"></small>
                             </div>
                             <div class="col-md-6 form-group">
@@ -2309,10 +2310,25 @@
             if (pin) {
                 var timer;
                 pin.addEventListener('input', function () {
-                    var v = pin.value.trim();
+                    // Digits only, max 6.
+                    pin.value = pin.value.replace(/[^0-9]/g, '').slice(0, 6);
+                    var v = pin.value;
                     clearTimeout(timer);
-                    if (/^\d{6}$/.test(v)) timer = setTimeout(function () { lookupPincode(v); }, 350);
-                    else if (statusEl) statusEl.textContent = '';
+                    if (/^\d{6}$/.test(v)) {
+                        timer = setTimeout(function () { lookupPincode(v); }, 350);
+                    } else {
+                        // Incomplete pincode → reset City/District/State to fresh defaults.
+                        if (cityEl) cityEl.value = '';
+                        if (districtEl) districtEl.value = '';
+                        if (stateEl) stateEl.value = '';
+                        if (statusEl) statusEl.textContent = '';
+                        var dg = form.querySelector('.delivery-method-group');
+                        if (dg) {
+                            dg.style.display = 'none';
+                            var home = form.querySelector('input[name="deliveryMethod"][value="HOME_DELIVERY"]');
+                            if (home) home.checked = true;
+                        }
+                    }
                 });
             }
             async function lookupPincode(p) {
@@ -2349,11 +2365,15 @@
             // Mirror the server's town logic: Head/GPO name (suffix stripped) → Block → District.
             function townFromOffices(offices) {
                 var real = function (s) { return s && s !== 'NA' && String(s).trim() !== ''; };
-                var strip = function (n) { return String(n || '').replace(/\s*(H\.?O|S\.?O|B\.?O|G\.?P\.?O|GPO|Bazar|Bazaar)\.?$/i, '').trim(); };
+                var strip = function (n) { return String(n || '').replace(/\s*(H\.?O|S\.?O|B\.?O|G\.?P\.?O|GPO|\(O\)|Bazar|Bazaar)\.?$/i, '').trim(); };
                 var head = offices.find(function (o) { return String(o.BranchType || '').toLowerCase().indexOf('head') >= 0; });
                 if (head && real(strip(head.Name))) return strip(head.Name);
+                var subs = offices.filter(function (o) { return String(o.BranchType || '').toLowerCase().indexOf('sub') >= 0; })
+                                  .map(function (o) { return strip(o.Name); }).filter(real);
+                if (subs.length === 1) return subs[0];   // one SO = a town
                 var blk = offices.find(function (o) { return real(o.Block); });
-                if (blk) return blk.Block;
+                if (blk) return blk.Block;               // many SOs = localities → use the Block
+                if (subs.length) return subs[0];
                 return offices[0].District || '';
             }
             async function fetchPincode(p) {

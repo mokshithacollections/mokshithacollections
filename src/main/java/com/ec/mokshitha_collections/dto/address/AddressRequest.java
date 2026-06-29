@@ -39,7 +39,7 @@ public class AddressRequest {
     private String state;
 
     @NotBlank(message = "Pin code is required")
-    @Pattern(regexp = "^[0-9]{4,10}$", message = "Invalid pin code")
+    @Pattern(regexp = "^[0-9]{6}$", message = "Pincode must be exactly 6 digits")
     private String pinCode;
 
     @NotBlank(message = "Country is required")
