@@ -456,7 +456,8 @@
                 <h4>Items in this order (<span th:text="${#lists.size(order.items)}">0</span>)</h4>
                 <div class="order-item" th:each="item : ${order.items}">
                     <img class="order-item-img"
-                         th:src="${item.productImageUrl}"
+                         th:src="${variantImages != null and variantImages.containsKey(item.variantId)
+                                  ? variantImages.get(item.variantId) : item.productImageUrl}"
                          th:alt="${item.productName}"
                          onerror="this.style.display='none'">
                     <div class="order-item-info">

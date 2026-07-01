@@ -138,7 +138,10 @@ public class PageController {
     public String orderSuccess(@PathVariable Long orderId,
                                @AuthenticationPrincipal CustomUserDetails principal,
                                Model model) {
-        model.addAttribute("order", orderService.getById(principal.getUserId(), orderId));
+        var order = orderService.getById(principal.getUserId(), orderId);
+        model.addAttribute("order", order);
+        // Show each ordered variant's own image (hero only as a fallback).
+        model.addAttribute("variantImages", orderService.variantImagesForOrder(order));
         return "order-success";
     }
 
