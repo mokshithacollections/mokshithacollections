@@ -108,6 +108,7 @@ public class SecurityConfig {
                     .requestMatchers(
                             "/", "/home", "/shop", "/about", "/contact",
                             "/login_register", "/user_redirect", "/product-detail/**",
+                            "/forgot-password", "/reset-password",
                             "/error", "/favicon.ico"
                     ).permitAll()
                     // Static assets + uploaded images

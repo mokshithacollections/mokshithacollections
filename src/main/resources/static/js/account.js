@@ -441,46 +441,67 @@ function getCsrfToken() {
                 document.getElementById('profileForm').reset();
             });
             
-            // Security form submission
-            document.getElementById('securityForm').addEventListener('submit', function(e) {
+            // Security form submission — real call to /account/password
+            const securityForm = document.getElementById('securityForm');
+            if (securityForm) securityForm.addEventListener('submit', async function (e) {
                 e.preventDefault();
-                
+
                 const currentPass = document.getElementById('currentPassword').value;
                 const newPass = document.getElementById('newPassword').value;
                 const confirmPass = document.getElementById('confirmNewPassword').value;
-                
+
                 if (!currentPass || !newPass || !confirmPass) {
                     showNotification('Please fill in all password fields', 'error');
                     return;
                 }
-                
                 if (newPass !== confirmPass) {
                     showNotification('New passwords do not match', 'error');
                     return;
                 }
-                
                 if (newPass.length < 8) {
-                    showNotification('Password must be at least 8 characters', 'error');
+                    showNotification('New password must be at least 8 characters', 'error');
                     return;
                 }
-                
-                // Simulate API call
+                if (newPass === currentPass) {
+                    showNotification('New password must differ from the current one', 'error');
+                    return;
+                }
+
                 const saveBtn = this.querySelector('.btn-primary');
                 const originalText = saveBtn.innerHTML;
-                
                 saveBtn.innerHTML = '<span class="spinner"></span> Updating...';
                 saveBtn.disabled = true;
-                
-                setTimeout(() => {
+                try {
+                    const res = await fetch('/account/password', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-XSRF-TOKEN': getCsrfToken()
+                        },
+                        body: new URLSearchParams({
+                            currentPassword: currentPass,
+                            newPassword: newPass,
+                            confirmPassword: confirmPass
+                        })
+                    });
+                    const data = await res.json().catch(() => null);
+                    if (res.ok) {
+                        this.reset();
+                        showNotification((data && data.message) || 'Password updated successfully', 'success');
+                    } else {
+                        showNotification((data && data.message) || 'Could not update password', 'error');
+                    }
+                } catch (err) {
+                    showNotification('Network error while updating password', 'error');
+                } finally {
                     saveBtn.innerHTML = originalText;
                     saveBtn.disabled = false;
-                    this.reset();
-                    showNotification('Password updated successfully', 'success');
-                }, 1500);
+                }
             });
-            
-            // Notifications form submission
-            document.getElementById('notificationsForm').addEventListener('submit', function(e) {
+
+            // Notifications form (only if present on the page)
+            const notificationsForm = document.getElementById('notificationsForm');
+            if (notificationsForm) notificationsForm.addEventListener('submit', function (e) {
                 e.preventDefault();
                 showNotification('Notification preferences saved', 'success');
             });

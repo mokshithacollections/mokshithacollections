@@ -13,8 +13,10 @@ import com.ec.mokshitha_collections.exception.ResourceNotFoundException;
 import com.ec.mokshitha_collections.repository.OrderRepository;
 import com.ec.mokshitha_collections.repository.ProductVariantImageRepository;
 import com.ec.mokshitha_collections.repository.ProductVariantRepository;
+import com.ec.mokshitha_collections.service.EmailService;
 import com.ec.mokshitha_collections.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,11 +28,13 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AdminOrderService {
 
     private final OrderRepository orderRepository;
     private final ProductVariantRepository variantRepository;
     private final ProductVariantImageRepository variantImageRepository;
+    private final EmailService emailService;
 
     @Transactional(readOnly = true)
     public Page<OrderSummaryResponse> list(OrderStatus statusFilter, Pageable pageable) {
@@ -151,7 +155,26 @@ public class AdminOrderService {
         if (req.getPaymentStatus() != null) {
             order.setPaymentStatus(req.getPaymentStatus());
         }
-        return OrderService.toResponse(orderRepository.save(order));
+        Order saved = orderRepository.save(order);
+
+        // Notify the customer on the key milestones (skips PROCESSING and no-op
+        // re-saves). Read user/shipping values here (tx open) — the send is async.
+        if (previous != next) {
+            try {
+                emailService.sendOrderStatus(
+                        saved.getUser().getEmail(),
+                        saved.getUser().getFirstName(),
+                        saved.getOrderNumber(),
+                        next.name(),
+                        saved.getCourier(),
+                        saved.getTrackingNumber(),
+                        saved.getTrackingUrl(),
+                        saved.getExpectedDeliveryDate());
+            } catch (Exception e) {
+                log.warn("Could not queue status email for order {}: {}", saved.getOrderNumber(), e.getMessage());
+            }
+        }
+        return OrderService.toResponse(saved);
     }
 
     private static boolean notBlank(String s) {

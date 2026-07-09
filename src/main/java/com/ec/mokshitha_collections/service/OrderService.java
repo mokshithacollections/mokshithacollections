@@ -40,6 +40,7 @@ public class OrderService {
     private final AddressRepository addressRepository;
     private final ProductVariantRepository variantRepository;
     private final ProductVariantImageRepository variantImageRepository;
+    private final EmailService emailService;
 
     /** Flat delivery charge added when the subtotal is below the free threshold. */
     @Value("${app.shipping.flat-fee:100.00}")
@@ -174,6 +175,9 @@ public class OrderService {
         // in the cart. orphanRemoval=true on UserCart.items handles deletion.
         cart.getItems().removeAll(orderedLines);
         cartRepository.save(cart);
+
+        emailService.sendOrderPlaced(user.getEmail(), user.getFirstName(),
+                saved.getOrderNumber(), saved.getTotalAmount());
 
         return toResponse(saved);
     }

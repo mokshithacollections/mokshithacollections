@@ -204,6 +204,12 @@
                                         <span class="menu-text">Profile Details</span>
                                     </a>
                                 </li>
+                                <li class="menu-item">
+                                    <a href="#security" class="menu-link" data-content="security">
+                                        <span class="menu-icon"><i class="fas fa-lock"></i></span>
+                                        <span class="menu-text">Change Password</span>
+                                    </a>
+                                </li>
                             </ul>
 
                             <!-- Logout Button -->
@@ -562,6 +568,35 @@
                                 <div class="form-actions">
                                     <button type="submit" class="btn-primary">Save Changes</button>
                                     <button type="button" class="btn-secondary" id="cancelProfileChanges">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Change Password -->
+                        <div id="security" class="account-content">
+                            <div class="content-header">
+                                <h2 class="content-title">Change Password</h2>
+                            </div>
+
+                            <form id="securityForm" style="max-width:520px;">
+                                <div class="form-group">
+                                    <label for="currentPassword" class="form-label">Current Password</label>
+                                    <input type="password" class="form-control" id="currentPassword"
+                                           name="currentPassword" autocomplete="current-password" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="newPassword" class="form-label">New Password</label>
+                                    <input type="password" class="form-control" id="newPassword"
+                                           name="newPassword" autocomplete="new-password" required>
+                                    <div class="form-text">At least 8 characters, including a letter and a number.</div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirmNewPassword" class="form-label">Confirm New Password</label>
+                                    <input type="password" class="form-control" id="confirmNewPassword"
+                                           name="confirmPassword" autocomplete="new-password" required>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-primary">Update Password</button>
                                 </div>
                             </form>
                         </div>

@@ -4,6 +4,7 @@ import com.ec.mokshitha_collections.security.CustomUserDetails;
 import com.ec.mokshitha_collections.service.CartService;
 import com.ec.mokshitha_collections.service.CategoryService;
 import com.ec.mokshitha_collections.service.OrderService;
+import com.ec.mokshitha_collections.service.PasswordResetService;
 import com.ec.mokshitha_collections.service.ProductService;
 import com.ec.mokshitha_collections.service.ReviewService;
 import com.ec.mokshitha_collections.service.WishlistService;
@@ -38,12 +39,22 @@ public class PageController {
     private final ReviewService reviewService;
     private final OrderService orderService;
     private final WishlistService wishlistService;
+    private final PasswordResetService passwordResetService;
 
     private static final int DEFAULT_PAGE_SIZE = 12;
 
     @GetMapping("/about")          public String about()         { return "about"; }
     @GetMapping("/contact")        public String contact()       { return "contact"; }
     @GetMapping("/login_register") public String loginRegister() { return "login_register"; }
+    @GetMapping("/forgot-password") public String forgotPassword() { return "forgot-password"; }
+
+    /** Reset page opened from the emailed link; flags whether the token is still valid. */
+    @GetMapping("/reset-password")
+    public String resetPassword(@RequestParam(required = false) String token, Model model) {
+        model.addAttribute("token", token);
+        model.addAttribute("validToken", token != null && passwordResetService.isValidToken(token));
+        return "reset-password";
+    }
 
     @GetMapping("/shop")
     public String shop(@RequestParam(required = false) Long categoryId,

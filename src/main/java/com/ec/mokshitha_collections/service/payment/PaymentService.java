@@ -5,6 +5,7 @@ import com.ec.mokshitha_collections.exception.BadRequestException;
 import com.ec.mokshitha_collections.exception.OutOfStockException;
 import com.ec.mokshitha_collections.exception.ResourceNotFoundException;
 import com.ec.mokshitha_collections.repository.*;
+import com.ec.mokshitha_collections.service.EmailService;
 import com.ec.mokshitha_collections.service.OfferService;
 import com.ec.mokshitha_collections.service.OfferService.DiscountLine;
 import com.ec.mokshitha_collections.service.OfferService.DiscountResult;
@@ -51,6 +52,7 @@ public class PaymentService {
     private final OfferService offerService;
     private final OfferRepository offerRepository;
     private final OfferRedemptionRepository offerRedemptionRepository;
+    private final EmailService emailService;
     private final JdbcTemplate jdbc;
 
     @Value("${razorpay.currency:INR}")
@@ -248,6 +250,11 @@ public class PaymentService {
                         .discountAmount(pending.getDiscountAmount())
                         .build()));
         }
+
+        // Order-placed confirmation email (online payment).
+        userRepository.findById(pending.getUserId()).ifPresent(u ->
+                emailService.sendOrderPlaced(u.getEmail(), u.getFirstName(),
+                        saved.getOrderNumber(), saved.getTotalAmount()));
 
         // Remove the purchased lines from the cart (leave anything else) — but a
         // "Buy Now" checkout never used the cart, so leave it completely alone.

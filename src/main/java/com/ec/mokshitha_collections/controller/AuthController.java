@@ -1,14 +1,19 @@
 package com.ec.mokshitha_collections.controller;
 
+import com.ec.mokshitha_collections.dto.auth.ForgotPasswordRequest;
 import com.ec.mokshitha_collections.dto.auth.LoginRequest;
 import com.ec.mokshitha_collections.dto.auth.RegisterRequest;
+import com.ec.mokshitha_collections.dto.auth.ResetPasswordRequest;
 import com.ec.mokshitha_collections.dto.common.ApiResponse;
 import com.ec.mokshitha_collections.entity.User;
 import com.ec.mokshitha_collections.exception.ConflictException;
+import com.ec.mokshitha_collections.exception.ResourceNotFoundException;
 import com.ec.mokshitha_collections.exception.TooManyAttemptsException;
 import com.ec.mokshitha_collections.repository.UserRepository;
 import com.ec.mokshitha_collections.security.CustomUserDetails;
 import com.ec.mokshitha_collections.security.LoginAttemptService;
+import com.ec.mokshitha_collections.service.EmailService;
+import com.ec.mokshitha_collections.service.PasswordResetService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -39,6 +44,8 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final RememberMeServices rememberMeServices;
     private final LoginAttemptService loginAttemptService;
+    private final PasswordResetService passwordResetService;
+    private final EmailService emailService;
 
     private final SecurityContextRepository securityContextRepository =
             new HttpSessionSecurityContextRepository();
@@ -108,6 +115,7 @@ public class AuthController {
                 .build();
 
         User saved = userRepository.save(user);
+        emailService.sendWelcome(saved.getEmail(), saved.getFirstName());
 
         return ResponseEntity.ok(ApiResponse.builder()
                 .status("success")
@@ -116,6 +124,27 @@ public class AuthController {
                         "userId", saved.getUserId(),
                         "firstName", saved.getFirstName()))
                 .build());
+    }
+
+    /**
+     * Step 1 of reset: email a reset link if the account exists. Always responds
+     * the same way so it can't be used to discover which emails are registered.
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse> forgotPassword(@Valid @ModelAttribute ForgotPasswordRequest req) {
+        boolean sent = passwordResetService.requestReset(req.getEmail());
+        if (!sent) {
+            throw new ResourceNotFoundException("This email is not registered.");
+        }
+        return ResponseEntity.ok(ApiResponse.success(
+                "A password reset link has been sent to your email. Please check your inbox."));
+    }
+
+    /** Step 2 of reset: set the new password using the emailed token. */
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse> resetPassword(@Valid @ModelAttribute ResetPasswordRequest req) {
+        passwordResetService.reset(req.getToken(), req.getNewPassword(), req.getConfirmPassword());
+        return ResponseEntity.ok(ApiResponse.success("Password updated successfully. You can now log in."));
     }
 
     @PostMapping("/logout")
