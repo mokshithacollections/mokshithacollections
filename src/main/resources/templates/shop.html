@@ -1659,7 +1659,8 @@
                                               search=${filters?.search},
                                               minPrice=${filters?.minPrice},
                                               maxPrice=${filters?.maxPrice},
-                                              sort=${filters?.sort})}">&laquo;</a>
+                                              sort=${filters?.sort},
+                                              offer=${offerId})}">&laquo;</a>
                             </li>
 
                             <!-- First page + leading ellipsis (only when the window doesn't start at 1) -->
@@ -1670,7 +1671,8 @@
                                               search=${filters?.search},
                                               minPrice=${filters?.minPrice},
                                               maxPrice=${filters?.maxPrice},
-                                              sort=${filters?.sort})}">1</a>
+                                              sort=${filters?.sort},
+                                              offer=${offerId})}">1</a>
                             </li>
                             <li class="page-item disabled" th:if="${start > 1}"><span class="page-link">&hellip;</span></li>
 
@@ -1684,7 +1686,8 @@
                                               search=${filters?.search},
                                               minPrice=${filters?.minPrice},
                                               maxPrice=${filters?.maxPrice},
-                                              sort=${filters?.sort})}"
+                                              sort=${filters?.sort},
+                                              offer=${offerId})}"
                                    th:text="${i + 1}">1</a>
                             </li>
 
@@ -1697,7 +1700,8 @@
                                               search=${filters?.search},
                                               minPrice=${filters?.minPrice},
                                               maxPrice=${filters?.maxPrice},
-                                              sort=${filters?.sort})}"
+                                              sort=${filters?.sort},
+                                              offer=${offerId})}"
                                    th:text="${total}">N</a>
                             </li>
 
@@ -1709,7 +1713,8 @@
                                               search=${filters?.search},
                                               minPrice=${filters?.minPrice},
                                               maxPrice=${filters?.maxPrice},
-                                              sort=${filters?.sort})}">&raquo;</a>
+                                              sort=${filters?.sort},
+                                              offer=${offerId})}">&raquo;</a>
                             </li>
                         </ul>
                     </nav>
