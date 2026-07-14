@@ -3,8 +3,44 @@
 <head th:replace="~{admin/_layout :: head('Offer')}"></head>
 <body>
 <style>
-    .multi-select { min-height: 140px; }
     .scope-hint { background: #f1f5f9; border-radius: 8px; padding: 10px 14px; font-size: 0.85rem; color: #475569; }
+
+    /* ---- Item pickers (products / categories) ---- */
+    .picker-toolbar { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+    .picker-filter { flex:1; padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.85rem; background:#fff; }
+    .picker-count { font-size:0.78rem; color:#64748b; white-space:nowrap; }
+
+    .picker-box {
+        max-height: 420px; overflow-y: auto;
+        border: 1px solid #e2e8f0; border-radius: 10px; background: #fff;
+        padding: 6px;
+    }
+    .picker-box--cats { max-height: 470px; }
+
+    .picker-item {
+        display: flex; align-items: center; gap: 10px;
+        padding: 8px 10px; border-radius: 8px; cursor: pointer;
+        border: 1px solid transparent;
+    }
+    .picker-item:hover { background: #f8fafc; }
+    .picker-item input[type="checkbox"] { width: 17px; height: 17px; flex: 0 0 auto; cursor: pointer; accent-color: #6d28d9; }
+    .picker-item:has(input:checked) { background: #f5f3ff; border-color: #ddd6fe; }
+
+    .picker-thumb {
+        width: 46px; height: 46px; flex: 0 0 auto;
+        object-fit: cover; border-radius: 8px; background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+    }
+    .picker-thumb--empty { display:flex; align-items:center; justify-content:center; color:#94a3b8; font-size:1rem; }
+
+    .picker-meta { display: flex; flex-direction: column; min-width: 0; }
+    .picker-name { font-size: 0.9rem; font-weight: 600; color: #1e293b; line-height: 1.25; }
+    .picker-sku { font-size: 0.75rem; color: #64748b; }
+
+    .picker-item--cat { padding: 9px 10px; }
+    .picker-item--cat .picker-name { font-weight: 500; }
+
+    .picker-empty { padding: 18px 10px; text-align: center; color: #94a3b8; font-size: 0.85rem; }
 </style>
 <div class="admin-shell">
     <aside th:replace="~{admin/_layout :: sidebar('offers')}"></aside>
@@ -136,26 +172,49 @@
                         Leave both empty to apply it to the whole order.</p>
                     <p class="scope-hint" style="margin-bottom:14px;">
                         <i class="fas fa-circle-info"></i>
-                        Hold <strong>Ctrl</strong> (or <strong>⌘</strong> on Mac) to select more than one. Selecting none = applies to all.
+                        Tick the products and/or categories this offer applies to. Selecting none = applies to the whole order.
                     </p>
                     <div class="form-grid-2">
+                        <!-- ---- Products picker ---- -->
                         <div class="form-row">
                             <label>Applicable products</label>
-                            <select name="productIds" id="productIds" multiple class="multi-select">
-                                <option th:each="p : ${allProducts}"
-                                        th:value="${p.productId}"
-                                        th:text="${p.name}"
-                                        th:selected="${offer != null and offer.productIds.contains(p.productId)}">Product</option>
-                            </select>
+                            <div class="picker-toolbar">
+                                <select id="productCategoryFilter" class="picker-filter" title="Filter products by category">
+                                    <option value="">All categories</option>
+                                    <option th:each="c : ${allCategories}"
+                                            th:if="${c.slug != null and (c.isParent == null or !c.isParent)}"
+                                            th:value="${c.slug}"
+                                            th:text="${c.name}">Category</option>
+                                </select>
+                                <span class="picker-count" id="productPickCount"></span>
+                            </div>
+                            <div class="picker-box" id="productPicker">
+                                <label class="picker-item" th:each="p : ${allProducts}"
+                                       th:attr="data-category=${p.categorySlug}">
+                                    <input type="checkbox" name="productIds" class="pick-product"
+                                           th:value="${p.productId}"
+                                           th:checked="${offer != null and offer.productIds.contains(p.productId)}">
+                                    <img class="picker-thumb" th:if="${p.imageUrl != null}" th:src="${p.imageUrl}" alt="">
+                                    <span class="picker-thumb picker-thumb--empty" th:if="${p.imageUrl == null}"><i class="fas fa-image"></i></span>
+                                    <span class="picker-meta">
+                                        <span class="picker-name" th:text="${p.name}">Product</span>
+                                        <span class="picker-sku" th:text="${'SKU: ' + p.sku}">SKU</span>
+                                    </span>
+                                </label>
+                                <p class="picker-empty" id="productPickerEmpty" style="display:none;">No products in this category.</p>
+                            </div>
                         </div>
+                        <!-- ---- Categories picker ---- -->
                         <div class="form-row">
                             <label>Applicable categories</label>
-                            <select name="categoryIds" id="categoryIds" multiple class="multi-select">
-                                <option th:each="c : ${allCategories}"
-                                        th:value="${c.categoryId}"
-                                        th:text="${c.name + ((c.isParent != null and c.isParent) ? ' (group)' : '')}"
-                                        th:selected="${offer != null and offer.categoryIds.contains(c.categoryId)}">Category</option>
-                            </select>
+                            <div class="picker-box picker-box--cats" id="categoryPicker">
+                                <label class="picker-item picker-item--cat" th:each="c : ${allCategories}">
+                                    <input type="checkbox" name="categoryIds" class="pick-category"
+                                           th:value="${c.categoryId}"
+                                           th:checked="${offer != null and offer.categoryIds.contains(c.categoryId)}">
+                                    <span class="picker-name" th:text="${c.name + ((c.isParent != null and c.isParent) ? ' (group)' : '')}">Category</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -289,10 +348,39 @@
     }
     dt.addEventListener('change', syncHint); syncHint();
 
-    function selectedIds(id) {
-        return Array.from(document.getElementById(id).selectedOptions)
-            .map(o => parseInt(o.value, 10));
+    function selectedIds(name) {
+        return Array.from(document.querySelectorAll('input[name="' + name + '"]:checked'))
+            .map(cb => parseInt(cb.value, 10));
     }
+
+    // ---- Product picker: category filter + selection count ----
+    (function wirePicker() {
+        const filter = document.getElementById('productCategoryFilter');
+        const box = document.getElementById('productPicker');
+        const emptyMsg = document.getElementById('productPickerEmpty');
+        const countEl = document.getElementById('productPickCount');
+        if (!box) return;
+        const items = Array.from(box.querySelectorAll('.picker-item'));
+
+        function applyFilter() {
+            const cat = filter ? filter.value : '';
+            let visible = 0;
+            items.forEach(it => {
+                const show = !cat || (it.getAttribute('data-category') === cat);
+                it.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            if (emptyMsg) emptyMsg.style.display = visible === 0 ? 'block' : 'none';
+        }
+        function updateCount() {
+            const n = box.querySelectorAll('input.pick-product:checked').length;
+            if (countEl) countEl.textContent = n ? (n + ' selected') : '';
+        }
+        if (filter) filter.addEventListener('change', applyFilter);
+        box.addEventListener('change', updateCount);
+        applyFilter();
+        updateCount();
+    })();
     function numOrNull(v) {
         return (v === '' || v === null || v === undefined) ? null : parseFloat(v);
     }

@@ -26,9 +26,12 @@ import com.ec.mokshitha_collections.service.impl.ProductServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -59,6 +62,14 @@ public class AdminProductService {
                 ? productRepository.findAll(pageable)
                 : productRepository.findByNameContainingIgnoreCase(search.trim(), pageable);
         return page.map(ProductServiceImpl::toSummary);
+    }
+
+    /** Full (unpaged) product summary list for admin pickers (e.g. offer item selection). */
+    @Transactional(readOnly = true)
+    public List<ProductSummaryResponse> listAllSummaries() {
+        return productRepository.findAll(Sort.by(Sort.Direction.ASC, "name")).stream()
+                .map(ProductServiceImpl::toSummary)
+                .toList();
     }
 
     @Transactional

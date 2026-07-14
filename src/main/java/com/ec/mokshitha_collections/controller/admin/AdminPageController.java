@@ -234,7 +234,7 @@ public class AdminPageController {
     @GetMapping("/offers/new")
     public String offerNew(Model model) {
         model.addAttribute("offer", null); // signals "new"
-        model.addAttribute("allProducts", productRepository.findAll());
+        model.addAttribute("allProducts", productService.listAllSummaries());
         model.addAttribute("allCategories", categoryService.listAll());
         return "admin/offer-form";
     }
@@ -242,7 +242,7 @@ public class AdminPageController {
     @GetMapping("/offers/{id}")
     public String offerEdit(@PathVariable Long id, Model model) {
         model.addAttribute("offer", offerService.getById(id));
-        model.addAttribute("allProducts", productRepository.findAll());
+        model.addAttribute("allProducts", productService.listAllSummaries());
         model.addAttribute("allCategories", categoryService.listAll());
         return "admin/offer-form";
     }
