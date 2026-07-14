@@ -154,6 +154,22 @@
             transform: translateY(0) scale(1);
             z-index: 1;
         }
+        /* ----- Sale-artwork hero slide (clickable to the sale) ----- */
+        .hero-slide.offer-slide {
+            background-image: var(--hero-bg-d);
+            background-size: cover; background-position: center;
+            cursor: pointer; text-decoration: none; display: block;
+        }
+        @media (max-width: 768px) {
+            .hero-slide.offer-slide { background-image: var(--hero-bg-m); }
+        }
+        /* While a sale slide is active, hide the standard hero text + CTAs so the
+           artwork (which already has the offer text) shows cleanly. */
+        .hero-section.offer-active .hero-content,
+        .hero-section.offer-active .hero-actions,
+        .hero-section.offer-active .hero-actions-mobile,
+        .hero-section.offer-active .floating-element { display: none !important; }
+
         .hero-slide.slide-1 { background-image: url(../images/ALL1.jpeg); }
 		.hero-slide.slide-2 { background-image: url(../images/DesktopBG3.jpeg); }
         .hero-slide.slide-3 { background-image: url(../images/DesktopBG.png); }
@@ -871,10 +887,8 @@
             /* Free the bottom area for the buttons (dots would overlap them). */
             .hero-dots { display: none; }
 
-            /* Smaller slider controls on phones */
-            .hero-nav { width: 38px; height: 38px; font-size: 0.9rem; }
-            .hero-prev { left: 10px; }
-            .hero-next { right: 10px; }
+            /* Hide the prev/next arrows on phones (swipe/auto-advance only) */
+            .hero-nav { display: none; }
             .hero-dots { bottom: 14px; }
 
             /* Tighter vertical rhythm — less empty space between sections */
@@ -1010,6 +1024,7 @@
             width: 100%; max-width: 1120px;
             padding: 10px 30px 0;
             display: flex; align-items: center; justify-content: space-between; gap: 26px;
+            text-decoration: none; color: inherit; cursor: pointer;   /* whole slide is a link */
         }
         .ob-left { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
 

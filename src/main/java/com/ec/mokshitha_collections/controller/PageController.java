@@ -3,6 +3,7 @@ package com.ec.mokshitha_collections.controller;
 import com.ec.mokshitha_collections.security.CustomUserDetails;
 import com.ec.mokshitha_collections.service.CartService;
 import com.ec.mokshitha_collections.service.CategoryService;
+import com.ec.mokshitha_collections.service.OfferService;
 import com.ec.mokshitha_collections.service.OrderService;
 import com.ec.mokshitha_collections.service.PasswordResetService;
 import com.ec.mokshitha_collections.service.ProductService;
@@ -40,6 +41,7 @@ public class PageController {
     private final OrderService orderService;
     private final WishlistService wishlistService;
     private final PasswordResetService passwordResetService;
+    private final OfferService offerService;
 
     private static final int DEFAULT_PAGE_SIZE = 12;
 
@@ -62,17 +64,39 @@ public class PageController {
                        @RequestParam(required = false) BigDecimal minPrice,
                        @RequestParam(required = false) BigDecimal maxPrice,
                        @RequestParam(required = false) String search,
+                       @RequestParam(required = false) Long offer,
                        @RequestParam(defaultValue = "0") int page,
                        @RequestParam(defaultValue = "createdAt,desc") String sort,
                        Model model) {
 
         Pageable pageable = PageRequest.of(page, DEFAULT_PAGE_SIZE, parseSort(sort));
-        var products = productService.listProducts(
-                categoryId, categorySlug, minPrice, maxPrice, search, null, pageable);
+
+        // If a sale banner was clicked, restrict the listing to that offer's items
+        // and expose the offer (discount label + live/scheduled) to the template.
+        var shopOffer = offer == null ? java.util.Optional.<OfferService.ShopOffer>empty()
+                                      : offerService.shopOffer(offer);
+        var products = shopOffer
+                .map(so -> productService.listProducts(categoryId, categorySlug, minPrice, maxPrice,
+                        search, null, so.productIds(), so.categoryIds(), pageable))
+                .orElseGet(() -> productService.listProducts(
+                        categoryId, categorySlug, minPrice, maxPrice, search, null, pageable));
 
         model.addAttribute("products", products);
         model.addAttribute("categories", categoryService.listActive());
         model.addAttribute("filters", new ShopFilters(categoryId, categorySlug, minPrice, maxPrice, search, sort));
+        model.addAttribute("offerId", offer);
+        // Active sales (LIVE + SCHEDULED) so the filter can list them like categories.
+        model.addAttribute("saleOffers", offerService.listActiveBanners());
+        shopOffer.ifPresent(so -> {
+            model.addAttribute("shopOffer", so);
+            // The exact after-offer price per product (shown for live AND upcoming sales).
+            java.util.Map<Long, java.math.BigDecimal> offerPrices = new java.util.HashMap<>();
+            products.getContent().forEach(p -> {
+                java.math.BigDecimal cp = so.checkoutPrice(p.getPrice(), p.getDiscountPrice());
+                if (cp != null) offerPrices.put(p.getProductId(), cp);
+            });
+            model.addAttribute("offerPrices", offerPrices);
+        });
         return "shop";
     }
 

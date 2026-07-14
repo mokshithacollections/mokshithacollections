@@ -2,9 +2,13 @@ package com.ec.mokshitha_collections.service.product;
 
 import com.ec.mokshitha_collections.entity.Product;
 import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Composable JPA Criteria fragments. Combine with `Specification.where(...).and(...)`.
@@ -69,5 +73,31 @@ public final class ProductSpecifications {
 
     public static Specification<Product> isFeatured(Boolean featured) {
         return (root, q, cb) -> featured == null ? null : cb.equal(root.get("isFeatured"), featured);
+    }
+
+    /**
+     * Restricts to the products an offer covers: any listed product id, OR any
+     * product in a listed category / that category's parent group. When both
+     * sets are empty the offer applies to everything, so no filter is added.
+     */
+    public static Specification<Product> inOffer(Set<Long> productIds, Set<Long> categoryIds) {
+        boolean noProducts = productIds == null || productIds.isEmpty();
+        boolean noCategories = categoryIds == null || categoryIds.isEmpty();
+        // Return a no-op spec (null predicate) rather than a null Specification,
+        // matching the other fragments so Specification.allOf(...) stays happy.
+        if (noProducts && noCategories) return (root, q, cb) -> null;
+        return (root, q, cb) -> {
+            List<Predicate> ors = new ArrayList<>();
+            if (!noProducts) {
+                ors.add(root.get("productId").in(productIds));
+            }
+            if (!noCategories) {
+                var category = root.join("category", JoinType.INNER);
+                var parent = category.join("parent", JoinType.LEFT);
+                ors.add(category.get("categoryId").in(categoryIds));
+                ors.add(parent.get("categoryId").in(categoryIds));
+            }
+            return cb.or(ors.toArray(new Predicate[0]));
+        };
     }
 }

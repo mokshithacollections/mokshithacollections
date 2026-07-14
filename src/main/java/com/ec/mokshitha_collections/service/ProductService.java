@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 public interface ProductService {
 
@@ -22,6 +23,18 @@ public interface ProductService {
                                               BigDecimal maxPrice,
                                               String search,
                                               Boolean featured,
+                                              Pageable pageable);
+
+    /** As above, additionally restricted to an offer's products/categories
+     *  (both null/empty = no offer restriction). */
+    Page<ProductSummaryResponse> listProducts(Long categoryId,
+                                              String categorySlug,
+                                              BigDecimal minPrice,
+                                              BigDecimal maxPrice,
+                                              String search,
+                                              Boolean featured,
+                                              Set<Long> offerProductIds,
+                                              Set<Long> offerCategoryIds,
                                               Pageable pageable);
 
     /** Detail view: product + category + variants + images + review aggregates. */

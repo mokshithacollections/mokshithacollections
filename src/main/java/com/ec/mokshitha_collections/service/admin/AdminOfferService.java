@@ -105,6 +105,11 @@ public class AdminOfferService {
         o.setPerCustomerLimit(req.getPerCustomerLimit());
         o.setActive(req.getActive() == null ? Boolean.TRUE : req.getActive());
         o.setAutoApply(Boolean.TRUE.equals(req.getAutoApply()));
+        o.setApplyOnMrp(Boolean.TRUE.equals(req.getApplyOnMrp()));
+        o.setBannerImageDesktop(blankToNull(req.getBannerImageDesktop()));
+        o.setBannerImageMobile(blankToNull(req.getBannerImageMobile()));
+        o.setBannerBeforeDesktop(blankToNull(req.getBannerBeforeDesktop()));
+        o.setBannerBeforeMobile(blankToNull(req.getBannerBeforeMobile()));
         o.setPriority(req.getPriority() == null ? 0 : req.getPriority());
         o.setProductIds(req.getProductIds() == null ? new HashSet<>() : new HashSet<>(req.getProductIds()));
         o.setCategoryIds(req.getCategoryIds() == null ? new HashSet<>() : new HashSet<>(req.getCategoryIds()));
@@ -112,6 +117,10 @@ public class AdminOfferService {
 
     private static String normalizeCode(String code) {
         return code.trim().toUpperCase();
+    }
+
+    private static String blankToNull(String s) {
+        return (s == null || s.isBlank()) ? null : s.trim();
     }
 
     private static OfferResponse toResponse(Offer o) {
@@ -129,6 +138,11 @@ public class AdminOfferService {
                 .perCustomerLimit(o.getPerCustomerLimit())
                 .active(o.getActive())
                 .autoApply(o.getAutoApply())
+                .applyOnMrp(o.getApplyOnMrp())
+                .bannerImageDesktop(o.getBannerImageDesktop())
+                .bannerImageMobile(o.getBannerImageMobile())
+                .bannerBeforeDesktop(o.getBannerBeforeDesktop())
+                .bannerBeforeMobile(o.getBannerBeforeMobile())
                 .priority(o.getPriority())
                 .productIds(new HashSet<>(o.getProductIds()))     // force LAZY init inside tx
                 .categoryIds(new HashSet<>(o.getCategoryIds()))

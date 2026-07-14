@@ -23,8 +23,10 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Customer-facing offer logic: the home-banner feed and the checkout coupon
@@ -86,13 +88,83 @@ public class OfferService {
                 .countdownLabel(scheduled ? "Starts in" : "Ends in")
                 .secondsRemaining(secs)
                 .validityText(validity)
+                // Coming soon → "before" artwork; live → "after" artwork (each falls
+                // back to the other so a half-filled offer still shows something).
+                .bannerImageDesktop(scheduled
+                        ? firstNonBlank(o.getBannerBeforeDesktop(), o.getBannerImageDesktop())
+                        : firstNonBlank(o.getBannerImageDesktop(), o.getBannerBeforeDesktop()))
+                .bannerImageMobile(scheduled
+                        ? firstNonBlank(o.getBannerBeforeMobile(), o.getBannerImageMobile())
+                        : firstNonBlank(o.getBannerImageMobile(), o.getBannerBeforeMobile()))
                 .build();
+    }
+
+    /* ===================== Shop "sale" view ===================== */
+
+    /** Offer info for the shop when a customer clicks a sale banner. */
+    public record ShopOffer(Long offerId, String name, String discountLabel, String discountShort,
+                            boolean live, String startsAtText, boolean percentage,
+                            BigDecimal discountValue, BigDecimal maxDiscountAmount, boolean applyOnMrp,
+                            Set<Long> productIds, Set<Long> categoryIds) {
+
+        /**
+         * After-offer unit price for a product, or {@code null} when it isn't a
+         * per-item figure (a fixed rupee coupon is deducted from the order total,
+         * not each product). Mirrors the checkout discount math.
+         */
+        public BigDecimal checkoutPrice(BigDecimal price, BigDecimal discountPrice) {
+            if (!percentage || price == null) return null;
+            BigDecimal selling = discountPrice != null ? discountPrice : price;
+            BigDecimal base = applyOnMrp ? price : selling;
+            BigDecimal disc = base.multiply(discountValue)
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            if (maxDiscountAmount != null) disc = disc.min(maxDiscountAmount);
+            disc = disc.min(selling);
+            return selling.subtract(disc).max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
+        }
+    }
+
+    /**
+     * Resolves an offer for the shop sale view. Returns empty if the offer is
+     * missing, inactive, or already expired. {@code live} is true when it's
+     * currently running (false = scheduled/coming soon).
+     */
+    @Transactional(readOnly = true)
+    public Optional<ShopOffer> shopOffer(Long offerId) {
+        if (offerId == null) return Optional.empty();
+        Offer o = offerRepository.findById(offerId).orElse(null);
+        if (o == null || o.getActive() == null || !o.getActive()) return Optional.empty();
+
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isAfter(o.getEndAt())) return Optional.empty(); // expired — nothing to show
+
+        boolean live = !now.isBefore(o.getStartAt());
+        boolean percentage = o.getDiscountType() == OfferDiscountType.PERCENTAGE;
+        String label = percentage
+                ? strip(o.getDiscountValue()) + "% OFF"
+                : "₹" + strip(o.getDiscountValue()) + " OFF";
+        String shortLabel = percentage
+                ? strip(o.getDiscountValue()) + "%"
+                : "₹" + strip(o.getDiscountValue());
+
+        return Optional.of(new ShopOffer(
+                o.getOfferId(), o.getName(), label, shortLabel, live,
+                o.getStartAt().format(DAY_MONTH_YEAR),
+                percentage, o.getDiscountValue(), o.getMaxDiscountAmount(),
+                Boolean.TRUE.equals(o.getApplyOnMrp()),
+                new HashSet<>(o.getProductIds()),
+                new HashSet<>(o.getCategoryIds())));
     }
 
     /* ===================== Checkout coupon ===================== */
 
-    /** One discountable checkout line — the minimum an offer needs to score it. */
-    public record DiscountLine(Long productId, Long categoryId, Long parentCategoryId, BigDecimal lineTotal) {}
+    /**
+     * One discountable checkout line. {@code lineTotal} is the selling price × qty
+     * (what the customer pays); {@code mrpLineTotal} is the original price × qty,
+     * used when an offer's discount is computed on the MRP.
+     */
+    public record DiscountLine(Long productId, Long categoryId, Long parentCategoryId,
+                               BigDecimal lineTotal, BigDecimal mrpLineTotal) {}
 
     /** Outcome of a valid coupon: the matched offer + the rupee discount to apply. */
     public record DiscountResult(Offer offer, BigDecimal discountAmount) {}
@@ -163,6 +235,7 @@ public class OfferService {
             throw new BadRequestException("You've already used this code the maximum number of times.");
         }
 
+        // Selling-price subtotal of the matching items (what those items cost).
         BigDecimal applicable = lines.stream()
                 .filter(l -> applies(offer, l))
                 .map(DiscountLine::lineTotal)
@@ -173,7 +246,12 @@ public class OfferService {
 
         BigDecimal discount;
         if (offer.getDiscountType() == OfferDiscountType.PERCENTAGE) {
-            discount = applicable.multiply(offer.getDiscountValue())
+            // Percentage base: original price (MRP) when the offer opts in, else selling price.
+            BigDecimal base = Boolean.TRUE.equals(offer.getApplyOnMrp())
+                    ? lines.stream().filter(l -> applies(offer, l))
+                            .map(DiscountLine::mrpLineTotal).reduce(BigDecimal.ZERO, BigDecimal::add)
+                    : applicable;
+            discount = base.multiply(offer.getDiscountValue())
                     .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
         } else {
             discount = offer.getDiscountValue().min(applicable);
@@ -181,7 +259,8 @@ public class OfferService {
         if (offer.getMaxDiscountAmount() != null) {
             discount = discount.min(offer.getMaxDiscountAmount());
         }
-        discount = discount.min(fullSubtotal).setScale(2, RoundingMode.HALF_UP);
+        // Never discount more than the matching items actually cost (selling price).
+        discount = discount.min(applicable).setScale(2, RoundingMode.HALF_UP);
         if (discount.signum() <= 0) {
             throw new BadRequestException("This code gives no discount on your order.");
         }
@@ -231,15 +310,24 @@ public class OfferService {
     /** Build a single line from a variant + quantity (price logic mirrors PaymentService). */
     public static DiscountLine lineFor(ProductVariant v, int qty) {
         Product p = v.getProduct();
+        BigDecimal qtyBd = BigDecimal.valueOf(qty);
         BigDecimal unitPrice = p.getDiscountPrice() != null ? p.getDiscountPrice() : p.getPrice();
-        BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(qty));
+        BigDecimal lineTotal = unitPrice.multiply(qtyBd);
+        BigDecimal mrpLineTotal = p.getPrice().multiply(qtyBd);  // original price × qty
         ProductCategory cat = p.getCategory();
         Long catId = cat != null ? cat.getCategoryId() : null;
         Long parentId = (cat != null && cat.getParent() != null) ? cat.getParent().getCategoryId() : null;
-        return new DiscountLine(p.getProductId(), catId, parentId, lineTotal);
+        return new DiscountLine(p.getProductId(), catId, parentId, lineTotal, mrpLineTotal);
     }
 
     private static String strip(BigDecimal v) {
         return v.stripTrailingZeros().toPlainString();
+    }
+
+    /** First non-blank of the given values, or null. */
+    private static String firstNonBlank(String a, String b) {
+        if (a != null && !a.isBlank()) return a;
+        if (b != null && !b.isBlank()) return b;
+        return null;
     }
 }

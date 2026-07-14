@@ -25,4 +25,7 @@ public class OfferBannerResponse {
     private final long secondsRemaining;
     /** Human validity window, shown beside the badge, e.g. "23 Jun → 30 Jun 2026". */
     private final String validityText;
+    /** Optional promo artwork for the hero slider (null = no hero slide for this offer). */
+    private final String bannerImageDesktop;
+    private final String bannerImageMobile;
 }

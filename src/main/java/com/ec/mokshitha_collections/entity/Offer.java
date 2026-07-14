@@ -74,6 +74,29 @@ public class Offer {
     @Builder.Default
     private Boolean autoApply = false;
 
+    /**
+     * Base price a PERCENTAGE discount is computed on: false (default) = the
+     * current selling price (after any product discount); true = the original
+     * price / MRP. Nullable for safe column-add; treated as false when null.
+     */
+    @Column(name = "apply_on_mrp")
+    @Builder.Default
+    private Boolean applyOnMrp = false;
+
+    /** Promo hero artwork shown once the sale is LIVE (after it starts). */
+    @Column(name = "banner_image_desktop", columnDefinition = "TEXT")
+    private String bannerImageDesktop;
+
+    @Column(name = "banner_image_mobile", columnDefinition = "TEXT")
+    private String bannerImageMobile;
+
+    /** Promo hero artwork shown while the sale is COMING SOON (before it starts). */
+    @Column(name = "banner_before_desktop", columnDefinition = "TEXT")
+    private String bannerBeforeDesktop;
+
+    @Column(name = "banner_before_mobile", columnDefinition = "TEXT")
+    private String bannerBeforeMobile;
+
     /** Tie-breaker / ordering when several offers could apply (higher = first). */
     @Column(nullable = false)
     private Integer priority;
@@ -100,6 +123,7 @@ public class Offer {
         if (createdAt == null) createdAt = LocalDateTime.now();
         if (active == null) active = true;
         if (autoApply == null) autoApply = false;
+        if (applyOnMrp == null) applyOnMrp = false;
         if (priority == null) priority = 0;
     }
 }

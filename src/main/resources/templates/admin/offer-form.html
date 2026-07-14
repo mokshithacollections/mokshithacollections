@@ -80,6 +80,22 @@
                     </div>
                     <div class="form-grid-2">
                         <div class="form-row">
+                            <label>Discount applies on</label>
+                            <select name="applyOnMrp" id="applyOnMrp">
+                                <option value="false"
+                                        th:selected="${offer == null or offer.applyOnMrp == null or !offer.applyOnMrp}">
+                                    Selling price (after product discount)
+                                </option>
+                                <option value="true"
+                                        th:selected="${offer != null and offer.applyOnMrp != null and offer.applyOnMrp}">
+                                    Original price / MRP
+                                </option>
+                            </select>
+                            <div class="helper">Affects percentage offers: compute the % off the current sale price, or off the full MRP (a bigger saving). Fixed-amount offers ignore this.</div>
+                        </div>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-row">
                             <label>Maximum discount amount</label>
                             <input type="number" name="maxDiscountAmount" min="0" step="0.01"
                                    placeholder="Optional — caps the discount (₹)"
@@ -140,6 +156,71 @@
                                         th:text="${c.name + ((c.isParent != null and c.isParent) ? ' (group)' : '')}"
                                         th:selected="${offer != null and offer.categoryIds.contains(c.categoryId)}">Category</option>
                             </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Home banner artwork ===== -->
+                <div class="form-section">
+                    <h3 class="form-section-head"><i class="fas fa-image"></i>Home banner artwork</h3>
+                    <p class="form-section-sub">Optional. Shown as a clickable slide in the home hero (opens this sale).
+                        Put the offer name, description, dates and a Shop&nbsp;Now button in the artwork itself.
+                        The <b>Before</b> image shows while the sale is Coming Soon; the <b>After</b> image shows once it's Live.
+                        Recommended: <b>desktop ~1600×450</b>, <b>mobile ~1000×620</b> (JPG/PNG/WebP, ≤5MB). Mobile falls back to desktop if blank.</p>
+
+                    <h4 style="margin:6px 0 10px;font-size:0.95rem;color:#6b21a8;"><i class="fas fa-hourglass-half"></i> Before sale (Coming Soon)</h4>
+                    <div class="form-grid-2">
+                        <div class="form-row">
+                            <label>Desktop image</label>
+                            <input type="file" id="beforeDesktopFile" accept="image/*">
+                            <input type="hidden" name="bannerBeforeDesktop" id="bannerBeforeDesktop"
+                                   th:value="${offer != null ? offer.bannerBeforeDesktop : ''}">
+                            <div class="helper" id="beforeDesktopStatus"></div>
+                            <img id="beforeDesktopPreview" alt="preview"
+                                 th:src="${offer != null and offer.bannerBeforeDesktop != null ? offer.bannerBeforeDesktop : ''}"
+                                 th:style="${offer != null and offer.bannerBeforeDesktop != null}
+                                           ? 'margin-top:8px;max-width:100%;border-radius:8px;display:block;'
+                                           : 'margin-top:8px;max-width:100%;border-radius:8px;display:none;'">
+                        </div>
+                        <div class="form-row">
+                            <label>Mobile image</label>
+                            <input type="file" id="beforeMobileFile" accept="image/*">
+                            <input type="hidden" name="bannerBeforeMobile" id="bannerBeforeMobile"
+                                   th:value="${offer != null ? offer.bannerBeforeMobile : ''}">
+                            <div class="helper" id="beforeMobileStatus">Optional.</div>
+                            <img id="beforeMobilePreview" alt="preview"
+                                 th:src="${offer != null and offer.bannerBeforeMobile != null ? offer.bannerBeforeMobile : ''}"
+                                 th:style="${offer != null and offer.bannerBeforeMobile != null}
+                                           ? 'margin-top:8px;max-width:220px;border-radius:8px;display:block;'
+                                           : 'margin-top:8px;max-width:220px;border-radius:8px;display:none;'">
+                        </div>
+                    </div>
+
+                    <h4 style="margin:18px 0 10px;font-size:0.95rem;color:#1e7a34;"><i class="fas fa-bolt"></i> After sale starts (Live)</h4>
+                    <div class="form-grid-2">
+                        <div class="form-row">
+                            <label>Desktop image</label>
+                            <input type="file" id="desktopFile" accept="image/*">
+                            <input type="hidden" name="bannerImageDesktop" id="bannerImageDesktop"
+                                   th:value="${offer != null ? offer.bannerImageDesktop : ''}">
+                            <div class="helper" id="desktopStatus"></div>
+                            <img id="desktopPreview" alt="preview"
+                                 th:src="${offer != null and offer.bannerImageDesktop != null ? offer.bannerImageDesktop : ''}"
+                                 th:style="${offer != null and offer.bannerImageDesktop != null}
+                                           ? 'margin-top:8px;max-width:100%;border-radius:8px;display:block;'
+                                           : 'margin-top:8px;max-width:100%;border-radius:8px;display:none;'">
+                        </div>
+                        <div class="form-row">
+                            <label>Mobile image</label>
+                            <input type="file" id="mobileFile" accept="image/*">
+                            <input type="hidden" name="bannerImageMobile" id="bannerImageMobile"
+                                   th:value="${offer != null ? offer.bannerImageMobile : ''}">
+                            <div class="helper" id="mobileStatus">Optional.</div>
+                            <img id="mobilePreview" alt="preview"
+                                 th:src="${offer != null and offer.bannerImageMobile != null ? offer.bannerImageMobile : ''}"
+                                 th:style="${offer != null and offer.bannerImageMobile != null}
+                                           ? 'margin-top:8px;max-width:220px;border-radius:8px;display:block;'
+                                           : 'margin-top:8px;max-width:220px;border-radius:8px;display:none;'">
                         </div>
                     </div>
                 </div>
@@ -219,6 +300,42 @@
         return (v === '' || v === null || v === undefined) ? null : parseInt(v, 10);
     }
 
+    // Upload a banner image immediately on select; store the returned URL in the hidden field.
+    function wireBannerUpload(fileId, hiddenId, statusId, previewId) {
+        const fileEl = document.getElementById(fileId);
+        if (!fileEl) return;
+        fileEl.addEventListener('change', async () => {
+            const file = fileEl.files && fileEl.files[0];
+            if (!file) return;
+            const statusEl = document.getElementById(statusId);
+            statusEl.textContent = 'Uploading…';
+            const fd = new FormData();
+            fd.append('file', file);
+            try {
+                const res = await fetch('/api/admin/offers/banner/upload', {
+                    method: 'POST',
+                    headers: { 'X-XSRF-TOKEN': getCsrfToken() },
+                    body: fd
+                });
+                const data = await res.json();
+                if (res.ok && data.url) {
+                    document.getElementById(hiddenId).value = data.url;
+                    statusEl.textContent = 'Uploaded ✓';
+                    const prev = document.getElementById(previewId);
+                    if (prev) { prev.src = data.url; prev.style.display = 'block'; }
+                } else {
+                    statusEl.textContent = (data && data.message) || 'Upload failed';
+                }
+            } catch (err) {
+                statusEl.textContent = 'Upload failed — try again';
+            }
+        });
+    }
+    wireBannerUpload('beforeDesktopFile', 'bannerBeforeDesktop', 'beforeDesktopStatus', 'beforeDesktopPreview');
+    wireBannerUpload('beforeMobileFile', 'bannerBeforeMobile', 'beforeMobileStatus', 'beforeMobilePreview');
+    wireBannerUpload('desktopFile', 'bannerImageDesktop', 'desktopStatus', 'desktopPreview');
+    wireBannerUpload('mobileFile', 'bannerImageMobile', 'mobileStatus', 'mobilePreview');
+
     document.getElementById('offerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const fd = new FormData(e.target);
@@ -236,6 +353,11 @@
             priority: intOrNull(fd.get('priority')),
             active: fd.get('active') === 'on',
             autoApply: fd.get('autoApply') === 'on',
+            applyOnMrp: fd.get('applyOnMrp') === 'true',
+            bannerImageDesktop: fd.get('bannerImageDesktop') || null,
+            bannerImageMobile: fd.get('bannerImageMobile') || null,
+            bannerBeforeDesktop: fd.get('bannerBeforeDesktop') || null,
+            bannerBeforeMobile: fd.get('bannerBeforeMobile') || null,
             productIds: selectedIds('productIds'),
             categoryIds: selectedIds('categoryIds')
         };

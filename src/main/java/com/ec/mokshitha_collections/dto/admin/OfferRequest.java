@@ -49,6 +49,16 @@ public class OfferRequest {
     /** Auto-apply the best eligible offer at checkout (no code typing needed). */
     private Boolean autoApply;
 
+    /** Percentage base: false = selling price (default), true = original price / MRP. */
+    private Boolean applyOnMrp;
+
+    /** Promo artwork URLs (uploaded via the banner upload endpoint).
+     *  bannerImage* = shown when LIVE; bannerBefore* = shown when COMING SOON. */
+    private String bannerImageDesktop;
+    private String bannerImageMobile;
+    private String bannerBeforeDesktop;
+    private String bannerBeforeMobile;
+
     private Integer priority;
 
     /** Empty = applies to all products. */

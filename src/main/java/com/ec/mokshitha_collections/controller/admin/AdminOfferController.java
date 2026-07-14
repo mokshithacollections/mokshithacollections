@@ -4,12 +4,15 @@ import com.ec.mokshitha_collections.dto.admin.OfferRequest;
 import com.ec.mokshitha_collections.dto.common.ApiResponse;
 import com.ec.mokshitha_collections.dto.offer.OfferResponse;
 import com.ec.mokshitha_collections.service.admin.AdminOfferService;
+import com.ec.mokshitha_collections.service.admin.ImageStorageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/offers")
@@ -17,6 +20,7 @@ import java.util.List;
 public class AdminOfferController {
 
     private final AdminOfferService service;
+    private final ImageStorageService imageStorageService;
 
     @GetMapping
     public ResponseEntity<List<OfferResponse>> list() {
@@ -55,5 +59,12 @@ public class AdminOfferController {
     public ResponseEntity<ApiResponse> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.ok(ApiResponse.success("Offer deleted"));
+    }
+
+    /** Uploads a promo banner image (desktop/mobile) and returns its public URL. */
+    @PostMapping("/banner/upload")
+    public ResponseEntity<Map<String, Object>> uploadBanner(@RequestParam("file") MultipartFile file) {
+        String url = imageStorageService.store(file, "offers");
+        return ResponseEntity.ok(Map.of("status", "success", "url", url));
     }
 }

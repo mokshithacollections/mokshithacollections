@@ -139,7 +139,8 @@
             <div class="offer-slide" th:each="ob,iter : ${offerBanners}"
                  th:classappend="${iter.first} ? 'active'"
                  th:attr="data-seconds=${ob.secondsRemaining}, data-mode=${ob.mode}">
-                <div class="ob-inner">
+                <!-- Whole slide links to the shop filtered to this sale's products -->
+                <a class="ob-inner" th:href="@{/shop(offer=${ob.offerId})}">
                     <!-- Left: badge + headline + validity window -->
                     <div class="ob-left">
                         <div class="ob-badge-row">
@@ -180,7 +181,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
 
@@ -196,7 +197,15 @@
     <section class="hero-section">
         <!-- Background image slider — crossfades, auto-advances every 5s -->
         <div class="hero-slider" id="heroSlider">
-            <div class="hero-slide slide-1 active"></div>
+            <!-- Sale artwork slides (clickable → the sale). Shown first when present. -->
+            <!-- Whole artwork is clickable → the sale (the Shop Now button is drawn into the image) -->
+            <a class="hero-slide offer-slide" th:each="ho,iter : ${heroOffers}"
+               th:classappend="${iter.first} ? 'active'"
+               th:href="@{/shop(offer=${ho.offerId})}"
+               aria-label="Shop this sale"
+               th:style="|--hero-bg-d:url(${ho.bannerImageDesktop}); --hero-bg-m:url(${ho.bannerImageMobile != null ? ho.bannerImageMobile : ho.bannerImageDesktop});|"></a>
+            <div class="hero-slide slide-1"
+                 th:classappend="${heroOffers == null or #lists.isEmpty(heroOffers)} ? 'active'"></div>
             <!--<div class="hero-slide slide-2"></div>
 			<div class="hero-slide slide-3"></div>-->
         </div>
@@ -559,6 +568,12 @@
             var current = slides.findIndex(function (s) { return s.classList.contains('active'); });
             if (current < 0) { current = 0; slides[0].classList.add('active'); }
 
+            // Hide the hero text/CTA overlays while a sale-artwork slide is showing.
+            function syncOfferActive() {
+                section.classList.toggle('offer-active', slides[current].classList.contains('offer-slide'));
+            }
+            syncOfferActive();
+
             // Build dots
             var dots = [];
             if (dotsWrap) {
@@ -588,6 +603,7 @@
                 current = (n + slides.length) % slides.length;
                 slides[current].classList.add('active');
                 if (dots[current]) dots[current].classList.add('active');
+                syncOfferActive();
             }
 
             // Reset the progress bar to 0, then animate it to 100% over INTERVAL.

@@ -52,6 +52,20 @@ public class ProductServiceImpl implements ProductService {
                                                      String search,
                                                      Boolean featured,
                                                      Pageable pageable) {
+        return listProducts(categoryId, categorySlug, minPrice, maxPrice, search, featured, null, null, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ProductSummaryResponse> listProducts(Long categoryId,
+                                                     String categorySlug,
+                                                     BigDecimal minPrice,
+                                                     BigDecimal maxPrice,
+                                                     String search,
+                                                     Boolean featured,
+                                                     java.util.Set<Long> offerProductIds,
+                                                     java.util.Set<Long> offerCategoryIds,
+                                                     Pageable pageable) {
         Specification<Product> spec = Specification.allOf(
                 ProductSpecifications.isActive(),
                 ProductSpecifications.hasCategory(categoryId),
@@ -59,7 +73,8 @@ public class ProductServiceImpl implements ProductService {
                 ProductSpecifications.priceAtLeast(minPrice),
                 ProductSpecifications.priceAtMost(maxPrice),
                 ProductSpecifications.matches(search),
-                ProductSpecifications.isFeatured(featured));
+                ProductSpecifications.isFeatured(featured),
+                ProductSpecifications.inOffer(offerProductIds, offerCategoryIds));
 
         Page<Product> page = productRepository.findAll(spec, pageable);
 

@@ -158,13 +158,13 @@
                             <div class="form-row">
                                 <label>Courier</label>
                                 <input type="text" name="courier" maxlength="64"
-                                       th:value="${order.courier}"
+                                        th:value="${order.courier ?: 'DTDC'}"
                                        placeholder="e.g. Delhivery, BlueDart">
                             </div>
                             <div class="form-row">
                                 <label>Tracking URL</label>
                                 <input type="text" name="trackingUrl"
-                                       th:value="${order.trackingUrl}"
+                                       th:value="${order.trackingUrl ?: 'https://www.dtdc.com/track-your-shipment/'}"
                                        placeholder="https://www.delhivery.com/track/DLH123456789">
                                 <div class="helper">Customer clicks this link to track the parcel on the courier's site.</div>
                             </div>

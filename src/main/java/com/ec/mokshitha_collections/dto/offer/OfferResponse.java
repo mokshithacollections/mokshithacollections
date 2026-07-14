@@ -26,6 +26,11 @@ public class OfferResponse {
     private final Integer perCustomerLimit;
     private final Boolean active;
     private final Boolean autoApply;
+    private final Boolean applyOnMrp;
+    private final String bannerImageDesktop;
+    private final String bannerImageMobile;
+    private final String bannerBeforeDesktop;
+    private final String bannerBeforeMobile;
     private final Integer priority;
     private final Set<Long> productIds;
     private final Set<Long> categoryIds;

@@ -404,7 +404,7 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
             transition: all 0.3s;
             background: white;
-            margin-bottom: 30px;
+            margin-bottom: 0px;
             height: 100%;
         }
         
@@ -467,7 +467,60 @@
         .product-badge.trending {
             background: #8b5cf6;
         }
-        
+
+        /* Sale discount tag on the card (stacks below bestseller/trending) — no icon */
+        .product-badge.offer-tag {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            color: #fff;
+        }
+
+        /* Attractive sale-price pill under the price */
+        .sale-price-pill {
+            display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; row-gap: 2px;
+            margin-top: -10px; margin-bottom: 10px; padding: 5px 11px; border-radius: 12px; max-width: 100%;
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            color: #fff; box-shadow: 0 4px 12px -4px rgba(136,0,18,0.5);
+        }
+        .sale-price-pill i { font-size: 0.72rem; color: #ffd86b; }
+        .sale-price-pill .spp-label {
+            font-size: 0.6rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.4px; color: #ffe9c9;
+        }
+        .sale-price-pill .spp-value { font-size: 0.95rem; font-weight: 800; color: #fff; }
+
+        /* Tighter on phones (cards are 2-per-row) */
+        @media (max-width: 576px) {
+            .sale-price-pill { gap: 3px; padding: 4px 9px; border-radius: 10px; margin-top: 0px; }
+            .sale-price-pill i { display: none; }
+            .sale-price-pill .spp-label { font-size: 0.70rem; letter-spacing: 0.3px; }
+            .sale-price-pill .spp-value { font-size: 0.82rem; }
+        }
+
+        /* Sale heading strip above the grid */
+        .sale-strip {
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+            width: 100%; margin: 0 0 18px; padding: 14px 20px; border-radius: 12px;
+            background: linear-gradient(135deg, #fff4f5, #fdeef0);
+            border: 1px solid rgba(136,0,18,0.15);
+        }
+        .sale-strip-main { display: flex; align-items: center; gap: 10px; }
+        .sale-strip-main i { color: var(--light-sea-green); }
+        .sale-strip-name { font-family: 'Playfair Display', serif; font-weight: 600; font-size: 1.15rem; color: var(--dark-text); }
+        .sale-strip-badge {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            color: #fff; padding: 3px 12px; border-radius: 999px; font-size: 0.82rem; font-weight: 700;
+        }
+        .sale-strip-note { font-size: 0.88rem; font-weight: 500; color: var(--dark-sea-green); }
+        .sale-strip-note i { margin-right: 5px; }
+
+        /* Sale entries in the filter sidebar */
+        .sale-filter-badge {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            color: #fff; font-size: 0.68rem; font-weight: 700;
+            padding: 2px 8px; border-radius: 999px;
+        }
+
         .product-wishlist {
             position: absolute;
             top: 15px;
@@ -938,6 +991,10 @@
 
         /* ---- Phones: two products per row, tighter cards ---- */
         @media (max-width: 767.98px) {
+			.row {
+			    --bs-gutter-x: 0.8rem;
+				--bs-gutter-y: 0.8rem;
+				}
 			
 			.header-top { padding: 4px 0; font-size: 0.60rem; }
 			.main-header { padding-top: 7px !important; padding-bottom: 7px !important; }
@@ -957,13 +1014,13 @@
                 height: auto;
                 aspect-ratio: 3 / 4;
             }
-            .product-card { margin-bottom: 18px; border-radius: 12px; }
-            .product-content { padding: 14px 12px; }
+            .product-card { margin-bottom: 0px; border-radius: 12px; }
+            .product-content { padding: 14px 12px;  }
             .product-title { font-size: 0.95rem; height: 2.6rem; margin-bottom: 5px; }
             .product-variants { font-size: 0.72rem; margin-bottom: 6px; }
-            .product-price { font-size: 1.05rem; margin-bottom: 8px; flex-direction: column; align-items: flex-start; gap: 1px; }
+            .product-price { font-size: 1.05rem; margin-bottom: 2px; flex-direction: column; align-items: flex-start; gap: 1px; }
             .product-price .old-price { font-size: 1.05rem; }
-            .product-btn { padding: 9px; font-size: 0.9rem; }
+            .product-btn { padding: 5px; font-size: 0.9rem; }
             .product-badge { font-size: 0.7rem; padding: 4px 9px; }
             .product-wishlist { width: 32px; height: 32px; }
 
@@ -1092,6 +1149,24 @@
                             <input type="text" name="search" class="form-control"
                                    placeholder="Product name or SKU"
                                    th:value="${filters != null ? filters.search : ''}">
+                        </div>
+
+                        <!-- Sales (active offers) — same behaviour as clicking a home-page sale banner -->
+                        <div class="filter-group" th:if="${saleOffers != null and not #lists.isEmpty(saleOffers)}">
+                            <h5>Sales</h5>
+                            <ul class="filter-options" style="list-style:none; padding:0;">
+                                <li th:each="s : ${saleOffers}" style="margin-bottom:6px;">
+                                    <a th:href="@{/shop(offer=${s.offerId})}"
+                                       th:classappend="${offerId != null and offerId == s.offerId} ? 'fw-bold text-success'"
+                                       style="text-decoration:none; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                                        <span>
+                                            <span th:text="${s.name}">Festive Sale</span>
+                                            <small th:if="${s.mode == 'SCHEDULED'}" class="text-muted">· Soon</small>
+                                        </span>
+                                        <span class="sale-filter-badge" th:text="${s.discountLabel}">20% OFF</span>
+                                    </a>
+                                </li>
+                            </ul>
                         </div>
 
                         <!-- Category Filter (clickable list, server-side filter) -->
@@ -1228,6 +1303,20 @@
                         </div>
                     </div>
                     
+                    <!-- Sale heading (shown when arriving from a sale banner) -->
+                    <div th:if="${shopOffer != null}" class="sale-strip">
+                        <div class="sale-strip-main">
+                            <i class="fas fa-tags"></i>
+                            <span class="sale-strip-name" th:text="${shopOffer.name}">Festive Sale</span>
+                            <span class="sale-strip-badge" th:text="${shopOffer.discountLabel}">20% OFF</span>
+                        </div>
+                        <div class="sale-strip-note">
+                            <span th:if="${shopOffer.live}"><i class="fas fa-circle-check"></i> Discount applied at checkout</span>
+                            <span th:unless="${shopOffer.live}"
+                                  th:text="'Sale starts on ' + ${shopOffer.startsAtText}">Sale starts on 23 Jun 2026</span>
+                        </div>
+                    </div>
+
                     <!-- Products Grid -->
                     <div class="row products-container">
                         <!-- Dynamic product cards from ${products.content} (PageController.shop) -->
@@ -1239,9 +1328,13 @@
                                         <img th:src="${product.imageUrl}" th:alt="${product.name}">
                                     </a>
                                     <div class="product-badges">
-                                        <div class="product-badge bestseller" th:if="${product.isBestseller != null and product.isBestseller}">Bestseller</div>
-                                        <div class="product-badge trending" th:if="${product.isTrending != null and product.isTrending}">Trending</div>
-                                        <div class="product-badge" th:if="${product.isFeatured != null and product.isFeatured}">Featured</div>
+                                        <!-- Bestseller/Trending/Featured only on the normal shop, not the sale view -->
+                                        <div class="product-badge bestseller" th:if="${shopOffer == null and product.isBestseller != null and product.isBestseller}">Bestseller</div>
+                                        <div class="product-badge trending" th:if="${shopOffer == null and product.isTrending != null and product.isTrending}">Trending</div>
+                                        <div class="product-badge" th:if="${shopOffer == null and product.isFeatured != null and product.isFeatured}">Featured</div>
+                                        <!-- On the sale view, show only the discount tag -->
+                                        <div class="product-badge offer-tag" th:if="${shopOffer != null}"
+                                             th:text="${shopOffer.discountShort}">20%</div>
                                     </div>
                                     <div class="product-wishlist"
                                          th:classappend="${wishlistProductIds != null and wishlistProductIds.contains(product.productId)} ? 'active'"
@@ -1265,6 +1358,18 @@
                                         <span th:if="${product.discountPrice != null}" th:text="'₹' + ${product.discountPrice}">₹0</span>
                                         <span th:unless="${product.discountPrice != null}" th:text="'₹' + ${product.price}">₹0</span>
                                     </div>
+                                    <!-- Sale price pill — shown for live AND upcoming sales -->
+                                    <div class="sale-price-pill" th:if="${shopOffer != null}">
+                                        <i class="fas fa-tags"></i>
+                                        <span class="spp-label"
+                                              th:text="${shopOffer.live} ? 'Sale price ' : 'Upcoming sale price '">Sale price</span>
+                                        <span class="spp-value"
+                                              th:if="${offerPrices != null and offerPrices.containsKey(product.productId)}"
+                                              th:text="'₹' + ${offerPrices.get(product.productId)}">₹720</span>
+                                        <span class="spp-value"
+                                              th:unless="${offerPrices != null and offerPrices.containsKey(product.productId)}"
+                                              th:text="${shopOffer.discountShort}">20%</span>
+                                    </div>
                                     <button class="product-btn"
                                             th:classappend="${cartProductIds != null and cartProductIds.contains(product.productId)} ? 'in-cart'"
                                             th:attr="data-product-id=${product.productId}"
@@ -1282,7 +1387,7 @@
                     </div>
 
                     <!-- The original template included 8 more hardcoded product cards; they
-                         lived under <!-- Product 2  through--> <!-- Product 9 . The single
+                         lived under--> <!-- Product 2  through--> <!-- Product 9 . The single
                          th:each loop above replaces all of them. -->
                     <div th:remove="all">
                         <!-- Product 1 -->
