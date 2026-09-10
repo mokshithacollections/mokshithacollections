@@ -878,14 +878,16 @@
             }
             .thumbnail {
                 width: 100%;           /* one full image per slide (no peek/series) */
-                height: 360px;
+                height: 660px;         /* taller image on mobile (was 360px) */
                 border-width: 0;       /* no selection border in gallery mode */
                 border-radius: 12px;
                 scroll-snap-align: center;
                 scroll-snap-stop: always;   /* one swipe = one image */
                 flex-shrink: 0;
             }
-            .thumbnail img { background: #f7f7f7; }
+            /* Fill the taller box so the image actually looks bigger (contain would
+               just leave empty bars above/below for non-portrait images). */
+            .thumbnail img { background: #f7f7f7; object-fit: cover; }
 
             .swipe-dots {
                 display: flex;
@@ -910,7 +912,7 @@
             .main-image {
                 height: 300px;
             }
-            .thumbnail { height: 300px; }
+            .thumbnail { height: 600px; }   /* taller image on mobile (was 300px) */
             
             .nav-tabs .nav-link {
                 padding: 10px 15px;

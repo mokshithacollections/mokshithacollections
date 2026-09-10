@@ -190,6 +190,20 @@ public class PaymentService {
      */
     @Transactional
     public Long confirm(String razorpayOrderId, String razorpayPaymentId) {
+        // Serialize concurrent confirms for the SAME payment. The browser /verify
+        // call and the Razorpay webhook routinely fire at almost the same instant;
+        // without this, both threads read the checkout as still-HELD, both pass the
+        // CONFIRMED guard below, and both INSERT an order — producing two orders
+        // with the same razorpay order/payment id (the bug we hit). A tx-scoped
+        // advisory lock keyed on the razorpay order id makes the second caller wait
+        // for the first to commit, so it then sees CONFIRMED and returns the
+        // existing order instead of duplicating it. Auto-releases on commit/rollback.
+        try {
+            jdbc.queryForList("SELECT pg_advisory_xact_lock(hashtext(?))", razorpayOrderId);
+        } catch (Exception e) {
+            log.warn("Advisory lock unavailable, confirm() is not fully serialized: {}", e.getMessage());
+        }
+
         PendingCheckout pending = pendingRepository.findByRazorpayOrderId(razorpayOrderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Checkout session not found"));
 
