@@ -61,11 +61,18 @@
                                 <div style="display:flex;align-items:center;gap:10px;">
                                     <!-- The ordered variant's first image (falls back to the
                                          snapshot hero image when the variant has none). -->
-                                    <img th:src="${variantImages != null and variantImages.containsKey(i.variantId)
-                                                  ? variantImages.get(i.variantId) : i.productImageUrl}"
-                                         th:alt="${i.productName}"
-                                         onerror="this.style.visibility='hidden'"
-                                         style="width:48px;height:60px;object-fit:cover;border-radius:6px;flex-shrink:0;background:#f1f1f1;">
+                                    <!-- Hover shows an eye icon; click opens the image full size. -->
+                                    <button type="button" class="item-thumb"
+                                            th:with="img=${variantImages != null and variantImages.containsKey(i.variantId)
+                                                          ? variantImages.get(i.variantId) : i.productImageUrl}"
+                                            th:classappend="${#strings.isEmpty(img)} ? 'is-broken'"
+                                            th:attr="data-src=${img},data-caption=${i.productName + ' — ' + i.variantColor + (i.variantSize != null ? ' / ' + i.variantSize : '')}"
+                                            th:aria-label="'View image of ' + ${i.productName}"
+                                            onclick="openItemImage(this)">
+                                        <img th:src="${img}" th:alt="${i.productName}"
+                                             onerror="this.closest('.item-thumb').classList.add('is-broken')">
+                                        <span class="item-thumb-eye" aria-hidden="true"><i class="fas fa-eye"></i></span>
+                                    </button>
                                     <a th:href="@{/admin/products/{id}(id=${i.productId})}"
                                        th:text="${i.productName}">Product</a>
                                 </div>
@@ -220,6 +227,81 @@
     </main>
 </div>
 
+<!-- Full-size viewer for an order item's image -->
+<dialog id="itemImageDialog" class="item-image-dialog" aria-label="Item image">
+    <button type="button" class="item-image-close" aria-label="Close" onclick="closeItemImage()">
+        <i class="fas fa-xmark"></i>
+    </button>
+    <img id="itemImageFull" alt="">
+    <div id="itemImageCaption" class="item-image-caption"></div>
+</dialog>
+
+<style>
+    .item-thumb {
+        position: relative;
+        flex-shrink: 0;
+        width: 48px;
+        height: 60px;
+        padding: 0;
+        border: 0;
+        border-radius: 6px;
+        overflow: hidden;
+        background: #f1f1f1;
+        cursor: zoom-in;
+    }
+    .item-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .item-thumb-eye {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.45);
+        color: #fff;
+        font-size: 1rem;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    .item-thumb:hover .item-thumb-eye,
+    .item-thumb:focus-visible .item-thumb-eye { opacity: 1; }
+    /* No usable image: hide the broken picture and don't offer a viewer. */
+    .item-thumb.is-broken { cursor: default; pointer-events: none; }
+    .item-thumb.is-broken img, .item-thumb.is-broken .item-thumb-eye { visibility: hidden; }
+
+    .item-image-dialog {
+        border: 0;
+        border-radius: 12px;
+        padding: 16px;
+        max-width: min(92vw, 720px);
+        background: #fff;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    }
+    .item-image-dialog::backdrop { background: rgba(0, 0, 0, 0.7); }
+    .item-image-dialog img {
+        display: block;
+        max-width: 100%;
+        max-height: 78vh;
+        margin: 0 auto;
+        border-radius: 8px;
+        object-fit: contain;
+    }
+    .item-image-caption { margin-top: 10px; text-align: center; font-weight: 600; color: #333; }
+    .item-image-close {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 34px;
+        height: 34px;
+        border: 0;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        font-size: 1.1rem;
+        cursor: pointer;
+    }
+    .item-image-close:hover { background: rgba(0, 0, 0, 0.8); }
+</style>
+
 <div th:replace="~{admin/_layout :: scripts}"></div>
 <script th:inline="javascript">
     /*<![CDATA[*/
@@ -237,6 +319,24 @@
         const show = s === 'SHIPPED' || s === 'DELIVERED' || !!hasExistingTracking;
         shippingFields.style.display = show ? 'block' : 'none';
     }
+    // ----- Item image viewer -----
+    const itemImageDialog = document.getElementById('itemImageDialog');
+    function openItemImage(btn) {
+        if (!btn.dataset.src) return;
+        const full = document.getElementById('itemImageFull');
+        full.src = btn.dataset.src;
+        full.alt = btn.dataset.caption || '';
+        document.getElementById('itemImageCaption').textContent = btn.dataset.caption || '';
+        itemImageDialog.showModal();
+    }
+    function closeItemImage() { itemImageDialog.close(); }
+    // Clicking the dark backdrop (outside the dialog box) also closes it.
+    itemImageDialog.addEventListener('click', (e) => {
+        const r = itemImageDialog.getBoundingClientRect();
+        const outside = e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+        if (outside) closeItemImage();
+    });
+
     statusSelect.addEventListener('change', refreshShippingVisibility);
     refreshShippingVisibility();
 

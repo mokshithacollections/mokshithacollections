@@ -746,35 +746,50 @@
 }
 
         
-        /* Pagination */
-        .pagination {
+        /* Pagination: Previous / Page X of Y / Next */
+        .shop-pager {
+            display: flex;
+            align-items: center;
             justify-content: center;
+            gap: 16px;
             margin-top: 50px;
-            flex-wrap: wrap;      /* never widen the page on small screens */
-            row-gap: 8px;
         }
 
-        .page-link {
+        .pager-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: 1px solid var(--dark-sea-green);
+            border-radius: 30px;
             color: var(--dark-sea-green);
-            border: 1px solid #dee2e6;
-            margin: 0 5px;
-            border-radius: 5px;
+            background: #fff;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
         }
+
+        .pager-btn i { font-size: 0.8rem; }
+
+        a.pager-btn:hover,
+        a.pager-btn:focus-visible {
+            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
+            color: #fff;
+        }
+
+        .pager-btn.disabled {
+            border-color: #dee2e6;
+            color: #adb5bd;
+            cursor: not-allowed;
+        }
+
+        .pager-status { color: #6c757d; white-space: nowrap; }
+        .pager-status strong { color: #333; }
 
         @media (max-width: 576px) {
-            .pagination { margin-top: 30px; }
-            .page-link { margin: 0 3px; padding: 6px 11px; font-size: 0.9rem; }
-        }
-        
-        .page-link:hover {
-            background: rgba(46, 139, 87, 0.1);
-            border-color: var(--dark-sea-green);
-            color: var(--dark-sea-green);
-        }
-        
-        .page-item.active .page-link {
-            background: linear-gradient(135deg, var(--dark-sea-green), var(--light-sea-green));
-            border-color: var(--dark-sea-green);
+            .shop-pager { margin-top: 30px; gap: 10px; }
+            .pager-btn { padding: 8px 14px; font-size: 0.9rem; }
+            .pager-status { font-size: 0.9rem; }
         }
         
         /* Footer (Reuse from index.html) */
@@ -1643,80 +1658,43 @@
                     </div>
                     <!-- end th:remove="all" wrapper -->
 
-                    <!-- Pagination — driven by Spring Data Page -->
-                    <nav aria-label="Page navigation"
-                         th:if="${products != null and products.totalPages > 1}">
-                        <ul class="pagination"
-                            th:with="cur=${products.number},
-                                     total=${products.totalPages},
-                                     start=${T(java.lang.Math).max(0, products.number - 2)},
-                                     end=${T(java.lang.Math).min(products.totalPages - 1, products.number + 2)}">
-                            <!-- Previous -->
-                            <li class="page-item" th:classappend="${!products.hasPrevious()} ? 'disabled'">
-                                <a class="page-link" aria-label="Previous"
-                                   th:href="@{/shop(page=${cur - 1},
-                                              categorySlug=${filters?.categorySlug},
-                                              search=${filters?.search},
-                                              minPrice=${filters?.minPrice},
-                                              maxPrice=${filters?.maxPrice},
-                                              sort=${filters?.sort},
-                                              offer=${offerId})}">&laquo;</a>
-                            </li>
+                    <!-- Pagination: Previous / Page X of Y / Next, driven by Spring Data Page -->
+                    <nav class="shop-pager" aria-label="Page navigation"
+                         th:if="${products != null and products.totalPages > 1}"
+                         th:with="cur=${products.number}, total=${products.totalPages}">
+                        <!-- Previous: a link when there is a previous page, otherwise a disabled placeholder -->
+                        <a class="pager-btn" rel="prev" th:if="${products.hasPrevious()}"
+                           th:href="@{/shop(page=${cur - 1},
+                                      categorySlug=${filters?.categorySlug},
+                                      search=${filters?.search},
+                                      minPrice=${filters?.minPrice},
+                                      maxPrice=${filters?.maxPrice},
+                                      sort=${filters?.sort},
+                                      offer=${offerId})}">
+                            <i class="fas fa-chevron-left" aria-hidden="true"></i><span>Previous</span>
+                        </a>
+                        <span class="pager-btn disabled" aria-disabled="true" th:unless="${products.hasPrevious()}">
+                            <i class="fas fa-chevron-left" aria-hidden="true"></i><span>Previous</span>
+                        </span>
 
-                            <!-- First page + leading ellipsis (only when the window doesn't start at 1) -->
-                            <li class="page-item" th:if="${start > 0}">
-                                <a class="page-link"
-                                   th:href="@{/shop(page=0,
-                                              categorySlug=${filters?.categorySlug},
-                                              search=${filters?.search},
-                                              minPrice=${filters?.minPrice},
-                                              maxPrice=${filters?.maxPrice},
-                                              sort=${filters?.sort},
-                                              offer=${offerId})}">1</a>
-                            </li>
-                            <li class="page-item disabled" th:if="${start > 1}"><span class="page-link">&hellip;</span></li>
+                        <span class="pager-status" aria-live="polite">
+                            Page <strong th:text="${cur + 1}">1</strong> of <strong th:text="${total}">N</strong>
+                        </span>
 
-                            <!-- Windowed page numbers (current ± 2) -->
-                            <li class="page-item"
-                                th:each="i : ${#numbers.sequence(start, end)}"
-                                th:classappend="${i == cur} ? 'active'">
-                                <a class="page-link"
-                                   th:href="@{/shop(page=${i},
-                                              categorySlug=${filters?.categorySlug},
-                                              search=${filters?.search},
-                                              minPrice=${filters?.minPrice},
-                                              maxPrice=${filters?.maxPrice},
-                                              sort=${filters?.sort},
-                                              offer=${offerId})}"
-                                   th:text="${i + 1}">1</a>
-                            </li>
-
-                            <!-- Trailing ellipsis + last page (only when the window doesn't reach the end) -->
-                            <li class="page-item disabled" th:if="${end < total - 2}"><span class="page-link">&hellip;</span></li>
-                            <li class="page-item" th:if="${end < total - 1}">
-                                <a class="page-link"
-                                   th:href="@{/shop(page=${total - 1},
-                                              categorySlug=${filters?.categorySlug},
-                                              search=${filters?.search},
-                                              minPrice=${filters?.minPrice},
-                                              maxPrice=${filters?.maxPrice},
-                                              sort=${filters?.sort},
-                                              offer=${offerId})}"
-                                   th:text="${total}">N</a>
-                            </li>
-
-                            <!-- Next -->
-                            <li class="page-item" th:classappend="${!products.hasNext()} ? 'disabled'">
-                                <a class="page-link" aria-label="Next"
-                                   th:href="@{/shop(page=${cur + 1},
-                                              categorySlug=${filters?.categorySlug},
-                                              search=${filters?.search},
-                                              minPrice=${filters?.minPrice},
-                                              maxPrice=${filters?.maxPrice},
-                                              sort=${filters?.sort},
-                                              offer=${offerId})}">&raquo;</a>
-                            </li>
-                        </ul>
+                        <!-- Next -->
+                        <a class="pager-btn" rel="next" th:if="${products.hasNext()}"
+                           th:href="@{/shop(page=${cur + 1},
+                                      categorySlug=${filters?.categorySlug},
+                                      search=${filters?.search},
+                                      minPrice=${filters?.minPrice},
+                                      maxPrice=${filters?.maxPrice},
+                                      sort=${filters?.sort},
+                                      offer=${offerId})}">
+                            <span>Next</span><i class="fas fa-chevron-right" aria-hidden="true"></i>
+                        </a>
+                        <span class="pager-btn disabled" aria-disabled="true" th:unless="${products.hasNext()}">
+                            <span>Next</span><i class="fas fa-chevron-right" aria-hidden="true"></i>
+                        </span>
                     </nav>
                 </div>
             </div>
